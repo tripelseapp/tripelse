@@ -6,19 +6,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
 
-    MongooseModule.forRoot(
-      'mongodb://tripelseapp:LNUBCdyDhvPgDfWO@mongodb:27017/tripelse?authSource=admin',
-      {
-        auth: {
-          user: process.env.DATABASE_USER,
-          password: process.env.DATABASE_PASS,
-        },
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useCreateIndex: true,
-        dbName: 'tripelse',
-      },
-    ),
+    MongooseModule.forRoot(process.env.CONNECT_STRING),
 
     UsersModule,
   ],
