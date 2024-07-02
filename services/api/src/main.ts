@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as compression from 'compression';
-import helmet from 'helmet';
+
 
 const PORT = parseInt(process.env.PORT, 10) || 4000;
 async function bootstrap() {
@@ -10,7 +10,7 @@ async function bootstrap() {
   // register all plugins and extension
   app.enableCors({ origin: '*' });
   app.useGlobalPipes(new ValidationPipe({}));
-  app.use(helmet());
+  
   app.use(compression());
 
   await app.listen(PORT, () => {
