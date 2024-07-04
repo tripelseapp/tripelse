@@ -5,17 +5,11 @@ export class User {
   @Prop({ unique: true })
   username: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, select: false })
   password: string;
 
   @Prop({ required: true })
-  displayName: string;
-
-  @Prop({ required: true })
   email: string;
-
-  @Prop({ required: false })
-  avatarUrl?: string;
 
   @Prop({ required: true })
   role: 'admin' | 'user';
