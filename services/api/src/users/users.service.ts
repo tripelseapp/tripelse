@@ -28,6 +28,7 @@ export class UsersService {
     const newUser = new this.userModel({
       ...createUserDto,
       createdAt: now,
+      updatedAt: now,
       password: hashedPassword,
       role: 'user',
     });
@@ -106,7 +107,6 @@ export class UsersService {
     if (!isPasswordValid) {
       throw new BadRequestException('Invalid password');
     }
-
     return user;
   }
 
@@ -142,7 +142,11 @@ export class UsersService {
   }
 
   async findUserById(id: string): Promise<User | null> {
-    return this.userModel.findById(id).exec();
+    try {
+      return this.userModel.findById(id).exec();
+    } catch (err) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   async deleteUser(id: string): Promise<User | null> {
@@ -150,7 +154,11 @@ export class UsersService {
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
+    try {
+      return this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
+    } catch (err) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   async updatePassword(

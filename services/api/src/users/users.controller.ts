@@ -28,11 +28,7 @@ export class UsersController {
 
   @Get(':id')
   async getUser(@Param('id') id: string) {
-    const user = this.usersService.findUserById(id);
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-    return user;
+    return this.usersService.findUserById(id);
   }
 
   @Post('register')
@@ -60,17 +56,29 @@ export class UsersController {
     return this.usersService.loginUser(usernameOrEmail, password);
   }
 
-  @Put('checkIfUsernameExists')
-  async checkIfUsernameExists(@Body() username: CreateUserDto['username']) {
-    const doesExist = this.checkIfUsernameExists(username);
+  @Put(':id')
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateUserDto: CreateUserDto,
+  ) {
+    const updatedUser = this.usersService.updateUser(id, updateUserDto);
+    if (!updatedUser) {
+      throw new BadRequestException('This user ID did not exist');
+    }
+    return updatedUser;
+  }
+
+  @Get('checkUsername/:username')
+  async checkIfUsernameExists(@Param('username') username: string) {
+    const doesExist = await this.usersService.checkIfUsernameExists(username);
     return {
       doesExist: doesExist,
     };
   }
 
   @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
-    const deletedUser = this.deleteUser(id);
+  async deleteUserController(@Param('id') id: string) {
+    const deletedUser = this.usersService.deleteUser(id);
     if (!deletedUser) {
       throw new BadRequestException('This user ID did not exist');
     }

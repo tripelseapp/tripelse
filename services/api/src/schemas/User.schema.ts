@@ -16,6 +16,9 @@ export class User {
 
   @Prop({ required: true })
   createdAt: Date;
+
+  @Prop({ required: true })
+  updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
