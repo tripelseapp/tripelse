@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import * as compression from 'compression';
 import { setupSwagger } from './utils/setupSwagger';
+import configuration from './config/configuration';
 
-const PORT = parseInt(process.env.PORT, 10) || 4000;
+const PORT = configuration().port;
 async function bootstrap() {
   console.log(process.env.CONNECT_STRING);
 
@@ -12,7 +12,6 @@ async function bootstrap() {
   // register all plugins and extension
   app.enableCors({ origin: '*' });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  app.use(compression());
 
   setupSwagger(app);
 

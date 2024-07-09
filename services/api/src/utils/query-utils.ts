@@ -22,14 +22,16 @@ export function buildQuery<T extends Document>({
   model,
   filters,
   searchIn,
-  fields,
+  fields = [],
 }: BuildQueryOptions<T>): ExtendedFilterQuery<T> {
   let query: ExtendedFilterQuery<T> = model.find();
 
-  if (filters.search) {
+  if (Boolean(filters.search)) {
+    const searchFields = searchIn || [];
+    const searchString = String(filters.search ?? '');
     query = query.or(
-      searchIn.map((field) => ({
-        [field]: { $regex: new RegExp(filters.search, 'i') },
+      searchFields.map((field) => ({
+        [field]: { $regex: new RegExp(searchString, 'i') },
       })),
     );
   }
@@ -65,7 +67,7 @@ export function buildSorting(orderBy: PossibleOrders | PossibleOrders[]) {
 export function buildSortOptions(orderBy: PossibleOrders[]): {
   [key: string]: SortOrder;
 } {
-  const sortOptions = {};
+  const sortOptions: { [key: string]: SortOrder } = {};
   orderBy.forEach((orderField) => {
     const [field, order] = orderField.split(':');
     sortOptions[field] = order === Orders.ASC ? 1 : -1;

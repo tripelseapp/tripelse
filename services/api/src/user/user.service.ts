@@ -1,28 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { hash } from 'bcrypt';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { PageMetaDto } from 'src/common/dto/pagination/page-meta.dto';
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
-import {
-  buildQuery,
-  buildSorting,
-  buildSortOptions,
-} from 'src/utils/query-utils';
+import { buildQuery, buildSorting } from 'src/utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SafeUser } from './dto/safe-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserDocument } from './entities/user.entity';
+import { User } from './entities/user.entity';
+import { UserById } from './interfaces/get-by-id.interface';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const now = new Date();
 
     // Encrypt the password
+
+    if (!createUserDto.password) throw new Error('Password is required');
     const hashedPassword = await this.hashPassword(createUserDto.password);
 
     // Create a new user instance
@@ -50,37 +49,49 @@ export class UserService {
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
-    const query = buildQuery<UserDocument>({
+    const query = buildQuery<User>({
       model: this.userModel,
       filters: { search, startDate, endDate },
       searchIn: ['username', 'email'],
       fields: ['username'],
     });
 
-    const usersQuery = query.skip(skip).limit(take).sort(buildSorting(orderBy));
+    const usersQuery = query
+      .skip(skip)
+      .limit(take)
+      .lean()
+      .sort(buildSorting(orderBy));
 
     try {
-      const [users, itemCount] = await Promise.all([
-        usersQuery.exec(),
-        this.userModel.countDocuments().exec(),
-      ]);
+      const [users, itemCount]: [FilterQuery<User>[], number] =
+        await Promise.all([
+          usersQuery.exec(),
+          this.userModel.countDocuments().exec(),
+        ]);
 
       const formattedUsers: SafeUser[] = users.map((user) => ({
         id: user._id.toString(),
         username: user.username,
-        email: 'e',
       }));
 
       const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
       return new PageDto(formattedUsers, pageMetaDto);
     } catch (error) {
-      throw new Error(`Error fetching users: ${error.message}`);
+      if (error instanceof Error) {
+        const message = `Error while fetching users. Error: ${error.message}`;
+        throw new Error(message);
+      }
+      throw new Error('Error while fetching users.');
     }
   }
 
   async update(id: string, data: UpdateUserDto): Promise<User | null> {
     try {
-      return this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
+      const newUser = { ...data, updatedAt: new Date() };
+      return this.userModel
+        .findByIdAndUpdate(id, newUser, { new: true })
+        .lean()
+        .exec();
     } catch (err) {
       throw new NotFoundException('User not found');
     }
@@ -147,9 +158,22 @@ export class UserService {
       .exec();
   }
 
-  async findUserById(id: string): Promise<User | null> {
+  async findUserById(id: string): Promise<UserById | null> {
     try {
-      return this.userModel.findById(id).exec();
+      const user = await this.userModel.findById(id).lean().exec();
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const parsedUser: UserById = {
+        id: String(user._id),
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+      return parsedUser;
     } catch (err) {
       throw new NotFoundException('User not found');
     }

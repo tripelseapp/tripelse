@@ -16,7 +16,7 @@ export class SafeUserDto {
     description: 'The unique username for a user.',
     minimum: 4,
     type: 'string',
-    default: null,
+    default: '',
   })
   readonly username: string;
 }

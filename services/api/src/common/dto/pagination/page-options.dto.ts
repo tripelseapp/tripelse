@@ -1,7 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsDateString,
   IsInt,
   IsOptional,
@@ -37,6 +36,9 @@ export class PageOptionsDto {
   readonly take?: number = 10;
 
   get skip(): number {
+    if (!this.page || !this.take) {
+      return 0;
+    }
     return (this.page - 1) * this.take;
   }
 

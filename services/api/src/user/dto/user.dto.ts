@@ -9,7 +9,7 @@ export class UserDto {
     description: 'The unique username for a user.',
     minimum: 4,
     type: 'string',
-    default: null,
+    default: '',
   })
   readonly username: string;
 
@@ -18,7 +18,7 @@ export class UserDto {
   @ApiProperty({
     description: 'The email of a user.',
     minimum: 8,
-    default: null,
+    default: '',
   })
   readonly email: string;
 
@@ -28,7 +28,7 @@ export class UserDto {
     description: 'The password of a user.',
     minimum: 8,
     type: 'string',
-    default: null,
+    default: '',
   })
   readonly password: string;
 

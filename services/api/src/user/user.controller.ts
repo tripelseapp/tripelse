@@ -13,14 +13,14 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
+import { PageDto } from 'src/common/dto/pagination/page.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { SafeUser, SafeUserDto } from './dto/safe-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
-import { SafeUser, SafeUserDto } from './dto/safe-user.dto';
-import { PageDto } from 'src/common/dto/pagination/page.dto';
-import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -32,7 +32,6 @@ export class UserController {
   @ApiOperation({
     summary: 'List all users',
     description: 'Returns an array of all users. Supports pagination',
-    security: [{ bearerAuth: [] }],
   })
   @HttpCode(HttpStatus.OK)
   @ApiPaginatedResponse(SafeUserDto)
@@ -40,7 +39,6 @@ export class UserController {
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<SafeUser>> {
     if (typeof pageOptionsDto.orderBy === 'string') {
-      console.log('pageOptionsDto.orderBy', pageOptionsDto.orderBy);
       pageOptionsDto.orderBy = [pageOptionsDto.orderBy];
     } else if (
       pageOptionsDto.orderBy &&
@@ -51,6 +49,7 @@ export class UserController {
 
     return this.userService.findAll(pageOptionsDto);
   }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Get user by id',
@@ -61,7 +60,21 @@ export class UserController {
   }
 
   @Post('')
+  @ApiOperation({
+    summary: 'Create user',
+    description: 'Creates a new user.',
+  })
   async create(@Body() createUserDto: CreateUserDto) {
+    if (
+      !createUserDto.username ||
+      !createUserDto.email ||
+      !createUserDto.password
+    ) {
+      throw new BadRequestException(
+        'Username, email, and password are required fields',
+      );
+    }
+
     const usernameExists = await this.userService.checkIfUsernameExists(
       createUserDto.username,
     );
@@ -80,6 +93,10 @@ export class UserController {
   }
 
   @Patch(':id')
+  @ApiOperation({
+    summary: 'Update user by id',
+    description: 'Updates a single user with a matching id.',
+  })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const updatedUser = this.userService.update(id, updateUserDto);
     if (!updatedUser) {
