@@ -21,16 +21,18 @@ services:
     build:
       context: .
       target: development
+      # only will build dev stage from dockerfile
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+    command: npm run start:dev
+    # command: npm run start
     environment:
       CONNECT_STRING: '${CONNECT_STRING}'
       NODE_ENV: 'production'
     ports:
       - '4000:${PORT}'
       - 9229:9229
-    command: npm run start
     env_file:
       - .env
     restart: unless-stopped
