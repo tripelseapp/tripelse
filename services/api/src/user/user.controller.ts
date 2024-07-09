@@ -39,6 +39,16 @@ export class UserController {
   async getUsers(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<SafeUser>> {
+    if (typeof pageOptionsDto.orderBy === 'string') {
+      console.log('pageOptionsDto.orderBy', pageOptionsDto.orderBy);
+      pageOptionsDto.orderBy = [pageOptionsDto.orderBy];
+    } else if (
+      pageOptionsDto.orderBy &&
+      !Array.isArray(pageOptionsDto.orderBy)
+    ) {
+      throw new BadRequestException('orderBy must be a string or an array');
+    }
+
     return this.userService.findAll(pageOptionsDto);
   }
   @Get(':id')

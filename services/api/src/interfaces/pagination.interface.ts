@@ -8,3 +8,6 @@ export enum Orders {
   ASC = 'ASC',
   DESC = 'DESC',
 }
+export type Order = `${Orders}`;
+
+export type PossibleOrders = `${string}:${Orders}`;

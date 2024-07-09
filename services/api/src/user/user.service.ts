@@ -4,16 +4,16 @@ import { hash } from 'bcrypt';
 import { Model } from 'mongoose';
 import { PageMetaDto } from 'src/common/dto/pagination/page-meta.dto';
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
-import { Orders } from 'src/interfaces/pagination.interface';
+import { PageDto } from 'src/common/dto/pagination/page.dto';
+import { buildQuery, buildSortOptions } from 'src/utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SafeUser } from './dto/safe-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { PageDto } from 'src/common/dto/pagination/page.dto';
+import { User, UserDocument } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const now = new Date();
@@ -36,18 +36,28 @@ export class UserService {
   public async findAll(
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<SafeUser>> {
-    const { page = 1, order = Orders.ASC, take = 10 } = pageOptionsDto;
+    const {
+      page = 1,
+      take = 10,
+      orderBy = ['createdAt:ASC'],
+      search,
+      startDate,
+      endDate,
+    } = pageOptionsDto;
+
     const skip = (page - 1) * take;
+    let query = buildQuery<UserDocument>(
+      this.userModel,
+      { search, startDate, endDate },
+      ['username', 'email'],
+    );
+    const sortOptions = orderBy
+      ? buildSortOptions(Array.isArray(orderBy) ? orderBy : [orderBy])
+      : {};
 
-    const sortOptions = {};
-    sortOptions['createdAt'] = order === Orders.ASC ? 1 : -1;
+    query = query.sort(sortOptions); // Ensure query is a valid Mongoose Query object
 
-    const usersQuery = this.userModel
-      .find()
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(take)
-      .select('_id username');
+    const usersQuery = query.skip(skip).limit(take);
 
     const [users, itemCount] = await Promise.all([
       usersQuery.exec(),
