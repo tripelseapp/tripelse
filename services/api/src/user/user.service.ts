@@ -5,7 +5,11 @@ import { Model } from 'mongoose';
 import { PageMetaDto } from 'src/common/dto/pagination/page-meta.dto';
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
-import { buildQuery, buildSortOptions } from 'src/utils/query-utils';
+import {
+  buildQuery,
+  buildSorting,
+  buildSortOptions,
+} from 'src/utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SafeUser } from './dto/safe-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -46,29 +50,32 @@ export class UserService {
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
-    let query = buildQuery<UserDocument>(
-      this.userModel,
-      { search, startDate, endDate },
-      ['username', 'email'],
-    );
-    const sortOptions = orderBy
-      ? buildSortOptions(Array.isArray(orderBy) ? orderBy : [orderBy])
-      : {};
+    const query = buildQuery<UserDocument>({
+      model: this.userModel,
+      filters: { search, startDate, endDate },
+      searchIn: ['username', 'email'],
+      fields: ['username'],
+    });
 
-    query = query.sort(sortOptions); // Ensure query is a valid Mongoose Query object
+    const usersQuery = query.skip(skip).limit(take).sort(buildSorting(orderBy));
 
-    const usersQuery = query.skip(skip).limit(take);
+    try {
+      const [users, itemCount] = await Promise.all([
+        usersQuery.exec(),
+        this.userModel.countDocuments().exec(),
+      ]);
 
-    const [users, itemCount] = await Promise.all([
-      usersQuery.exec(),
-      this.userModel.countDocuments().exec(),
-    ]);
-    const formattedUsers: SafeUser[] = users.map((user) => ({
-      id: user._id.toString(), // Assuming _id is a string or can be converted to a string
-      username: user.username,
-    }));
-    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
-    return new PageDto(formattedUsers, pageMetaDto);
+      const formattedUsers: SafeUser[] = users.map((user) => ({
+        id: user._id.toString(),
+        username: user.username,
+        email: 'e',
+      }));
+
+      const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+      return new PageDto(formattedUsers, pageMetaDto);
+    } catch (error) {
+      throw new Error(`Error fetching users: ${error.message}`);
+    }
   }
 
   async update(id: string, data: UpdateUserDto): Promise<User | null> {

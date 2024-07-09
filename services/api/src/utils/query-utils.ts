@@ -11,48 +11,55 @@ interface FiltersOptions {
 type ExtendedFilterQuery<T> = FilterQuery<T> & {
   createdAt?: { $gte?: Date; $lte?: Date };
 };
+interface BuildQueryOptions<T> {
+  model: Model<T>;
+  filters: FiltersOptions;
+  searchIn: (keyof T)[];
+  fields?: (keyof T)[];
+}
 
-export function buildQuery<T extends Document>(
-  model: Model<T>,
-  filters: FiltersOptions,
-  selectFields: (keyof T)[],
-): ExtendedFilterQuery<T> {
+export function buildQuery<T extends Document>({
+  model,
+  filters,
+  searchIn,
+  fields,
+}: BuildQueryOptions<T>): ExtendedFilterQuery<T> {
   let query: ExtendedFilterQuery<T> = model.find();
 
-  // Apply filters
   if (filters.search) {
-    query = query.or([
-      { username: { $regex: new RegExp(filters.search, 'i') } },
-      { email: { $regex: new RegExp(filters.search, 'i') } },
-    ]);
+    query = query.or(
+      searchIn.map((field) => ({
+        [field]: { $regex: new RegExp(filters.search, 'i') },
+      })),
+    );
   }
 
-  // if (filters.search) {
-  //   query.$or = selectFields.map((field) => ({
-  //     [field]: { $regex: filters.search, $options: 'i' },
-  //   })) as any; // Type assertion to avoid type conflict
-  // }
+  if (filters.startDate || filters.endDate) {
+    query.createdAt = {};
+    if (filters.startDate) {
+      query.createdAt.$gte = new Date(filters.startDate);
+    }
+    if (filters.endDate) {
+      query.createdAt.$lte = new Date(filters.endDate);
+    }
+  }
 
-  // if (filters.startDate || filters.endDate) {
-  //   query.createdAt = {};
-  //   if (filters.startDate) {
-  //     query.createdAt.$gte = new Date(filters.startDate);
-  //   }
-  //   if (filters.endDate) {
-  //     query.createdAt.$lte = new Date(filters.endDate);
-  //   }
-  // }
+  // Add other dynamic filters based on filters
+  Object.keys(filters).forEach((key) => {
+    if (!['search', 'startDate', 'endDate'].includes(key)) {
+      query[key as keyof T] = filters[key];
+    }
+  });
 
-  // // Add other dynamic filters based on filters
-  // Object.keys(filters).forEach((key) => {
-  //   if (!['search', 'startDate', 'endDate'].includes(key)) {
-  //     query[key as keyof T] = filters[key];
-  //   }
-  // });
-
-  query = query.select(selectFields.join(' '));
+  query = query.select(fields.join(' '));
 
   return query;
+}
+
+export function buildSorting(orderBy: PossibleOrders | PossibleOrders[]) {
+  return orderBy
+    ? buildSortOptions(Array.isArray(orderBy) ? orderBy : [orderBy])
+    : {};
 }
 
 export function buildSortOptions(orderBy: PossibleOrders[]): {

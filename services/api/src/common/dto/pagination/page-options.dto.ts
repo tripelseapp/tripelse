@@ -60,7 +60,6 @@ export class PageOptionsDto {
   @IsDateString()
   @ApiPropertyOptional({
     description: 'End date for filtering users',
-    default: new Date(),
   })
   readonly endDate?: Date;
 
