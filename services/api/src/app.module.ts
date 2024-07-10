@@ -1,19 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
-import { TripsModule } from './trips/trips.module';
+import { UserModule } from './user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
-    MongooseModule.forRoot(process.env.CONNECT_STRING, {}),
+    MongooseModule.forRoot(configuration().uri, {}),
     DevtoolsModule.register({
       http: process.env.NODE_ENV !== 'production',
     }),
-    UsersModule,
-    TripsModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],
