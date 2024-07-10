@@ -64,12 +64,14 @@
     "typescript": "^4.0.5"
   },
   "jest": {
+    "preset": "ts-jest",
+    "rootDir": "src",
     "moduleFileExtensions": [
+      "ts",
       "js",
       "json",
-      "ts"
+      "node"
     ],
-    "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -77,6 +79,11 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "<rootDir>/tsconfig.json"
+      }
+    },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }

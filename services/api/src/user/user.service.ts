@@ -134,10 +134,6 @@ export class UserService {
     return parsedUser;
   }
 
-  /**
-   * Find a user by username or email.
-   * @param usernameOrEmail - The username or email to search for.
-   */
   public async findByUsernameOrEmail(
     usernameOrEmail: string,
   ): Promise<UserDetailsDto | null> {
@@ -151,7 +147,7 @@ export class UserService {
     return user;
   }
 
-  async findUser({
+  public async findUser({
     email,
     username,
     id,
@@ -164,19 +160,17 @@ export class UserService {
       .exec();
     return user ? getUsersDetails(user) : null;
   }
-
   async findById(id: string): Promise<UserDetails> {
     const isValidId = mongoose.isValidObjectId(id);
     if (!isValidId) {
       throw new BadRequestException('Invalid ID');
     }
     try {
-      const user = await this.userModel.findById(id).lean().exec();
+      const user = await this.findUser({ id });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      const parsedUser = getUsersDetails(user);
-      return parsedUser;
+      return user;
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException(err);
