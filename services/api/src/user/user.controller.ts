@@ -31,6 +31,8 @@ import { UserDto } from './dto/user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // - Get all users
+
   @Get()
   @ApiOperation({
     summary: 'List all users',
@@ -53,6 +55,8 @@ export class UserController {
     return this.userService.findAll(pageOptionsDto);
   }
 
+  // - Get user by id
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -63,15 +67,15 @@ export class UserController {
     summary: 'Get user by id',
     description: 'Returns a single user with a matching id.',
   })
-  findOne(@Param('id') id: string): Promise<UserDetails | null> {
+  async findOne(@Param('id') id: string): Promise<UserDetails | null> {
     // validate the id
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       throw new BadRequestException('Invalid ID');
     }
-    return this.userService.findUserById(id);
+    return await this.userService.findUserById(id);
   }
 
-  //
+  // - Create user
 
   @Post('')
   @HttpCode(HttpStatus.CREATED)
@@ -90,7 +94,7 @@ export class UserController {
       );
     }
 
-    const usernameExists = await this.userService.checkIfUsernameExists(
+    const usernameExists = await this.userService.findByUsernameOrEmail(
       createUserDto.username,
     );
     if (usernameExists) {
@@ -114,6 +118,8 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  //  - Update user by id
+
   @Patch(':id')
   @ApiOperation({
     summary: 'Update user by id',
@@ -127,16 +133,36 @@ export class UserController {
     return updatedUser;
   }
 
-  @Get('checkUsername/:username')
-  async checkIfUsernameExists(@Param('username') username: string) {
-    const doesExist = await this.userService.checkIfUsernameExists(username);
-    return {
-      doesExist: doesExist,
-    };
+  //  - Get user by username or email
+
+  @Get('findByUsernameOrEmail/:userNameOrEmail')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+  })
+  @ApiOperation({
+    summary: 'Get user  by username or email',
+    description: 'Returns a single user with a matching username or email.',
+  })
+  async checkIfUsernameExists(
+    @Param('userNameOrEmail') userNameOrEmail: string,
+  ): Promise<UserDetails | null> {
+    const user = await this.userService.findByUsernameOrEmail(userNameOrEmail);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return user;
   }
 
+  //  - Delete user by id
+
   @Delete(':id')
-  async deleteUserController(@Param('id') id: string) {
+  @ApiOperation({
+    summary: 'Delete user by id',
+    description: 'Deletes a single user with a matching id.',
+  })
+  async deleteUserController(@Param('id') id: UserDto['id']) {
     const deletedUser = this.userService.remove(id);
     if (!deletedUser) {
       throw new BadRequestException('This user ID did not exist');

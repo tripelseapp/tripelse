@@ -13,7 +13,7 @@ import { buildQuery, buildSorting } from 'src/utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SafeUser } from './dto/safe-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDetails } from './dto/user-details.dto';
+import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { User } from './entities/user.entity';
 import { plainToInstance } from 'class-transformer';
 import { UserDto } from './dto/user.dto';
@@ -126,9 +126,14 @@ export class UserService {
    * @param username - The username to check.
    * @returns True if the username exists, false otherwise.
    */
-  async checkIfUsernameExists(username: User['username']): Promise<boolean> {
-    const user = await this.findByUsername(username);
-    return !!user;
+  async findByUsernameOrEmail(
+    usernameOrEmail: UserDto['username' | 'email'],
+  ): Promise<UserDetailsDto> {
+    const user = await this.retrieveUserByUsernameOrEmail(usernameOrEmail);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return this.getUsersDetails(user);
   }
 
   /**
@@ -136,12 +141,11 @@ export class UserService {
    * @param usernameOrEmail - The username or email to search for.
    * @returns The found user or null if not found.
    */
-  private async findUserByUsernameOrEmail(
+  private async retrieveUserByUsernameOrEmail(
     usernameOrEmail: string,
   ): Promise<User | null> {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmail = emailRegex.test(usernameOrEmail);
-
     if (isEmail) {
       return this.findUserByEmail(usernameOrEmail);
     }
@@ -157,6 +161,7 @@ export class UserService {
     const saltRounds = 10; // Adjust the number of salt rounds as needed
     return hash(password, saltRounds);
   }
+
   /**
    * Find a user by username.
    * @param username - The username to search for.
@@ -165,6 +170,7 @@ export class UserService {
   async findByUsername(username: string): Promise<User | null> {
     return this.userModel.findOne({ username }).exec();
   }
+
   /**
    * Find a user by email.
    * @param email - The email to search for.
@@ -178,25 +184,29 @@ export class UserService {
       .exec();
   }
 
+  private getUsersDetails = (user: User): UserDetails => {
+    // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
+
+    const updatedDate =
+      user.updatedAt?.toISOString() ?? user.createdAt.toISOString();
+
+    return {
+      id: String(user._id),
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: updatedDate,
+    };
+  };
+
   async findUserById(id: string): Promise<UserDetails | null> {
     try {
       const user = await this.userModel.findById(id).lean().exec();
       if (!user) {
         throw new NotFoundException('User not found');
       }
-
-      // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
-      const updatedDate =
-        user.updatedAt?.toISOString() ?? user.createdAt.toISOString();
-
-      const parsedUser: UserDetails = {
-        id: String(user._id),
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt?.toISOString(),
-        updatedAt: updatedDate,
-      };
+      const parsedUser = this.getUsersDetails(user);
       return parsedUser;
     } catch (err) {
       console.log(err);
