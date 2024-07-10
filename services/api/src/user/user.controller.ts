@@ -13,14 +13,16 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SafeUser, SafeUserDto } from './dto/safe-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { UserService } from './user.service';
+import { passwordStrongEnough } from 'src/utils/password-checker';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -51,15 +53,27 @@ export class UserController {
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+  })
   @ApiOperation({
     summary: 'Get user by id',
     description: 'Returns a single user with a matching id.',
   })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<UserDetails | null> {
+    // validate the id
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw new BadRequestException('Invalid ID');
+    }
     return this.userService.findUserById(id);
   }
 
+  //
+
   @Post('')
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create user',
     description: 'Creates a new user.',
@@ -88,7 +102,14 @@ export class UserController {
     if (emailExists) {
       throw new BadRequestException('Email already exists');
     }
+    // is pass strong enough?
+    const { strongEnough, reason } = passwordStrongEnough(
+      createUserDto.password,
+    );
 
+    if (!strongEnough && reason?.length) {
+      throw new BadRequestException(reason);
+    }
     return this.userService.create(createUserDto);
   }
 

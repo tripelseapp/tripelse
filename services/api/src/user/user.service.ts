@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { hash } from 'bcrypt';
 import { FilterQuery, Model } from 'mongoose';
@@ -9,8 +13,8 @@ import { buildQuery, buildSorting } from 'src/utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SafeUser } from './dto/safe-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserDetails } from './dto/user-details.dto';
 import { User } from './entities/user.entity';
-import { UserById } from './interfaces/get-by-id.interface';
 
 @Injectable()
 export class UserService {
@@ -19,21 +23,28 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const now = new Date();
 
-    // Encrypt the password
-
-    if (!createUserDto.password) throw new Error('Password is required');
     const hashedPassword = await this.hashPassword(createUserDto.password);
 
     // Create a new user instance
     const newUser = new this.userModel({
-      ...createUserDto,
+      // ...createUserDto,
+      username: createUserDto.username,
+      email: createUserDto.email,
       createdAt: now,
       updatedAt: now,
       password: hashedPassword,
       role: 'user',
     });
 
-    return newUser.save();
+    try {
+      // Save the user to the database
+      const savedUser = await newUser.save();
+      // Return plain object
+      return savedUser.toObject();
+    } catch (error) {
+      console.error('Error saving user:', error);
+      throw new Error('Could not save the user.');
+    }
   }
 
   public async findAll(
@@ -158,24 +169,29 @@ export class UserService {
       .exec();
   }
 
-  async findUserById(id: string): Promise<UserById | null> {
+  async findUserById(id: string): Promise<UserDetails | null> {
     try {
       const user = await this.userModel.findById(id).lean().exec();
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      const parsedUser: UserById = {
+      // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
+      const updatedDate =
+        user.updatedAt?.toISOString() ?? user.createdAt.toISOString();
+
+      const parsedUser: UserDetails = {
         id: String(user._id),
         username: user.username,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        createdAt: user.createdAt?.toISOString(),
+        updatedAt: updatedDate,
       };
       return parsedUser;
     } catch (err) {
-      throw new NotFoundException('User not found');
+      console.log(err);
+      throw new InternalServerErrorException(err);
     }
   }
 }
