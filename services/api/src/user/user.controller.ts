@@ -93,7 +93,7 @@ export class UserController {
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       throw new BadRequestException(['Invalid ID']);
     }
-    return await this.userService.findUserById(id);
+    return await this.userService.findById(id);
   }
 
   // - Create user
@@ -125,16 +125,16 @@ export class UserController {
     },
   })
   async create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
-    const usernameExists = await this.userService.retrieveUserByUsernameOrEmail(
+    const usernameExists = await this.userService.findByUsernameOrEmail(
       createUserDto.username,
     );
     if (usernameExists) {
       throw new BadRequestException('Username already exists');
     }
 
-    const emailExists = await this.userService.findUserByEmail(
-      createUserDto.email,
-    );
+    const emailExists = await this.userService.findUser({
+      email: createUserDto.email,
+    });
     if (emailExists) {
       throw new BadRequestException('Email already exists');
     }
