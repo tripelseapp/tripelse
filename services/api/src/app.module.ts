@@ -4,6 +4,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { TripsModule } from './trips/trips.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
@@ -12,6 +13,7 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
       http: process.env.NODE_ENV !== 'production',
     }),
     UsersModule,
+    TripsModule,
   ],
   controllers: [],
   providers: [],
