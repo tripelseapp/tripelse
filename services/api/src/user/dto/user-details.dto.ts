@@ -8,7 +8,5 @@ export class UserDetailsDto extends PickType(UserDto, [
   'role',
   'createdAt',
   'updatedAt',
-] as const) {
-  id: string;
-}
+] as const) {}
 export type UserDetails = UserDetailsDto;

@@ -11,7 +11,7 @@ import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
 import { buildQuery, buildSorting } from 'src/utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
-import { SafeUser } from './dto/safe-user.dto';
+import { SafeUser } from './dto/user-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { User } from './entities/user.entity';
