@@ -15,12 +15,14 @@ import { SafeUser } from './dto/safe-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails } from './dto/user-details.dto';
 import { User } from './entities/user.entity';
+import { plainToInstance } from 'class-transformer';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<UserDto> {
     const now = new Date();
 
     const hashedPassword = await this.hashPassword(createUserDto.password);
@@ -37,10 +39,17 @@ export class UserService {
     });
 
     try {
-      // Save the user to the database
       const savedUser = await newUser.save();
-      // Return plain object
-      return savedUser.toObject();
+      // Convert savedUser to a plain object and format the response
+      const userObj = savedUser.toObject();
+      const userDto = {
+        ...userObj,
+        id: String(userObj._id),
+        password: undefined, // Exclude the password field
+        _id: undefined, // Exclude the _id field
+        __v: undefined, // Exclude the __v field
+      };
+      return plainToInstance(UserDto, userDto);
     } catch (error) {
       console.error('Error saving user:', error);
       throw new Error('Could not save the user.');

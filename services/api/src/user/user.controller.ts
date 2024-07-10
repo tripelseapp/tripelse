@@ -23,6 +23,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { UserService } from './user.service';
 import { passwordStrongEnough } from 'src/utils/password-checker';
+import { UserDto } from './dto/user.dto';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -78,7 +79,7 @@ export class UserController {
     summary: 'Create user',
     description: 'Creates a new user.',
   })
-  async create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
     if (
       !createUserDto.username ||
       !createUserDto.email ||
