@@ -24,7 +24,7 @@ export const passwordStrongEnough = (
   password: User['password'],
 ): {
   strongEnough: boolean;
-  reason?: string;
+  reason?: string[];
 } => {
   const checks = [
     {
@@ -54,7 +54,7 @@ export const passwordStrongEnough = (
   if (failedCheck) {
     return {
       strongEnough: false,
-      reason: failedCheck.reason,
+      reason: [failedCheck.reason],
     };
   }
 

@@ -6,6 +6,8 @@ import {
   IsIn,
   IsNotEmpty,
   IsDateString,
+  MinLength,
+  MaxLength,
 } from 'class-validator';
 
 export class UserDto {
@@ -21,6 +23,8 @@ export class UserDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(30)
   @ApiProperty({
     description: 'The unique username for a user.',
     minimum: 4,
@@ -31,6 +35,8 @@ export class UserDto {
 
   @IsEmail()
   @IsNotEmpty()
+  @MinLength(5)
+  @MaxLength(70)
   @ApiProperty({
     description: 'The email of a user.',
     minimum: 8,
@@ -40,6 +46,8 @@ export class UserDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(8)
+  @MaxLength(200)
   @ApiProperty({
     description: 'The password of a user.',
     minimum: 8,

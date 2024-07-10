@@ -117,8 +117,13 @@ export class UserService {
     }
   }
 
-  async remove(id: string): Promise<User | null> {
-    return this.userModel.findByIdAndDelete(id).exec();
+  async remove(id: string): Promise<UserDetailsDto | null> {
+    const user = await this.userModel.findByIdAndDelete(id).lean().exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const parsedUser = this.getUsersDetails(user);
+    return parsedUser;
   }
 
   /**
@@ -141,7 +146,7 @@ export class UserService {
    * @param usernameOrEmail - The username or email to search for.
    * @returns The found user or null if not found.
    */
-  private async retrieveUserByUsernameOrEmail(
+  async retrieveUserByUsernameOrEmail(
     usernameOrEmail: string,
   ): Promise<User | null> {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -177,7 +182,7 @@ export class UserService {
    * @returns The found user or null if not found.
    */
   async findUserByEmail(email: string): Promise<User | null> {
-    return this.userModel
+    return await this.userModel
       .findOne({
         email,
       })
