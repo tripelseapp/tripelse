@@ -14,7 +14,7 @@ import { buildQuery, buildSorting } from 'src/utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
-import { SafeUser } from './dto/user-list.dto';
+import { UserInListDto } from './dto/user-list.dto';
 import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { getUsersDetails } from './utils/get-users-details';
@@ -63,10 +63,9 @@ export class UserService {
       throw new Error('Could not save the user.');
     }
   }
-
   public async findAll(
     pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<SafeUser>> {
+  ): Promise<PageDto<UserInListDto>> {
     const {
       page = 1,
       take = 10,
@@ -97,7 +96,7 @@ export class UserService {
           this.userModel.countDocuments().exec(),
         ]);
 
-      const formattedUsers: SafeUser[] = users.map((user) => ({
+      const formattedUsers: UserInListDto[] = users.map((user) => ({
         id: user._id.toString(),
         username: user.username,
       }));
@@ -112,7 +111,6 @@ export class UserService {
       throw new Error('Error while fetching users.');
     }
   }
-
   public async update(id: string, data: UpdateUserDto): Promise<User | null> {
     try {
       const newUser = { ...data, updatedAt: new Date() };
@@ -124,7 +122,6 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
   }
-
   public async remove(id: string): Promise<UserDetailsDto | null> {
     const user = await this.userModel.findByIdAndDelete(id).lean().exec();
     if (!user) {
@@ -133,7 +130,6 @@ export class UserService {
     const parsedUser = getUsersDetails(user);
     return parsedUser;
   }
-
   public async findByUsernameOrEmail(
     usernameOrEmail: string,
   ): Promise<UserDetailsDto | null> {
@@ -146,7 +142,6 @@ export class UserService {
 
     return user;
   }
-
   public async findUser({
     email,
     username,

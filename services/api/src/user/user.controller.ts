@@ -24,7 +24,7 @@ import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-respon
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { SafeUser, UserInListDto } from './dto/user-list.dto';
+import { UserInListDto } from './dto/user-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ExampleUserDetailsDto,
@@ -52,7 +52,7 @@ export class UserController {
   @ApiPaginatedResponse(UserInListDto)
   async getUsers(
     @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<SafeUser>> {
+  ): Promise<PageDto<UserInListDto>> {
     if (typeof pageOptionsDto.orderBy === 'string') {
       pageOptionsDto.orderBy = [pageOptionsDto.orderBy];
     } else if (
