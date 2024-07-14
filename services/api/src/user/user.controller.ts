@@ -13,17 +13,29 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { SafeUser, UserInListDto } from './dto/user-list.dto';
+import { UserInListDto } from './dto/user-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
+import {
+  ExampleUserDetailsDto,
+  UserDetails,
+  UserDetailsDto,
+} from './dto/user-details.dto';
 import { UserService } from './user.service';
 import { passwordStrongEnough } from 'src/utils/password-checker';
 import { UserDto } from './dto/user.dto';
+import { NewUserRoleDto } from './dto/new-role-dto';
+import { NewUserPasswordDto } from './dto/new-password-dto';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -42,7 +54,7 @@ export class UserController {
   @ApiPaginatedResponse(UserInListDto)
   async getUsers(
     @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<SafeUser>> {
+  ): Promise<PageDto<UserInListDto>> {
     if (typeof pageOptionsDto.orderBy === 'string') {
       pageOptionsDto.orderBy = [pageOptionsDto.orderBy];
     } else if (
@@ -51,49 +63,69 @@ export class UserController {
     ) {
       throw new BadRequestException('orderBy must be a string or an array');
     }
-
     return this.userService.findAll(pageOptionsDto);
   }
 
   // - Get user by id
 
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({
-    status: HttpStatus.OK,
-    type: UserDetailsDto,
-  })
   @ApiOperation({
     summary: 'Get user by id',
     description: 'Returns a single user with a matching id.',
   })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User found',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
   async findOne(@Param('id') id: string): Promise<UserDetails | null> {
     // validate the id
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      throw new BadRequestException('Invalid ID');
+      throw new BadRequestException(['Invalid ID']);
     }
-    return await this.userService.findUserById(id);
+    return await this.userService.findById(id);
   }
 
   // - Create user
 
   @Post('')
-  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create user',
     description: 'Creates a new user.',
   })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({
+    status: HttpStatus.CREATED,
+    type: UserDetailsDto,
+    description: 'User created',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Bad Request',
+    type: Error,
+    example: {
+      message: [
+        'username must be longer than or equal to 4 characters',
+        'username should not be empty',
+        'email must be longer than or equal to 5 characters',
+      ],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
   async create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
-    if (
-      !createUserDto.username ||
-      !createUserDto.email ||
-      !createUserDto.password
-    ) {
-      throw new BadRequestException(
-        'Username, email, and password are required fields',
-      );
-    }
-
     const usernameExists = await this.userService.findByUsernameOrEmail(
       createUserDto.username,
     );
@@ -101,9 +133,9 @@ export class UserController {
       throw new BadRequestException('Username already exists');
     }
 
-    const emailExists = await this.userService.findUserByEmail(
-      createUserDto.email,
-    );
+    const emailExists = await this.userService.findUser({
+      email: createUserDto.email,
+    });
     if (emailExists) {
       throw new BadRequestException('Email already exists');
     }
@@ -125,12 +157,59 @@ export class UserController {
     summary: 'Update user by id',
     description: 'Updates a single user with a matching id.',
   })
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User created',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['username must be longer than or equal to 4 characters'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const updatedUser = this.userService.update(id, updateUserDto);
     if (!updatedUser) {
       throw new BadRequestException('This user ID did not exist');
     }
     return updatedUser;
+  }
+
+  //  - Delete user by id
+
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Delete user by id',
+    description: 'Deletes a single user with a matching id.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User deleted successfully',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  async delete(@Param('id') id: UserDto['id']) {
+    const deletedUser = await this.userService.remove(id);
+    if (!deletedUser) {
+      throw new BadRequestException('This user ID did not exist');
+    }
+    return deletedUser;
   }
 
   //  - Get user by username or email
@@ -155,18 +234,72 @@ export class UserController {
     return user;
   }
 
-  //  - Delete user by id
-
-  @Delete(':id')
+  //  - Update User Role by id
+  @Patch(':id/role')
   @ApiOperation({
-    summary: 'Delete user by id',
-    description: 'Deletes a single user with a matching id.',
+    summary: 'Update user role by id',
+    description: 'Updates a single user role with a matching id.',
   })
-  async deleteUserController(@Param('id') id: UserDto['id']) {
-    const deletedUser = this.userService.remove(id);
-    if (!deletedUser) {
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User role updated',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  async updateRole(
+    @Param('id') id: string,
+    @Body() newUserRoleDto: NewUserRoleDto,
+  ) {
+    const role = newUserRoleDto.role;
+
+    const updatedUser = await this.userService.updateRole(id, role);
+    if (!updatedUser) {
       throw new BadRequestException('This user ID did not exist');
     }
-    return deletedUser;
+    return updatedUser;
+  }
+
+  //  - Update an user Password by id
+  @Patch(':id/password')
+  @ApiOperation({
+    summary: 'Update user password by id',
+    description: 'Updates a single user password with a matching id.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User password updated',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  async updatePassword(
+    @Param('id') id: string,
+    @Body() body: NewUserPasswordDto,
+  ) {
+    const newPassword = body.password;
+    const updatedUser = await this.userService.updatePassword(id, newPassword);
+    if (!updatedUser) {
+      throw new BadRequestException('This user ID did not exist');
+    }
+    return updatedUser;
   }
 }

@@ -1,31 +1,40 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { hash } from 'bcrypt';
-import { FilterQuery, Model } from 'mongoose';
+import { plainToInstance } from 'class-transformer';
+import mongoose, { FilterQuery, Model } from 'mongoose';
 import { PageMetaDto } from 'src/common/dto/pagination/page-meta.dto';
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
 import { buildQuery, buildSorting } from 'src/utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
-import { SafeUser } from './dto/user-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
-import { User } from './entities/user.entity';
-import { plainToInstance } from 'class-transformer';
+import { UserInListDto } from './dto/user-list.dto';
 import { UserDto } from './dto/user.dto';
+import { User } from './entities/user.entity';
+import { getUsersDetails } from './utils/get-users-details';
+import { hashPassword, comparePassword } from './utils/password-utils';
+import { Role } from './types/role.types';
 
+interface findUserOptions {
+  email?: string;
+  username?: string;
+  id?: string;
+  shy?: boolean;
+}
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserDto> {
+  public async create(createUserDto: CreateUserDto): Promise<UserDto> {
     const now = new Date();
 
-    const hashedPassword = await this.hashPassword(createUserDto.password);
+    const hashedPassword = await hashPassword(createUserDto.password);
 
     // Create a new user instance
     const newUser = new this.userModel({
@@ -55,10 +64,9 @@ export class UserService {
       throw new Error('Could not save the user.');
     }
   }
-
   public async findAll(
     pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<SafeUser>> {
+  ): Promise<PageDto<UserInListDto>> {
     const {
       page = 1,
       take = 10,
@@ -89,7 +97,7 @@ export class UserService {
           this.userModel.countDocuments().exec(),
         ]);
 
-      const formattedUsers: SafeUser[] = users.map((user) => ({
+      const formattedUsers: UserInListDto[] = users.map((user) => ({
         id: user._id.toString(),
         username: user.username,
       }));
@@ -104,8 +112,7 @@ export class UserService {
       throw new Error('Error while fetching users.');
     }
   }
-
-  async update(id: string, data: UpdateUserDto): Promise<User | null> {
+  public async update(id: string, data: UpdateUserDto): Promise<User | null> {
     try {
       const newUser = { ...data, updatedAt: new Date() };
       return this.userModel
@@ -116,101 +123,105 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
   }
-
-  async remove(id: string): Promise<User | null> {
-    return this.userModel.findByIdAndDelete(id).exec();
-  }
-
-  /**
-   * Check if a username exists.
-   * @param username - The username to check.
-   * @returns True if the username exists, false otherwise.
-   */
-  async findByUsernameOrEmail(
-    usernameOrEmail: UserDto['username' | 'email'],
-  ): Promise<UserDetailsDto> {
-    const user = await this.retrieveUserByUsernameOrEmail(usernameOrEmail);
+  public async remove(id: string): Promise<UserDetailsDto | null> {
+    const user = await this.userModel.findByIdAndDelete(id).lean().exec();
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return this.getUsersDetails(user);
+    const parsedUser = getUsersDetails(user);
+    return parsedUser;
   }
-
-  /**
-   * Find a user by username or email.
-   * @param usernameOrEmail - The username or email to search for.
-   * @returns The found user or null if not found.
-   */
-  private async retrieveUserByUsernameOrEmail(
+  public async findByUsernameOrEmail(
     usernameOrEmail: string,
-  ): Promise<User | null> {
+  ): Promise<UserDetailsDto | null> {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmail = emailRegex.test(usernameOrEmail);
-    if (isEmail) {
-      return this.findUserByEmail(usernameOrEmail);
-    }
-    return this.findByUsername(usernameOrEmail);
-  }
 
-  /**
-   * Hash a password using bcrypt.
-   * @param password - The password to hash.
-   * @returns The hashed password.
-   */
-  private async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10; // Adjust the number of salt rounds as needed
-    return hash(password, saltRounds);
-  }
+    const user = await this.findUser({
+      [isEmail ? 'email' : 'username']: usernameOrEmail,
+    });
 
-  /**
-   * Find a user by username.
-   * @param username - The username to search for.
-   * @returns The found user or null if not found.
-   */
-  async findByUsername(username: string): Promise<User | null> {
-    return this.userModel.findOne({ username }).exec();
+    return user;
   }
-
-  /**
-   * Find a user by email.
-   * @param email - The email to search for.
-   * @returns The found user or null if not found.
-   */
-  async findUserByEmail(email: string): Promise<User | null> {
-    return this.userModel
+  public async findUser({
+    email,
+    username,
+    id,
+  }: findUserOptions): Promise<UserDetailsDto | null> {
+    const user = await this.userModel
       .findOne({
-        email,
+        $or: [{ email }, { username }, { _id: id }],
       })
+      .lean()
       .exec();
+    return user ? getUsersDetails(user) : null;
   }
-
-  private getUsersDetails = (user: User): UserDetails => {
-    // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
-
-    const updatedDate =
-      user.updatedAt?.toISOString() ?? user.createdAt.toISOString();
-
-    return {
-      id: String(user._id),
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt.toISOString(),
-      updatedAt: updatedDate,
-    };
-  };
-
-  async findUserById(id: string): Promise<UserDetails | null> {
+  async findById(id: string): Promise<UserDetails> {
+    const isValidId = mongoose.isValidObjectId(id);
+    if (!isValidId) {
+      throw new BadRequestException('Invalid ID');
+    }
     try {
-      const user = await this.userModel.findById(id).lean().exec();
+      const user = await this.findUser({ id });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      const parsedUser = this.getUsersDetails(user);
-      return parsedUser;
+      return user;
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException(err);
     }
+  }
+  public async updateRole(id: User['id'], role: Role): Promise<UserDetails> {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, { role }, { new: true })
+      .lean()
+      .exec();
+    if (!user) {
+      throw new BadRequestException('Invalid ID');
+    }
+
+    if (user.role !== role) {
+      throw new InternalServerErrorException('Could not update user role');
+    }
+
+    const parsedUser = getUsersDetails(user);
+
+    return parsedUser;
+  }
+  public async updatePassword(
+    id: string,
+    password: string,
+  ): Promise<UserDetails> {
+    // check if the user already had the same password
+    const oldUser = await this.userModel.findById(id, { password: 1 }).lean();
+    console.log('oldUser', oldUser);
+    if (!oldUser) {
+      throw new BadRequestException('Invalid ID');
+    }
+    if (!oldUser.password) {
+      throw new BadRequestException('User does not have a password');
+    }
+    const isSamePassword = await comparePassword(password, oldUser.password);
+    if (isSamePassword) {
+      throw new BadRequestException(
+        'New password must be different from the old password',
+      );
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(id, { password: hashedPassword }, { new: true })
+      .lean()
+      .exec();
+
+    if (!updatedUser) {
+      throw new BadRequestException('Invalid ID');
+    }
+
+    const parsedUser = getUsersDetails(updatedUser);
+
+    return parsedUser;
   }
 }

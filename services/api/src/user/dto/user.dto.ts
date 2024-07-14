@@ -6,7 +6,11 @@ import {
   IsIn,
   IsNotEmpty,
   IsDateString,
+  MinLength,
+  MaxLength,
+  IsEnum,
 } from 'class-validator';
+import { Role, roles } from '../types/role.types';
 
 export class UserDto {
   @IsString()
@@ -21,6 +25,8 @@ export class UserDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(30)
   @ApiProperty({
     description: 'The unique username for a user.',
     minimum: 4,
@@ -31,6 +37,8 @@ export class UserDto {
 
   @IsEmail()
   @IsNotEmpty()
+  @MinLength(5)
+  @MaxLength(70)
   @ApiProperty({
     description: 'The email of a user.',
     minimum: 8,
@@ -40,6 +48,8 @@ export class UserDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(8)
+  @MaxLength(200)
   @ApiProperty({
     description: 'The password of a user.',
     minimum: 8,
@@ -48,10 +58,9 @@ export class UserDto {
   })
   readonly password: string;
 
-  @IsString()
-  @ApiProperty({ enum: ['user', 'admin'] })
-  @IsIn(['admin', 'user'])
-  readonly role: 'admin' | 'user';
+  @ApiProperty({ enum: roles })
+  @IsIn(roles)
+  readonly role: Role;
 
   @IsDateString()
   @ApiProperty({
