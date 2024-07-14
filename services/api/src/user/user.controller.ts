@@ -61,7 +61,6 @@ export class UserController {
     ) {
       throw new BadRequestException('orderBy must be a string or an array');
     }
-
     return this.userService.findAll(pageOptionsDto);
   }
 
