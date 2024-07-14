@@ -18,7 +18,7 @@ import { UserInListDto } from './dto/user-list.dto';
 import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { getUsersDetails } from './utils/get-users-details';
-import hashPassword from './utils/hash-password';
+import { hashPassword, comparePassword } from './utils/password-utils';
 
 interface findUserOptions {
   email?: string;
@@ -170,5 +170,60 @@ export class UserService {
       console.log(err);
       throw new InternalServerErrorException(err);
     }
+  }
+  public async updateRole(
+    id: string,
+    role: 'admin' | 'user',
+  ): Promise<UserDetails> {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, { role }, { new: true })
+      .lean()
+      .exec();
+    if (!user) {
+      throw new BadRequestException('Invalid ID');
+    }
+
+    if (user.role !== role) {
+      throw new InternalServerErrorException('Could not update user role');
+    }
+
+    const parsedUser = getUsersDetails(user);
+
+    return parsedUser;
+  }
+  public async updatePassword(
+    id: string,
+    password: string,
+  ): Promise<UserDetails> {
+    // check if the user already had the same password
+    const oldUser = await this.userModel.findById(id, { password: 1 }).lean();
+    console.log('oldUser', oldUser);
+    if (!oldUser) {
+      throw new BadRequestException('Invalid ID');
+    }
+    if (!oldUser.password) {
+      throw new BadRequestException('User does not have a password');
+    }
+    const isSamePassword = await comparePassword(password, oldUser.password);
+    if (isSamePassword) {
+      throw new BadRequestException(
+        'New password must be different from the old password',
+      );
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(id, { password: hashedPassword }, { new: true })
+      .lean()
+      .exec();
+
+    if (!updatedUser) {
+      throw new BadRequestException('Invalid ID');
+    }
+
+    const parsedUser = getUsersDetails(updatedUser);
+
+    return parsedUser;
   }
 }

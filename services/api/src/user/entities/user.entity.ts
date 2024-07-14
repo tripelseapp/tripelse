@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { Role } from '../types/role.types';
 
 /*
 Entity (User): Represents your MongoDB schema and is directly tied to your database structure. It includes all fields defined in your schema, such as username, email, password, role, createdAt, and potentially other fields.
@@ -16,7 +17,7 @@ export class User extends Document {
   email: string;
 
   @Prop({ required: true })
-  role: 'admin' | 'user';
+  role: Role;
 
   @Prop({ required: true })
   createdAt: Date;

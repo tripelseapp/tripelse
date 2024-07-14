@@ -34,6 +34,8 @@ import {
 import { UserService } from './user.service';
 import { passwordStrongEnough } from 'src/utils/password-checker';
 import { UserDto } from './dto/user.dto';
+import { NewUserRoleDto } from './dto/new-role-dto';
+import { NewUserPasswordDto } from './dto/new-password-dto';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -230,5 +232,74 @@ export class UserController {
       throw new BadRequestException('User not found');
     }
     return user;
+  }
+
+  //  - Update User Role by id
+  @Patch(':id/role')
+  @ApiOperation({
+    summary: 'Update user role by id',
+    description: 'Updates a single user role with a matching id.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User role updated',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  async updateRole(
+    @Param('id') id: string,
+    @Body() newUserRoleDto: NewUserRoleDto,
+  ) {
+    const role = newUserRoleDto.role;
+
+    const updatedUser = await this.userService.updateRole(id, role);
+    if (!updatedUser) {
+      throw new BadRequestException('This user ID did not exist');
+    }
+    return updatedUser;
+  }
+
+  //  - Update an user Password by id
+  @Patch(':id/password')
+  @ApiOperation({
+    summary: 'Update user password by id',
+    description: 'Updates a single user password with a matching id.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User password updated',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  async updatePassword(
+    @Param('id') id: string,
+    @Body() body: NewUserPasswordDto,
+  ) {
+    const newPassword = body.password;
+    const updatedUser = await this.userService.updatePassword(id, newPassword);
+    if (!updatedUser) {
+      throw new BadRequestException('This user ID did not exist');
+    }
+    return updatedUser;
   }
 }

@@ -8,7 +8,9 @@ import {
   IsDateString,
   MinLength,
   MaxLength,
+  IsEnum,
 } from 'class-validator';
+import { Role, roles } from '../types/role.types';
 
 export class UserDto {
   @IsString()
@@ -56,10 +58,9 @@ export class UserDto {
   })
   readonly password: string;
 
-  @IsString()
-  @ApiProperty({ enum: ['user', 'admin'] })
-  @IsIn(['admin', 'user'])
-  readonly role: 'admin' | 'user';
+  @ApiProperty({ enum: roles })
+  @IsIn(roles)
+  readonly role: Role;
 
   @IsDateString()
   @ApiProperty({
