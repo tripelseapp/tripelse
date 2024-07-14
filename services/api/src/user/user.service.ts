@@ -19,6 +19,7 @@ import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { getUsersDetails } from './utils/get-users-details';
 import { hashPassword, comparePassword } from './utils/password-utils';
+import { Role } from './types/role.types';
 
 interface findUserOptions {
   email?: string;
@@ -171,10 +172,7 @@ export class UserService {
       throw new InternalServerErrorException(err);
     }
   }
-  public async updateRole(
-    id: string,
-    role: 'admin' | 'user',
-  ): Promise<UserDetails> {
+  public async updateRole(id: User['id'], role: Role): Promise<UserDetails> {
     const user = await this.userModel
       .findByIdAndUpdate(id, { role }, { new: true })
       .lean()
