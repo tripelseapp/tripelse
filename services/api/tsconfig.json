@@ -8,8 +8,17 @@
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": true,
+    "skipLibCheck": true,
     "outDir": "./dist",
+    "strictPropertyInitialization": false,
+    "strict": true,
+    "esModuleInterop": true,
     "baseUrl": "./",
     "incremental": true
-  }
+  },
+  "watchOptions": {
+    "watchFile": "fixedPollingInterval"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }

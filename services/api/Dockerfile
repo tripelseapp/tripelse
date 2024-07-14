@@ -1,12 +1,13 @@
 # Stage 1: Development
-FROM node:16 AS development
+FROM node:20 AS development
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-# Install dependencies including @nestjs/cli locally
 RUN npm install -g @nestjs/cli
+
+
 RUN npm install
 
 COPY . .
@@ -18,12 +19,12 @@ COPY .env .env.development ./
 RUN npm run build
 
 # Expose the port on which the app will run
-EXPOSE 3001
+EXPOSE 4000
 
 
 
 # Stage 2: Production
-FROM node:16 AS production
+FROM node:20 AS production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}

@@ -1,33 +1,11 @@
-version: '3.7'
+version: '3.6'
 
 services:
-  nest:
-    container_name: 'nest'
-    build:
-      context: .
-      target: development
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    environment:
-      MONGO_URI: '${CONNECT_STRING}'
-    ports:
-      - '4000:${PORT}'
-      - 9229:9229
-    command: npm run start
-    env_file:
-      - .env
-    restart: unless-stopped
-    networks:
-      - server-network
-    depends_on:
-      - mongodb
-
   mongodb:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: mongodb
     volumes:
-      - mongodb_data_container:/data/db
+      - mongodata:/data/db
     env_file:
       - .env
     networks:
@@ -37,16 +15,35 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     ports:
-      - '27017:27017'
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo ${DB_HOST}:27017/test --quiet
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - 27017:27017
+  nest:
+    container_name: 'nest'
+    build:
+      context: .
+      target: development
+      # only will build dev stage from dockerfile
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev
+    # command: npm run start
+    environment:
+      CONNECT_STRING: '${CONNECT_STRING}'
+      NODE_ENV: 'production'
+    ports:
+      - '4000:${PORT}'
+      - 9229:9229
+    env_file:
+      - .env
     restart: unless-stopped
+    networks:
+      - server-network
+    depends_on:
+      - mongodb
 
 networks:
   server-network:
 
 volumes:
-  mongodb_data_container:
+  mongodata:
+    driver: local

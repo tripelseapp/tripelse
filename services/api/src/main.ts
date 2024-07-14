@@ -1,20 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import * as compression from 'compression';
+import { setupSwagger } from './utils/setupSwagger';
+import configuration from './config/configuration';
 
-const PORT = parseInt(process.env.PORT, 10) || 4000;
+const PORT = configuration().port;
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  console.log(process.env.CONNECT_STRING);
+
+  const app = await NestFactory.create(AppModule); //
   // register all plugins and extension
   app.enableCors({ origin: '*' });
-  app.useGlobalPipes(new ValidationPipe({}));
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-  app.use(compression());
+  setupSwagger(app);
 
   await app.listen(PORT, () => {
-    console.log('MONGO_URI:', process.env.CONNECT_STRING);
     console.log(`🚀 Application running at port ${PORT}`);
+    console.log(`🟢 Swagger opened in http://localhost:${PORT}/api`);
   });
 }
 bootstrap();
