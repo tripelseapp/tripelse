@@ -1,22 +1,63 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
-import { PageDto } from 'src/common/dto/pagination/page.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Trip } from './entities/trip.entity';
+import { plainToInstance } from 'class-transformer';
+import {
+  PageDto,
+  PageMetaDto,
+  PageOptionsDto,
+} from 'common/resources/pagination';
 import { FilterQuery, Model } from 'mongoose';
-import { buildQuery, buildSorting } from 'src/utils/query-utils';
-import { PageMetaDto } from 'src/common/dto/pagination/page-meta.dto';
-import { CreateTripDto } from './dto/trip-dtos/create-trip.dto';
-import { TripInListDto } from './dto/trip-dtos/trip-list.dto';
-import { UpdateTripDto } from './dto/trip-dtos/update-trip.dto';
+import { buildQuery, buildSorting } from 'utils/query-utils';
+import { CreateTripDto } from './dto/trip/create-trip.dto';
+import { TripDetailsDto } from './dto/trip/trip-details.dto';
+import { TripInListDto } from './dto/trip/trip-list.dto';
+import { TripDto } from './dto/trip/trip.dto';
+import { UpdateTripDto } from './dto/trip/update-trip.dto';
+import { Trip, TripDocument } from './entities/trip.entity';
+import { getDays } from './utils/create-days';
+import { getTripDetails } from './utils/get-trip-details';
+import { Day } from './entities/day.entity';
 
 @Injectable()
 export class TripService {
-  constructor(@InjectModel(Trip.name) private tripModel: Model<Trip>) {}
+  constructor(@InjectModel(Trip.name) private tripModel: Model<TripDocument>) {}
 
-  create(createTripDto: CreateTripDto) {
-    return 'This action adds a new trip';
+  public async create(createTripDto: CreateTripDto): Promise<TripDto> {
+    const days = getDays(createTripDto.startDate, createTripDto.endDate);
+
+    const completeTrip: Trip = {
+      ...createTripDto,
+      days,
+      thumbnail: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const newTrip = new this.tripModel(completeTrip);
+
+    try {
+      const savedTrip: TripDocument = await newTrip.save();
+      if (!savedTrip._id) {
+        throw new Error('Error saving trip');
+      }
+      const userObj = savedTrip.toObject();
+      const tripDto: TripDto = {
+        ...userObj,
+        days: userObj.days.map((day: Day) => ({
+          ...day,
+          id: day._id.toString(),
+          _id: undefined, // Exclude the _id field
+        })),
+        id: String(userObj._id),
+        _id: undefined, // Exclude the _id field
+        __v: undefined, // Exclude the __v field
+      };
+      return plainToInstance(TripDto, tripDto);
+    } catch (error) {
+      console.error('Error saving trip:', error);
+      throw new Error('Error saving trip');
+    }
   }
 
   public async findAll(
@@ -25,14 +66,14 @@ export class TripService {
     const {
       page = 1,
       take = 10,
-      orderBy = ['createdAt:ASC'],
+      orderBy = ['createdAt:DESC'],
       search,
       startDate,
       endDate,
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
-    const query = buildQuery<Trip>({
+    const query = buildQuery<TripDocument>({
       model: this.tripModel,
       filters: { search, startDate, endDate },
       searchIn: ['name', 'description'],
@@ -77,7 +118,12 @@ export class TripService {
     return `This action updates a #${id} trip`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} trip`;
+  public async remove(id: TripDto['id']): Promise<TripDetailsDto> {
+    const trip = await this.tripModel.findByIdAndDelete(id).lean().exec();
+    if (!trip) {
+      throw new NotFoundException('Trip not found');
+    }
+    const tripDetails = getTripDetails(trip);
+    return tripDetails;
   }
 }

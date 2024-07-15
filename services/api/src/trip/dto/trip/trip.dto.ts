@@ -1,31 +1,21 @@
 // trip.dto.ts
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import {
   IsArray,
   IsDateString,
-  IsEmail,
   IsIn,
   IsNotEmpty,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Expense } from 'src/common/entities/expense.entity';
-import { DayDto } from '../day-dtos/day.dto';
-import { categories, Category } from 'src/common/enums/category.enum';
-import { Day } from 'src/trip/entities/day.entity';
+import { CommonDto } from 'common/common.dto';
+import { CategoriesEnum } from 'common/enums/category.enum';
+import { Expense } from 'common/resources/expenses/entities/expense.entity';
+import { Day } from 'trip/entities/day.entity';
+import { DayDto } from '../day/day.dto';
 
-export class TripDto {
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'The unique identifier for a trip.',
-    minimum: 24,
-    type: 'string',
-    default: '',
-  })
-  readonly id: string;
-
+export class TripDto extends PickType(CommonDto, ['id'] as const) {
   @IsString()
   @IsNotEmpty()
   @MinLength(4)
@@ -52,44 +42,13 @@ export class TripDto {
   })
   readonly description: string;
 
-  @IsDateString()
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'The date when the first day of the trip is planned to start.',
-    type: 'string',
-    default: '2024-06-01T00:00:00.000Z',
-  })
-  readonly startDate: string;
-
-  @IsDateString()
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'The date when the last day of the trip is planned to end.',
-    type: 'string',
-    default: '2024-06-10T00:00:00.000Z',
-  })
-  readonly endDate: string;
-
   @IsString()
-  @IsNotEmpty()
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Link to the main image of the trip.',
     type: 'string',
     default: 'https://example.com/image.jpg',
   })
   readonly thumbnail: string;
-
-  @IsString({ each: true })
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'The list of user IDs that are part of the trip.',
-    type: 'array',
-    items: {
-      type: 'string',
-      default: ['user1', 'user2'],
-    },
-  })
-  readonly travelers: string[];
 
   @IsDateString()
   @IsNotEmpty()
@@ -114,26 +73,39 @@ export class TripDto {
     type: Expense,
     isArray: true,
     description: 'The list of expenses for the trip.',
-    default: ['Flights', 'Hotel'],
+    default: [],
   })
   readonly expenses: Expense[];
 
   @IsArray()
   @ApiPropertyOptional({
-    type: DayDto,
+    type: Day,
     isArray: true,
     description: 'Days into the trip.',
     default: [],
   })
-  readonly days: Day[];
+  readonly days: DayDto[];
 
-  //CATEGORY OF THE trip
+  @IsArray()
   @IsString({ each: true })
-  @IsIn(categories)
+  @IsIn(Object.values(CategoriesEnum), { each: true })
   @ApiPropertyOptional({
     description: 'The categories of the trip.',
     type: 'string',
-    default: ['Business', 'Family'],
+    isArray: true,
+    default: [CategoriesEnum.ENTERTAINMENT],
   })
-  readonly category: Category;
+  readonly categories: CategoriesEnum[];
+
+  @IsArray()
+  @IsNotEmpty({ each: true })
+  @ApiProperty({
+    description: 'The list of user IDs that are part of the trip.',
+    type: 'array',
+    items: {
+      type: 'string',
+    },
+    default: [],
+  })
+  readonly travelers: string[];
 }

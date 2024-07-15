@@ -12,13 +12,17 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
-import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
+import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { TripService } from './trip.service';
-import { PageDto } from 'src/common/dto/pagination/page.dto';
-import { CreateTripDto } from './dto/trip-dtos/create-trip.dto';
-import { UpdateTripDto } from './dto/trip-dtos/update-trip.dto';
-import { TripInListDto } from './dto/trip-dtos/trip-list.dto';
+import { CreateTripDto, CreateTripExample } from './dto/trip/create-trip.dto';
+import { UpdateTripDto } from './dto/trip/update-trip.dto';
+import { TripInListDto } from './dto/trip/trip-list.dto';
+import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
+import { PageDto } from 'common/resources/pagination/page.dto';
+import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
+import { TripDto } from './dto/trip/trip.dto';
+import { Trip } from './entities/trip.entity';
+import { TripDetailsDto } from './dto/trip/trip-details.dto';
 
 @Controller('trip')
 @ApiTags('Trip')
@@ -32,13 +36,16 @@ export class TripController {
     description: 'Creates a new trip with the provided data',
   })
   @ApiOkResponse({
+    example: CreateTripExample,
     status: 201,
     description: 'The trip has been successfully created.',
     type: TripInListDto,
   })
-  create(@Body() createTripDto: CreateTripDto) {
+  async create(@Body() createTripDto: CreateTripDto): Promise<TripDto> {
     return this.tripService.create(createTripDto);
   }
+
+  // Find all paginated trips
 
   @Get()
   @ApiOperation({
@@ -61,17 +68,32 @@ export class TripController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.tripService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
+  update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateTripDto: UpdateTripDto,
+  ) {
     return this.tripService.update(+id, updateTripDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tripService.remove(+id);
+  @ApiOperation({
+    summary: 'Deletes a trip',
+    description: 'Deletes a trip with the provided ID',
+  })
+  @ApiOkResponse({
+    example: CreateTripExample,
+    status: 201,
+    description: 'The trip has been successfully created.',
+    type: TripInListDto,
+  })
+  remove(
+    @Param('id', ParseObjectIdPipe) id: TripDto['id'],
+  ): Promise<TripDetailsDto> {
+    return this.tripService.remove(id);
   }
 }

@@ -1,21 +1,26 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+import { CategoriesEnum } from 'common/enums/category.enum';
+import {
+  Expense,
+  ExpenseSchema,
+} from 'common/resources/expenses/entities/expense.entity';
 import { Day, DaySchema } from './day.entity';
-import { Expense, ExpenseSchema } from 'src/common/entities/expense.entity';
+import { DayDto } from 'trip/dto/day/day.dto';
 
 @Schema()
-export class Trip extends Document {
+export class Trip {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   description: string;
 
-  @Prop({ required: true })
+  @Prop()
   thumbnail: string;
 
-  @Prop({ required: true })
+  @Prop([String])
   travelers: string[];
 
   @Prop({ required: true })
@@ -27,8 +32,11 @@ export class Trip extends Document {
   @Prop({ type: [DaySchema], required: true })
   days: Day[];
 
+  @Prop({ type: [String], required: true })
+  categories: CategoriesEnum[];
+
   @Prop({ type: [ExpenseSchema], required: true })
   expenses: Expense[];
 }
-
+export type TripDocument = Trip & Document<Trip>;
 export const TripSchema = SchemaFactory.createForClass(Trip);

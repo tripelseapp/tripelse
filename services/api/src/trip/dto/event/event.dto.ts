@@ -11,12 +11,10 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { AttachmentDto } from 'src/common/dto/attachment/attachment.dto';
-import { Attachment } from 'src/common/entities/attachment.entity';
-import { Expense } from 'src/common/entities/expense.entity';
-import { categories, Category } from 'src/common/enums/category.enum';
-import { Activity } from 'src/trip/entities/activity.entity';
-import { ActivityDto } from '../activity-dtos/activity.dto';
+import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
+import { categories, Category } from 'common/enums/category.enum';
+import { Activity } from 'trip/entities/activity.entity';
+import { Expense } from 'common/resources/expenses/entities/expense.entity';
 
 export class EventDto {
   @IsString()
@@ -94,7 +92,6 @@ export class EventDto {
   })
   readonly rating: number;
 
-  //CATEGORY OF THE EVENT
   @IsString({ each: true })
   @IsIn(categories)
   @ApiPropertyOptional({

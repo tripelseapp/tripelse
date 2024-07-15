@@ -1,31 +1,18 @@
 // attachment.dto.ts
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import {
-  IsArray,
   IsBoolean,
   IsDateString,
-  IsEmail,
-  IsIn,
   IsNotEmpty,
   IsNumber,
   IsString,
   IsUrl,
   Max,
   MaxLength,
-  MinLength,
 } from 'class-validator';
+import { CommonDto } from '../../../common.dto';
 
-export class AttachmentDto {
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'The unique identifier for a attachment.',
-    minimum: 24,
-    type: 'string',
-    default: '',
-  })
-  readonly id: string;
-
+export class AttachmentDto extends PickType(CommonDto, ['id'] as const) {
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)

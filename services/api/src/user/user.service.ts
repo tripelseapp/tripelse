@@ -7,10 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { plainToInstance } from 'class-transformer';
 import mongoose, { FilterQuery, Model } from 'mongoose';
-import { PageMetaDto } from 'src/common/dto/pagination/page-meta.dto';
-import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
-import { PageDto } from 'src/common/dto/pagination/page.dto';
-import { buildQuery, buildSorting } from 'src/utils/query-utils';
+import { buildQuery, buildSorting } from 'utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
@@ -20,6 +17,9 @@ import { User } from './entities/user.entity';
 import { getUsersDetails } from './utils/get-users-details';
 import { hashPassword, comparePassword } from './utils/password-utils';
 import { Role } from './types/role.types';
+import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
+import { PageDto } from 'common/resources/pagination/page.dto';
+import { PageMetaDto } from 'common/resources/pagination';
 
 interface findUserOptions {
   email?: string;
@@ -70,7 +70,7 @@ export class UserService {
     const {
       page = 1,
       take = 10,
-      orderBy = ['createdAt:ASC'],
+      orderBy = ['createdAt:DESC'],
       search,
       startDate,
       endDate,

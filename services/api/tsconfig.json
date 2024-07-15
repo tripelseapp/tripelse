@@ -13,7 +13,7 @@
     "strictPropertyInitialization": false,
     "strict": true,
     "esModuleInterop": true,
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "incremental": true
   },
   "watchOptions": {

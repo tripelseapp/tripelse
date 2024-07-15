@@ -1,7 +1,7 @@
 // activity.dto.ts
 
 import { PickType } from '@nestjs/swagger';
-import { EventDto } from '../event-dtos/event.dto';
+import { EventDto } from '../event/event.dto';
 
 export class ActivityDto extends PickType(EventDto, [
   'name',

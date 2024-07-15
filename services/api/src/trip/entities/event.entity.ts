@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Attachment } from 'src/common/entities/attachment.entity';
-import { Category } from 'src/common/enums/category.enum';
+import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
+import { Category } from 'common/enums/category.enum';
 import { Activity } from './activity.entity';
 
 @Schema()

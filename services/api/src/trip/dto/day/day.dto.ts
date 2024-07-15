@@ -7,8 +7,8 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { Event } from 'src/trip/entities/event.entity';
-import { EventDto } from '../event-dtos/event.dto';
+import { Event } from 'trip/entities/event.entity';
+import { EventDto } from '../event/event.dto';
 
 export class DayDto {
   @IsString()
@@ -22,9 +22,8 @@ export class DayDto {
   readonly id: string;
 
   @IsString()
-  @IsNotEmpty()
   @MaxLength(40)
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'A short name for the day, just to label it in a user-friendly way.',
     title: 'Name',
@@ -32,7 +31,7 @@ export class DayDto {
     type: 'string',
     default: 'A summer day to the beach',
   })
-  readonly name: string;
+  readonly name?: string;
 
   //description
   @IsString()
@@ -45,7 +44,7 @@ export class DayDto {
     type: 'string',
     default: 'A complete week of fun and relaxation at the beach.',
   })
-  readonly description: string;
+  readonly description?: string;
 
   @IsDateString()
   @IsNotEmpty()
