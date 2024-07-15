@@ -1,6 +1,7 @@
 // trip.dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsArray,
   IsDateString,
   IsEmail,
   IsIn,
@@ -9,6 +10,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Expense } from 'src/common/entities/expense.entity';
 
 export class TripDto {
   @IsString()
@@ -103,4 +105,12 @@ export class TripDto {
     format: 'date-time',
   })
   readonly updatedAt: string;
+
+  @IsArray()
+  @ApiProperty({
+    type: Expense,
+    isArray: true,
+    description: 'The list of expenses for the trip.',
+  })
+  readonly expenses: Expense[];
 }
