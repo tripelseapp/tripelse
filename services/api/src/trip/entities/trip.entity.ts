@@ -13,12 +13,6 @@ export class Trip extends Document {
   description: string;
 
   @Prop({ required: true })
-  startDate: Date;
-
-  @Prop({ required: true })
-  endDate: Date;
-
-  @Prop({ required: true })
   thumbnail: string;
 
   @Prop({ required: true })
