@@ -11,6 +11,9 @@ import {
   MinLength,
 } from 'class-validator';
 import { Expense } from 'src/common/entities/expense.entity';
+import { DayDto } from '../day-dtos/day.dto';
+import { categories, Category } from 'src/common/enums/category.enum';
+import { Day } from 'src/trip/entities/day.entity';
 
 export class TripDto {
   @IsString()
@@ -111,6 +114,26 @@ export class TripDto {
     type: Expense,
     isArray: true,
     description: 'The list of expenses for the trip.',
+    default: ['Flights', 'Hotel'],
   })
   readonly expenses: Expense[];
+
+  @IsArray()
+  @ApiPropertyOptional({
+    type: DayDto,
+    isArray: true,
+    description: 'Days into the trip.',
+    default: [],
+  })
+  readonly days: Day[];
+
+  //CATEGORY OF THE trip
+  @IsString({ each: true })
+  @IsIn(categories)
+  @ApiPropertyOptional({
+    description: 'The categories of the trip.',
+    type: 'string',
+    default: ['Business', 'Family'],
+  })
+  readonly category: Category;
 }

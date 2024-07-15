@@ -11,14 +11,14 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
-import { CreateTripDto } from './dto/create-trip.dto';
-import { UpdateTripDto } from './dto/update-trip.dto';
 import { TripService } from './trip.service';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
-import { TripInListDto } from './dto/trip-list.dto';
+import { CreateTripDto } from './dto/trip-dtos/create-trip.dto';
+import { UpdateTripDto } from './dto/trip-dtos/update-trip.dto';
+import { TripInListDto } from './dto/trip-dtos/trip-list.dto';
 
 @Controller('trip')
 @ApiTags('Trip')
@@ -27,14 +27,23 @@ export class TripController {
   constructor(private readonly tripService: TripService) {}
 
   @Post()
+  @ApiOperation({
+    summary: 'Create a new trip',
+    description: 'Creates a new trip with the provided data',
+  })
+  @ApiOkResponse({
+    status: 201,
+    description: 'The trip has been successfully created.',
+    type: TripInListDto,
+  })
   create(@Body() createTripDto: CreateTripDto) {
     return this.tripService.create(createTripDto);
   }
 
   @Get()
   @ApiOperation({
-    summary: 'List all users',
-    description: 'Returns an array of all users. Supports pagination',
+    summary: 'List all trips',
+    description: 'Returns an array of all trips. Supports pagination',
   })
   @ApiPaginatedResponse(TripInListDto)
   async getUsers(

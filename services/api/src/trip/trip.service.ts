@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTripDto } from './dto/create-trip.dto';
-import { UpdateTripDto } from './dto/update-trip.dto';
+
 import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
-import { TripInListDto } from './dto/trip-list.dto';
 import { PageDto } from 'src/common/dto/pagination/page.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Trip } from './entities/trip.entity';
 import { FilterQuery, Model } from 'mongoose';
 import { buildQuery, buildSorting } from 'src/utils/query-utils';
 import { PageMetaDto } from 'src/common/dto/pagination/page-meta.dto';
+import { CreateTripDto } from './dto/trip-dtos/create-trip.dto';
+import { TripInListDto } from './dto/trip-dtos/trip-list.dto';
+import { UpdateTripDto } from './dto/trip-dtos/update-trip.dto';
 
 @Injectable()
 export class TripService {
