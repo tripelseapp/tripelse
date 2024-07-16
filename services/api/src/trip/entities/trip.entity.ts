@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 import { CategoriesEnum } from 'common/enums/category.enum';
 import {
@@ -7,7 +7,6 @@ import {
   ExpenseSchema,
 } from 'common/resources/expenses/entities/expense.entity';
 import { Day, DaySchema } from './day.entity';
-import { DayDto } from 'trip/dto/day/day.dto';
 
 @Schema()
 export class Trip {
@@ -20,7 +19,7 @@ export class Trip {
   @Prop()
   thumbnail: string;
 
-  @Prop([String])
+  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'User' }])
   travelers: string[];
 
   @Prop({ required: true })

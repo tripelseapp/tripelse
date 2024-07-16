@@ -69,7 +69,7 @@ export class TripController {
 
   @Get(':id')
   findOne(@Param('id', ParseObjectIdPipe) id: string) {
-    return this.tripService.findOne(+id);
+    return this.tripService.findOne(id);
   }
 
   @Patch(':id')
@@ -91,9 +91,7 @@ export class TripController {
     description: 'The trip has been successfully created.',
     type: TripInListDto,
   })
-  remove(
-    @Param('id', ParseObjectIdPipe) id: TripDto['id'],
-  ): Promise<TripDetailsDto> {
+  remove(@Param('id', ParseObjectIdPipe) id: string): Promise<TripDetailsDto> {
     return this.tripService.remove(id);
   }
 }

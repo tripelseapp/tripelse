@@ -14,7 +14,7 @@ import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { UserInListDto } from './dto/user-list.dto';
 import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
-import { getUsersDetails } from './utils/get-users-details';
+import { getUserDetails } from './utils/get-users-details';
 import { hashPassword, comparePassword } from './utils/password-utils';
 import { Role } from './types/role.types';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
@@ -128,7 +128,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const parsedUser = getUsersDetails(user);
+    const parsedUser = getUserDetails(user);
     return parsedUser;
   }
   public async findByUsernameOrEmail(
@@ -154,7 +154,7 @@ export class UserService {
       })
       .lean()
       .exec();
-    return user ? getUsersDetails(user) : null;
+    return user ? getUserDetails(user) : null;
   }
   async findById(id: string): Promise<UserDetails> {
     const isValidId = mongoose.isValidObjectId(id);
@@ -185,7 +185,7 @@ export class UserService {
       throw new InternalServerErrorException('Could not update user role');
     }
 
-    const parsedUser = getUsersDetails(user);
+    const parsedUser = getUserDetails(user);
 
     return parsedUser;
   }
@@ -220,7 +220,7 @@ export class UserService {
       throw new BadRequestException('Invalid ID');
     }
 
-    const parsedUser = getUsersDetails(updatedUser);
+    const parsedUser = getUserDetails(updatedUser);
 
     return parsedUser;
   }

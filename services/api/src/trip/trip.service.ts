@@ -110,8 +110,20 @@ export class TripService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} trip`;
+  public async findOne(id: string) {
+    const trip = await this.tripModel
+      .findById(id)
+      // .populate({ path: 'travelers', model: 'User' })
+      .lean()
+      .exec();
+    if (!trip) {
+      throw new NotFoundException('Trip not found');
+    }
+
+    console.log('trip:', trip);
+
+    const tripDetails = getTripDetails(trip);
+    return tripDetails;
   }
 
   update(id: number, updateTripDto: UpdateTripDto) {
