@@ -1,11 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { CategoriesEnum } from 'common/enums/category.enum';
 import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
-import { Category } from 'common/enums/category.enum';
+import { Expense } from 'common/resources/expenses/entities/expense.entity';
+import { HydratedDocument } from 'mongoose';
 import { Activity } from './activity.entity';
 
 @Schema()
-export class Event extends Document {
+export class Event {
   @Prop({ required: true })
   name: string;
 
@@ -22,16 +23,21 @@ export class Event extends Document {
   rating: number;
 
   @Prop({ required: true })
-  category: Category;
+  dateTime: Date;
 
-  @Prop({ required: true })
-  attachment: Attachment[];
+  @Prop({ type: [String], required: true })
+  categories: CategoriesEnum[];
 
-  @Prop({ required: true })
-  activity: Activity;
+  @Prop({ type: [Attachment], required: true })
+  attachments: Attachment[];
 
-  @Prop({ required: true })
-  activities: string[];
+  @Prop({ type: [Expense], required: true })
+  expenses: Expense[];
+
+  @Prop({ type: [Activity], required: true })
+  activities: Activity[];
 }
+
+export type EventDocument = HydratedDocument<Event>;
 
 export const EventSchema = SchemaFactory.createForClass(Event);

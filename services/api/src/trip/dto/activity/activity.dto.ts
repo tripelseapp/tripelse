@@ -13,5 +13,5 @@ export class ActivityDto extends PickType(EventDto, [
   'date',
   'expenses',
   'attachments',
-  'category',
+  'categories',
 ] as const) {}

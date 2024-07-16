@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
 @Schema()
-export class Attachment extends Document {
+export class Attachment {
   @Prop({ required: true })
   url: string;
 
@@ -20,8 +20,10 @@ export class Attachment extends Document {
 
   @Prop({ required: true })
   updatedAt: Date;
+
   @Prop({ required: true })
   isFavorite: boolean;
 }
 
+export type AttachmentDocument = HydratedDocument<Attachment>;
 export const AttachmentSchema = SchemaFactory.createForClass(Attachment);

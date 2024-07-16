@@ -7,8 +7,8 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { Event } from 'trip/entities/event.entity';
-import { EventDto } from '../event/event.dto';
+import { EventDto, EventExample1, EventExample2 } from '../event/event.dto';
+import { Day } from 'trip/entities/day.entity';
 
 export class DayDto {
   @IsString()
@@ -80,5 +80,22 @@ export class DayDto {
     description: 'List of events for the day.',
     default: [],
   })
-  readonly events: Event[];
+  readonly events: EventDto[];
 }
+
+export const DayExample1: Day = {
+  name: 'Day 1',
+  description: '',
+  date: new Date('2024-06-01T00:00:00.000Z'),
+  createdAt: new Date('2024-06-01T00:00:00.000Z'),
+  updatedAt: new Date('2024-06-01T00:00:00.000Z'),
+  events: [EventExample1, EventExample2],
+};
+export const DayExample2: Day = {
+  name: 'Day 2',
+  description: 'A day to relax and enjoy the beach.',
+  date: new Date('2024-06-02T00:00:00.000Z'),
+  createdAt: new Date('2024-06-02T00:00:00.000Z'),
+  updatedAt: new Date('2024-06-02T00:00:00.000Z'),
+  events: [EventExample2],
+};

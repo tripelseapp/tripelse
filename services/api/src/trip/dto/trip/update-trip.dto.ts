@@ -1,4 +1,12 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateTripDto } from './create-trip.dto';
+import { PickType } from '@nestjs/swagger';
+import { TripDto } from './trip.dto';
 
-export class UpdateTripDto extends PartialType(CreateTripDto) {}
+export class UpdateTripDto extends PickType(TripDto, [
+  'name',
+  'description',
+  'travelers',
+  'categories',
+  'expenses',
+  'thumbnail',
+  'days',
+] as const) {}

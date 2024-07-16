@@ -1,19 +1,21 @@
 // attachment.dto.ts
-import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import {
+  ArrayMinSize,
   IsArray,
   IsDateString,
-  IsIn,
   IsNotEmpty,
   IsString,
   MaxLength,
 } from 'class-validator';
-import { CommonDto } from '../../../common.dto';
 import { Contributor } from 'interfaces/contributor.interface';
-import { categories, Category } from 'common/enums/category.enum';
-import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
+import { CommonDto } from '../../../common.dto';
 
-export class ExpenseDto extends PickType(CommonDto, ['id'] as const) {
+export class ExpenseDto extends PickType(CommonDto, [
+  'id',
+  'categories',
+  'attachments',
+] as const) {
   @IsString()
   @MaxLength(200)
   @ApiProperty({
@@ -33,7 +35,7 @@ export class ExpenseDto extends PickType(CommonDto, ['id'] as const) {
     format: 'date-time',
     default: '2024-06-01T13:24:15.000Z',
   })
-  readonly date: string;
+  readonly dateTime: Date;
 
   @IsString()
   @IsNotEmpty()
@@ -44,33 +46,16 @@ export class ExpenseDto extends PickType(CommonDto, ['id'] as const) {
   })
   readonly currency: string;
 
-  @IsString({ each: true })
+  @IsArray()
   @IsNotEmpty()
+  @ArrayMinSize(1)
   @ApiProperty({
     description: 'The people involved in the payment.',
     type: 'array',
     isArray: true,
-    default: ['Alice', 'Bob'],
+    default: [{ id: '60b3e3c5c9e77c001f8f6b3b', amount: 100 }],
   })
   readonly contributors: Contributor[];
-
-  @IsString({ each: true })
-  @IsIn(categories)
-  @ApiPropertyOptional({
-    description: 'The category of the event.',
-    type: 'string',
-    default: 'Food',
-  })
-  readonly category: Category;
-
-  @IsArray()
-  @ApiPropertyOptional({
-    type: Attachment,
-    isArray: true,
-    description: 'Attachments associated with the event.',
-    default: [],
-  })
-  readonly attachments: Attachment[];
 
   @IsDateString()
   @IsNotEmpty()
@@ -80,7 +65,7 @@ export class ExpenseDto extends PickType(CommonDto, ['id'] as const) {
     format: 'date-time',
     default: '2024-06-01T00:00:00.000Z',
   })
-  readonly createdAt: string;
+  readonly createdAt: Date;
 
   @IsDateString()
   @IsNotEmpty()
@@ -90,5 +75,5 @@ export class ExpenseDto extends PickType(CommonDto, ['id'] as const) {
     format: 'date-time',
     default: '2024-06-01T00:00:00.000Z',
   })
-  readonly updatedAt: string;
+  readonly updatedAt: Date;
 }

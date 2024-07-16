@@ -11,10 +11,12 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { CategoriesEnum } from 'common/enums/category.enum';
+import { AttachmentExample } from 'common/resources/attachments/dto/attachment.dto';
 import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
-import { categories, Category } from 'common/enums/category.enum';
-import { Activity } from 'trip/entities/activity.entity';
 import { Expense } from 'common/resources/expenses/entities/expense.entity';
+import { Activity } from 'trip/entities/activity.entity';
+import { Event } from 'trip/entities/event.entity';
 
 export class EventDto {
   @IsString()
@@ -92,14 +94,16 @@ export class EventDto {
   })
   readonly rating: number;
 
+  @IsArray()
   @IsString({ each: true })
-  @IsIn(categories)
+  @IsIn(Object.values(CategoriesEnum), { each: true })
   @ApiPropertyOptional({
-    description: 'The category of the event.',
+    description: 'The categories of the trip.',
     type: 'string',
-    default: 'Food',
+    isArray: true,
+    default: [CategoriesEnum.ENTERTAINMENT, CategoriesEnum.FOOD],
   })
-  readonly category: Category;
+  readonly categories: CategoriesEnum[];
 
   @IsArray()
   @ApiProperty({
@@ -120,6 +124,7 @@ export class EventDto {
   readonly attachments: Attachment[];
 
   @IsArray()
+  @IsString({ each: true })
   @ApiPropertyOptional({
     type: Activity,
     isArray: true,
@@ -128,3 +133,28 @@ export class EventDto {
   })
   readonly activities: Activity[];
 }
+
+export const EventExample1: Event = {
+  name: 'Event 1',
+  description: 'Description of the event',
+  createdAt: new Date('2024-06-01T00:00:00.000Z'),
+  rating: 5,
+  updatedAt: new Date('2024-06-01T00:00:00.000Z'),
+  activities: [],
+  categories: [CategoriesEnum.FOOD, CategoriesEnum.LODGING],
+  attachments: [],
+  dateTime: new Date('2024-06-01T07:30:00.000Z'),
+  expenses: [],
+};
+export const EventExample2: Event = {
+  name: 'Event 2',
+  description: 'Description of the event',
+  createdAt: new Date('2024-06-01T00:00:00.000Z'),
+  rating: 5,
+  updatedAt: new Date('2024-06-01T00:00:00.000Z'),
+  activities: [],
+  categories: [CategoriesEnum.FOOD, CategoriesEnum.LODGING],
+  attachments: [AttachmentExample],
+  dateTime: new Date('2024-06-01T14:37:00.000Z'),
+  expenses: [],
+};

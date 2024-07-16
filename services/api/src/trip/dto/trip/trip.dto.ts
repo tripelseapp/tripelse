@@ -3,19 +3,21 @@ import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import {
   IsArray,
   IsDateString,
-  IsIn,
   IsNotEmpty,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
 import { CommonDto } from 'common/common.dto';
-import { CategoriesEnum } from 'common/enums/category.enum';
-import { Expense } from 'common/resources/expenses/entities/expense.entity';
 import { Day } from 'trip/entities/day.entity';
-import { DayDto } from '../day/day.dto';
+import { UserInListDto } from 'user/dto/user-list.dto';
 
-export class TripDto extends PickType(CommonDto, ['id'] as const) {
+export class TripDto extends PickType(CommonDto, [
+  'id',
+  'attachments',
+  'expenses',
+  'categories',
+] as const) {
   @IsString()
   @IsNotEmpty()
   @MinLength(4)
@@ -48,7 +50,7 @@ export class TripDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string',
     default: 'https://example.com/image.jpg',
   })
-  readonly thumbnail: string;
+  readonly thumbnail: string | null;
 
   @IsDateString()
   @IsNotEmpty()
@@ -57,7 +59,7 @@ export class TripDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string',
     format: 'date-time',
   })
-  readonly createdAt: string;
+  readonly createdAt: Date;
 
   @IsDateString()
   @IsNotEmpty()
@@ -66,16 +68,7 @@ export class TripDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string',
     format: 'date-time',
   })
-  readonly updatedAt: string;
-
-  @IsArray()
-  @ApiProperty({
-    type: Expense,
-    isArray: true,
-    description: 'The list of expenses for the trip.',
-    default: [],
-  })
-  readonly expenses: Expense[];
+  readonly updatedAt: Date;
 
   @IsArray()
   @ApiPropertyOptional({
@@ -84,28 +77,14 @@ export class TripDto extends PickType(CommonDto, ['id'] as const) {
     description: 'Days into the trip.',
     default: [],
   })
-  readonly days: DayDto[];
-
-  @IsArray()
-  @IsString({ each: true })
-  @IsIn(Object.values(CategoriesEnum), { each: true })
-  @ApiPropertyOptional({
-    description: 'The categories of the trip.',
-    type: 'string',
-    isArray: true,
-    default: [CategoriesEnum.ENTERTAINMENT],
-  })
-  readonly categories: CategoriesEnum[];
+  readonly days: Day[];
 
   @IsArray()
   @IsNotEmpty({ each: true })
   @ApiProperty({
     description: 'The list of user IDs that are part of the trip.',
-    type: 'array',
-    items: {
-      type: 'string',
-    },
+    type: [UserInListDto],
     default: [],
   })
-  readonly travelers: string[];
+  readonly travelers: UserInListDto[];
 }

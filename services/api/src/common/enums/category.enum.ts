@@ -1,11 +1,11 @@
 export enum CategoriesEnum {
-  FOOD = 'food',
-  TRANSPORT = 'transport',
-  LODGING = 'lodging',
-  TOURISM = 'tourism',
-  SHOPPING = 'shopping',
-  ENTERTAINMENT = 'entertainment',
-  OTHER = 'other',
+  FOOD = 'FOOD',
+  TRANSPORT = 'TRANSPORT',
+  LODGING = 'LODGING',
+  TOURISM = 'TOURISM',
+  SHOPPING = 'SHOPPING',
+  ENTERTAINMENT = 'ENTERTAINMENT',
+  OTHER = 'OTHER',
 }
 
 export type Category = `${CategoriesEnum}`;

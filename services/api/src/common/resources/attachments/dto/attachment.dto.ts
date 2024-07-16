@@ -11,6 +11,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { CommonDto } from '../../../common.dto';
+import { Attachment } from '../entity/attachment.entity';
 
 export class AttachmentDto extends PickType(CommonDto, ['id'] as const) {
   @IsString()
@@ -86,3 +87,13 @@ export class AttachmentDto extends PickType(CommonDto, ['id'] as const) {
   })
   readonly updatedAt: string;
 }
+
+export const AttachmentExample: Attachment = {
+  filename: 'summercat',
+  url: 'https://www.google.com',
+  mimetype: '.jpeg',
+  size: 17000,
+  isFavorite: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};

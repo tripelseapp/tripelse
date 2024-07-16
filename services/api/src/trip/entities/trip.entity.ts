@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, now } from 'mongoose';
 
 import { CategoriesEnum } from 'common/enums/category.enum';
 import {
@@ -7,6 +7,7 @@ import {
   ExpenseSchema,
 } from 'common/resources/expenses/entities/expense.entity';
 import { Day, DaySchema } from './day.entity';
+import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
 
 @Schema()
 export class Trip {
@@ -19,23 +20,29 @@ export class Trip {
   @Prop()
   thumbnail: string;
 
-  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'User' }])
+  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User' })
   travelers: string[];
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: now() })
   createdAt: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: now() })
   updatedAt: Date;
 
-  @Prop({ type: [DaySchema], required: true })
+  @Prop({ type: [DaySchema], default: [] })
   days: Day[];
 
-  @Prop({ type: [String], required: true })
+  @Prop({ type: [String], default: [] })
   categories: CategoriesEnum[];
 
-  @Prop({ type: [ExpenseSchema], required: true })
+  @Prop({ type: [ExpenseSchema], default: [] })
   expenses: Expense[];
+
+  @Prop({ type: [Attachment], default: [] })
+  attachments: Attachment[];
 }
-export type TripDocument = Trip & Document<Trip>;
+
+export type TripDocument = HydratedDocument<Trip>;
+
+// export type TripDocument = Trip & Document<Trip>;
 export const TripSchema = SchemaFactory.createForClass(Trip);
