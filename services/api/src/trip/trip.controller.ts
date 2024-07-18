@@ -13,6 +13,12 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
+import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
+import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
+import {
+  Expense,
+  expenseExample,
+} from 'common/resources/expenses/entities/expense.entity';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
@@ -22,15 +28,8 @@ import {
   tripDetailsExample,
 } from './dto/trip/trip-details.dto';
 import { TripInListDto } from './dto/trip/trip-list.dto';
-import { TripDto } from './dto/trip/trip.dto';
 import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { TripService } from './trip.service';
-import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
-import {
-  Expense,
-  expenseExample,
-} from 'common/resources/expenses/entities/expense.entity';
-import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 
 @Controller('trip')
 @ApiTags('Trip')
@@ -41,7 +40,6 @@ export class TripController {
   @Post()
   @ApiOperation({
     summary: 'Create a new trip',
-
     description: 'Creates a new trip with the provided data',
   })
   @ApiOkResponse({

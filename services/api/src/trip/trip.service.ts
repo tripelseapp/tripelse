@@ -120,7 +120,7 @@ export class TripService {
     if (!trip) {
       throw new NotFoundException('Trip not found');
     }
-    const tripDetails = getTripDetails(trip);
+    const tripDetails = getTripDetails(trip as TripDocument);
 
     return tripDetails;
   }
@@ -137,7 +137,7 @@ export class TripService {
       throw new NotFoundException('Trip not found');
     }
     // the return value of findByIdAndUpdate is the document before the update
-    const tripDetails = getTripDetails(trip);
+    const tripDetails = getTripDetails(trip as TripDocument);
     return tripDetails;
   }
 
@@ -146,7 +146,7 @@ export class TripService {
     if (!trip) {
       throw new NotFoundException('Trip not found');
     }
-    const tripDetails = getTripDetails(trip);
+    const tripDetails = getTripDetails(trip as TripDocument);
     return tripDetails;
   }
 

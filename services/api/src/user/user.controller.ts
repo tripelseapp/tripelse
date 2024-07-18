@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -53,8 +54,10 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiPaginatedResponse(UserInListDto)
   async getUsers(
+    @Req() req: Request,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<UserInListDto>> {
+    console.log(req);
     if (typeof pageOptionsDto.orderBy === 'string') {
       pageOptionsDto.orderBy = [pageOptionsDto.orderBy];
     } else if (

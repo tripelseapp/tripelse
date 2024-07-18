@@ -14,7 +14,8 @@
     "strict": true,
     "esModuleInterop": true,
     "baseUrl": "./src",
-    "incremental": true
+    "incremental": true,
+    "forceConsistentCasingInFileNames": true
   },
   "watchOptions": {
     "watchFile": "fixedPollingInterval"

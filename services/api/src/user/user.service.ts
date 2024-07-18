@@ -112,13 +112,18 @@ export class UserService {
       throw new Error('Error while fetching users.');
     }
   }
-  public async update(id: string, data: UpdateUserDto): Promise<User | null> {
+  public async update(id: string, data: UpdateUserDto): Promise<UserDetails> {
     try {
       const newUser = { ...data, updatedAt: new Date() };
-      return this.userModel
+      const savedUser = (await this.userModel
         .findByIdAndUpdate(id, newUser, { new: true })
         .lean()
-        .exec();
+        .exec()) as User | null;
+
+      if (!savedUser) {
+        throw new NotFoundException('User not found');
+      }
+      return getUserDetails(savedUser);
     } catch (err) {
       throw new NotFoundException('User not found');
     }
@@ -128,7 +133,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const parsedUser = getUserDetails(user);
+    const parsedUser = getUserDetails(user as User);
     return parsedUser;
   }
   public async findByUsernameOrEmail(
@@ -154,7 +159,7 @@ export class UserService {
       })
       .lean()
       .exec();
-    return user ? getUserDetails(user) : null;
+    return user ? getUserDetails(user as User) : null;
   }
   async findById(id: string): Promise<UserDetails> {
     const isValidId = mongoose.isValidObjectId(id);
@@ -185,7 +190,7 @@ export class UserService {
       throw new InternalServerErrorException('Could not update user role');
     }
 
-    const parsedUser = getUserDetails(user);
+    const parsedUser = getUserDetails(user as User);
 
     return parsedUser;
   }
@@ -220,7 +225,7 @@ export class UserService {
       throw new BadRequestException('Invalid ID');
     }
 
-    const parsedUser = getUserDetails(updatedUser);
+    const parsedUser = getUserDetails(updatedUser as User);
 
     return parsedUser;
   }
