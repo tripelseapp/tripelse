@@ -1,14 +1,13 @@
 // user.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsString,
+  IsDateString,
   IsEmail,
   IsIn,
   IsNotEmpty,
-  IsDateString,
-  MinLength,
+  IsString,
   MaxLength,
-  IsEnum,
+  MinLength,
 } from 'class-validator';
 import { Role, roles } from '../types/role.types';
 

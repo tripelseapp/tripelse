@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -20,9 +21,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
-import { PageOptionsDto } from 'src/common/dto/pagination/page-options.dto';
-import { PageDto } from 'src/common/dto/pagination/page.dto';
+import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserInListDto } from './dto/user-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -32,10 +31,13 @@ import {
   UserDetailsDto,
 } from './dto/user-details.dto';
 import { UserService } from './user.service';
-import { passwordStrongEnough } from 'src/utils/password-checker';
+import { passwordStrongEnough } from 'utils/password-checker';
 import { UserDto } from './dto/user.dto';
 import { NewUserRoleDto } from './dto/new-role-dto';
 import { NewUserPasswordDto } from './dto/new-password-dto';
+import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
+import { PageDto } from 'common/resources/pagination/page.dto';
+import { getUserDetails } from './utils/get-users-details';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -53,6 +55,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiPaginatedResponse(UserInListDto)
   async getUsers(
+    @Req() req: Request,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<UserInListDto>> {
     if (typeof pageOptionsDto.orderBy === 'string') {
@@ -125,7 +128,9 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
+  async create(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<{ token: string }> {
     const usernameExists = await this.userService.findByUsernameOrEmail(
       createUserDto.username,
     );
@@ -231,7 +236,7 @@ export class UserController {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    return user;
+    return getUserDetails(user);
   }
 
   //  - Update User Role by id

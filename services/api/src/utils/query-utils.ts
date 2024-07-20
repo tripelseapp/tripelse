@@ -1,6 +1,6 @@
 // utils/query-utils.ts
 import { Model, Document, SortOrder, FilterQuery } from 'mongoose';
-import { Orders, PossibleOrders } from 'src/interfaces/pagination.interface';
+import { Orders, PossibleOrders } from 'interfaces/pagination.interface';
 
 interface FiltersOptions {
   search?: string;

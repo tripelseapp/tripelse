@@ -1,4 +1,4 @@
-import { User } from 'src/user/entities/user.entity';
+import { UserEntity } from 'user/entities/user.entity';
 
 const isXCharsLong = (password: string, x: number): boolean => {
   return password.length >= x;
@@ -21,7 +21,7 @@ const containsSpecialCharacter = (password: string): boolean => {
 };
 
 export const passwordStrongEnough = (
-  password: User['password'],
+  password: UserEntity['password'],
 ): {
   strongEnough: boolean;
   reason?: string[];
