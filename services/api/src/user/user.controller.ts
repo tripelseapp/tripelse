@@ -103,34 +103,6 @@ export class UserController {
     }
     return await this.userService.findById(id);
   }
-  @Get('current')
-  @ApiOperation({
-    summary: 'Get user by id',
-    description: 'Returns a single user with a matching id.',
-  })
-  @ApiOkResponse({
-    status: HttpStatus.OK,
-    type: UserDetailsDto,
-    description: 'User found',
-    example: ExampleUserDetailsDto,
-  })
-  @ApiBadRequestResponse({
-    status: HttpStatus.BAD_REQUEST,
-    type: BadRequestException,
-    description: 'Bad Request',
-    example: {
-      message: ['Invalid ID'],
-      error: 'Bad Request',
-      statusCode: 400,
-    },
-  })
-  @UseGuards(AuthGuard)
-  async currentUser(@Request() req: any): Promise<UserDetails | null> {
-    if (!req.user) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
-    return req.user;
-  }
 
   // - Create user
 
@@ -165,8 +137,19 @@ export class UserController {
     return getUserDetails(newUser);
   }
 
-  //  - Update user by id
+  @Post('multiple')
+  @ApiOperation({
+    summary: 'Create user',
+    description: 'Creates a new user.',
+  })
+  async createMultiple(
+    @Body() createUserDtos: CreateUserDto[],
+  ): Promise<UserDetails[]> {
+    const newUser = await this.userService.createMultiple(createUserDtos);
+    return newUser;
+  }
 
+  //  - Update user by id
   @Patch(':id')
   @ApiOperation({
     summary: 'Update user by id',

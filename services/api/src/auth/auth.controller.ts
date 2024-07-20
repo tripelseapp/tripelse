@@ -14,8 +14,8 @@ import { LoginRes } from './types/LoginRes.type';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { AuthGuard } from './guards/auth.guard';
 import { UserService } from 'user/user.service';
-import { NotFoundError } from 'rxjs';
 import { UserDetails } from 'user/dto/user-details.dto';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 
 @ApiTags('auth')
 @ApiCookieAuth('Access token')
@@ -25,15 +25,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {}
-
-  @Post('login')
-  @ApiOperation({
-    summary: 'Login user',
-    description: 'Get a JWT token for a user by username or email and password',
-  })
-  login(@Body() loginDto: LoginDto): Promise<LoginRes> {
-    return this.authService.login(loginDto);
-  }
 
   @Post('register')
   @ApiOperation({
@@ -62,5 +53,25 @@ export class AuthController {
     }
 
     return userById;
+  }
+  @Post('login/credentials')
+  @ApiOperation({
+    summary: 'Login user',
+    description: 'Get a JWT token for a user by username or email and password',
+  })
+  login(@Body() loginDto: LoginDto): Promise<LoginRes> {
+    return this.authService.login(loginDto);
+  }
+
+  @Get('login/social/google')
+  @UseGuards(GoogleAuthGuard)
+  googleLogin() {
+    return { msg: 'google auth' };
+    // redirect to google, google auths, google sends back to /auth/login/social/google/callback
+  }
+  @Get('login/social/google/redirect')
+  @UseGuards(GoogleAuthGuard)
+  googleLoginCallback() {
+    return { msg: 'ok' };
   }
 }

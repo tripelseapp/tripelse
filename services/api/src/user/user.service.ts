@@ -81,6 +81,31 @@ export class UserService {
     }
   }
 
+  public async createMultiple(
+    createUserDtos: CreateUserDto[],
+  ): Promise<UserDetails[]> {
+    const now = new Date();
+    const newUsers = createUserDtos.map((createUserDto) => {
+      return new this.userModel({
+        username: createUserDto.username,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        createdAt: now,
+        updatedAt: now,
+        role: 'user',
+      });
+    });
+
+    try {
+      const usersInserted = await this.userModel.insertMany(newUsers);
+      const formattedUsers = usersInserted.map((user) => getUserDetails(user));
+      return formattedUsers;
+    } catch (error) {
+      console.error('Error saving users:', error);
+      throw new Error('Could not save the users.');
+    }
+  }
+
   public async findAll(
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<UserInListDto>> {
