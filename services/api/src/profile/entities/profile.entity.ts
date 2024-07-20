@@ -1,9 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { UserEntity } from '@/user/entities/user.entity';
 import { HydratedDocument, Schema as MongooseSchema, now } from 'mongoose';
 
 @Schema()
 export class Profile {
-  @Prop({ required: true })
+  @Prop({ required: false })
   bio: string;
 
   @Prop({ required: false })
@@ -19,6 +20,9 @@ export class Profile {
 
   @Prop({ required: true, default: now() })
   updatedAt: Date;
+
+  @Prop({ required: true })
+  userId: string; // This is the reference to the user
 }
 
 export type ProfileDocument = HydratedDocument<Profile>;

@@ -69,4 +69,11 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     format: 'date-time',
   })
   readonly updatedAt: Date;
+
+  @ApiProperty({
+    description: 'User associated ID',
+    example: '12345',
+  })
+  @IsString()
+  userId: string; // This is the reference to the user
 }

@@ -6,6 +6,7 @@ import { UserService } from './user.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ProfileModule } from '@/profile/profile.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ConfigService } from '@nestjs/config';
         };
       },
     }),
+    ProfileModule,
   ],
   controllers: [UserController],
   providers: [UserService],
