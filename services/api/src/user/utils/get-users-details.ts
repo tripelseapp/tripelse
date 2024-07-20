@@ -1,7 +1,7 @@
 import { UserDetails } from '../dto/user-details.dto';
-import { User } from '../entities/user.entity';
+import { UserDocument } from '../entities/user.entity';
 
-export const getUserDetails = (user: User): UserDetails => {
+export const getUserDetails = (user: UserDocument): UserDetails => {
   // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
 
   const updatedDate =
@@ -17,6 +17,6 @@ export const getUserDetails = (user: User): UserDetails => {
   };
 };
 
-export const getUsersDetails = (users: User[]): UserDetails[] => {
+export const getUsersDetails = (users: UserDocument[]): UserDetails[] => {
   return users.map((user) => getUserDetails(user));
 };

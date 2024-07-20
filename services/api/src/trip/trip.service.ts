@@ -2,11 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
 import { plainToInstance } from 'class-transformer';
+import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
 import {
   Expense,
   ExpenseDocument,
 } from 'common/resources/expenses/entities/expense.entity';
+import { createExpenseFromDto } from 'common/resources/expenses/utils/createExpenseFromDto.util';
 import {
   PageDto,
   PageMetaDto,
@@ -22,9 +24,6 @@ import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { Trip, TripDocument } from './entities/trip.entity';
 import { getDays } from './utils/create-days';
 import { getTripDetails } from './utils/get-trip-details';
-import { createExpenseFromDto } from 'common/resources/expenses/utils/createExpenseFromDto.util';
-import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
-import { map } from 'rxjs';
 
 @Injectable()
 export class TripService {

@@ -37,6 +37,7 @@ import { NewUserRoleDto } from './dto/new-role-dto';
 import { NewUserPasswordDto } from './dto/new-password-dto';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
+import { getUserDetails } from './utils/get-users-details';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -57,7 +58,6 @@ export class UserController {
     @Req() req: Request,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<UserInListDto>> {
-    console.log(req);
     if (typeof pageOptionsDto.orderBy === 'string') {
       pageOptionsDto.orderBy = [pageOptionsDto.orderBy];
     } else if (
@@ -128,7 +128,9 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
+  async create(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<{ token: string }> {
     const usernameExists = await this.userService.findByUsernameOrEmail(
       createUserDto.username,
     );
@@ -234,7 +236,7 @@ export class UserController {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    return user;
+    return getUserDetails(user);
   }
 
   //  - Update User Role by id

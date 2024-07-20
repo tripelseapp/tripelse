@@ -5,6 +5,7 @@ import configuration from './config/configuration';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { UserModule } from './user/user.module';
 import { TripModule } from './trip/trip.module';
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
@@ -14,6 +15,7 @@ import { TripModule } from './trip/trip.module';
     }),
     UserModule,
     TripModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

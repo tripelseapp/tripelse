@@ -5,21 +5,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { plainToInstance } from 'class-transformer';
+import { PageMetaDto } from 'common/resources/pagination';
+import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
+import { PageDto } from 'common/resources/pagination/page.dto';
 import mongoose, { FilterQuery, Model } from 'mongoose';
 import { buildQuery, buildSorting } from 'utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { UserInListDto } from './dto/user-list.dto';
-import { UserDto } from './dto/user.dto';
-import { User } from './entities/user.entity';
-import { getUserDetails } from './utils/get-users-details';
-import { hashPassword, comparePassword } from './utils/password-utils';
+import { UserDocument, UserEntity } from './entities/user.entity';
 import { Role } from './types/role.types';
-import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
-import { PageDto } from 'common/resources/pagination/page.dto';
-import { PageMetaDto } from 'common/resources/pagination';
+import { getUserDetails } from './utils/get-users-details';
+import { comparePassword, hashPassword } from './utils/password-utils';
+import { JwtService } from '@nestjs/jwt';
 
 interface findUserOptions {
   email?: string;
@@ -29,41 +28,43 @@ interface findUserOptions {
 }
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(UserEntity.name)
+    private userModel: Model<UserDocument>,
+    private jwtService: JwtService,
+  ) {}
 
-  public async create(createUserDto: CreateUserDto): Promise<UserDto> {
+  public async create(
+    createUserDto: CreateUserDto,
+  ): Promise<{ token: string }> {
     const now = new Date();
-
-    const hashedPassword = await hashPassword(createUserDto.password);
 
     // Create a new user instance
     const newUser = new this.userModel({
       // ...createUserDto,
       username: createUserDto.username,
       email: createUserDto.email,
+      password: createUserDto.password,
       createdAt: now,
       updatedAt: now,
-      password: hashedPassword,
       role: 'user',
     });
 
     try {
       const savedUser = await newUser.save();
-      // Convert savedUser to a plain object and format the response
-      const userObj = savedUser.toObject();
-      const userDto = {
-        ...userObj,
-        id: String(userObj._id),
-        password: undefined, // Exclude the password field
-        _id: undefined, // Exclude the _id field
-        __v: undefined, // Exclude the __v field
-      };
-      return plainToInstance(UserDto, userDto);
+      const token = this.jwtService.sign({
+        id: savedUser._id,
+        role: savedUser.role,
+        username: savedUser.username,
+      });
+
+      return { token };
     } catch (error) {
       console.error('Error saving user:', error);
       throw new Error('Could not save the user.');
     }
   }
+
   public async findAll(
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<UserInListDto>> {
@@ -77,7 +78,7 @@ export class UserService {
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
-    const query = buildQuery<User>({
+    const query = buildQuery<UserDocument>({
       model: this.userModel,
       filters: { search, startDate, endDate },
       searchIn: ['username', 'email'],
@@ -91,7 +92,7 @@ export class UserService {
       .sort(buildSorting(orderBy));
 
     try {
-      const [users, itemCount]: [FilterQuery<User>[], number] =
+      const [users, itemCount]: [FilterQuery<UserEntity>[], number] =
         await Promise.all([
           usersQuery.exec(),
           this.userModel.countDocuments().exec(),
@@ -118,7 +119,7 @@ export class UserService {
       const savedUser = (await this.userModel
         .findByIdAndUpdate(id, newUser, { new: true })
         .lean()
-        .exec()) as User | null;
+        .exec()) as UserDocument | null;
 
       if (!savedUser) {
         throw new NotFoundException('User not found');
@@ -133,12 +134,12 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const parsedUser = getUserDetails(user as User);
+    const parsedUser = getUserDetails(user);
     return parsedUser;
   }
   public async findByUsernameOrEmail(
     usernameOrEmail: string,
-  ): Promise<UserDetailsDto | null> {
+  ): Promise<UserDocument | null> {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmail = emailRegex.test(usernameOrEmail);
 
@@ -148,18 +149,20 @@ export class UserService {
 
     return user;
   }
+
   public async findUser({
     email,
     username,
     id,
-  }: findUserOptions): Promise<UserDetailsDto | null> {
+  }: findUserOptions): Promise<UserDocument | null> {
     const user = await this.userModel
       .findOne({
         $or: [{ email }, { username }, { _id: id }],
       })
+      .select('+password')
       .lean()
       .exec();
-    return user ? getUserDetails(user as User) : null;
+    return user;
   }
   async findById(id: string): Promise<UserDetails> {
     const isValidId = mongoose.isValidObjectId(id);
@@ -171,13 +174,16 @@ export class UserService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      return user;
+      return getUserDetails(user);
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException(err);
     }
   }
-  public async updateRole(id: User['id'], role: Role): Promise<UserDetails> {
+  public async updateRole(
+    id: UserDocument['id'],
+    role: Role,
+  ): Promise<UserDetails> {
     const user = await this.userModel
       .findByIdAndUpdate(id, { role }, { new: true })
       .lean()
@@ -190,7 +196,7 @@ export class UserService {
       throw new InternalServerErrorException('Could not update user role');
     }
 
-    const parsedUser = getUserDetails(user as User);
+    const parsedUser = getUserDetails(user);
 
     return parsedUser;
   }
@@ -225,7 +231,7 @@ export class UserService {
       throw new BadRequestException('Invalid ID');
     }
 
-    const parsedUser = getUserDetails(updatedUser as User);
+    const parsedUser = getUserDetails(updatedUser);
 
     return parsedUser;
   }
