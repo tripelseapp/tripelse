@@ -139,8 +139,8 @@ export class UserController {
 
   @Post('multiple')
   @ApiOperation({
-    summary: 'Create user',
-    description: 'Creates a new user.',
+    summary: 'Create multiple users',
+    description: 'Creates multiple users.',
   })
   async createMultiple(
     @Body() createUserDtos: CreateUserDto[],
@@ -294,6 +294,9 @@ export class UserController {
     @Body() body: NewUserPasswordDto,
   ) {
     const newPassword = body.password;
+    if (!newPassword) {
+      throw new BadRequestException('Password cannot be empty');
+    }
     const updatedUser = await this.userService.updatePassword(id, newPassword);
     if (!updatedUser) {
       throw new BadRequestException('This user ID did not exist');

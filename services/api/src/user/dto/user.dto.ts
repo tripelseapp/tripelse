@@ -58,7 +58,7 @@ export class UserDto {
     type: 'string',
     default: '',
   })
-  readonly password: string;
+  readonly password: string | null;
 
   @ApiProperty({ enum: roles })
   @IsIn(roles)

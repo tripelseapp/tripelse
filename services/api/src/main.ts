@@ -6,6 +6,8 @@ import configuration from './config/configuration';
 import helmet from 'helmet';
 import { constants } from 'constants/constants';
 import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import passport from 'passport';
 
 const PORT = configuration().port;
 async function bootstrap() {
@@ -21,7 +23,17 @@ async function bootstrap() {
   app.setGlobalPrefix(`${constants.api.prefix}/${constants.api.version}`);
   app.use(helmet());
   app.use(cookieParser());
+  app.use(
+    session({
+      secret: 'randomString',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { maxAge: 60000 },
+    }),
+  );
 
+  app.use(passport.initialize());
+  app.use(passport.session());
   setupSwagger(app);
 
   await app.listen(PORT, () => {

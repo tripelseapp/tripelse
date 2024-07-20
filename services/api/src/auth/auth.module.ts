@@ -5,10 +5,13 @@ import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants/jwt.constants';
 import { GoogleStrategy } from './utils/googleStrategy.util';
+import { PassportModule } from '@nestjs/passport';
+import { SessionSerializer } from './utils/serializer.util';
 
 @Module({
   imports: [
     UserModule,
+    PassportModule.register({ session: true }),
     JwtModule.register({
       global: true,
       secret: jwtConstants.secret,
@@ -16,6 +19,14 @@ import { GoogleStrategy } from './utils/googleStrategy.util';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy],
+  providers: [
+    AuthService,
+    GoogleStrategy,
+    SessionSerializer,
+    {
+      provide: 'AUTH_SERVICE',
+      useClass: AuthService,
+    },
+  ],
 })
 export class AuthModule {}

@@ -16,6 +16,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { UserService } from 'user/user.service';
 import { UserDetails } from 'user/dto/user-details.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { Request } from 'express';
 
 @ApiTags('auth')
 @ApiCookieAuth('Access token')
@@ -54,6 +55,20 @@ export class AuthController {
 
     return userById;
   }
+
+  @Get('status')
+  @ApiOperation({
+    summary: 'Get status',
+    description: 'Get the status of the API',
+  })
+  getStatus(@Req() request: Request) {
+    if (request.user) {
+      return { status: 'authorized', user: request.user };
+    }
+    return { status: 'unauthorized' };
+  }
+
+  //  Logins section
   @Post('login/credentials')
   @ApiOperation({
     summary: 'Login user',

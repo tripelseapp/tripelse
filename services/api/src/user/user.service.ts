@@ -8,7 +8,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { PageMetaDto } from 'common/resources/pagination';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
-import mongoose, { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
+import { passwordStrongEnough } from 'utils/password-checker';
 import { buildQuery, buildSorting } from 'utils/query-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -18,7 +19,6 @@ import { UserDocument, UserEntity } from './entities/user.entity';
 import { Role } from './types/role.types';
 import { getUserDetails } from './utils/get-users-details';
 import { comparePassword, hashPassword } from './utils/password-utils';
-import { passwordStrongEnough } from 'utils/password-checker';
 
 interface findUserOptions {
   email?: string;
@@ -41,7 +41,6 @@ export class UserService {
     if (usernameExists) {
       throw new BadRequestException('Username already exists');
     }
-    console.log('Checking if email exists');
 
     const emailExists = await this.findUser({
       email: createUserDto.email,
@@ -50,7 +49,9 @@ export class UserService {
       throw new BadRequestException('Email already exists');
     }
 
-    console.log('Checking if password is strong enough');
+    if (!createUserDto.password) {
+      throw new BadRequestException('Password is required');
+    }
 
     // is pass strong enough?
     const { strongEnough, reason } = passwordStrongEnough(
@@ -211,10 +212,6 @@ export class UserService {
     return user;
   }
   async findById(id: string): Promise<UserDetails> {
-    const isValidId = mongoose.isValidObjectId(id);
-    if (!isValidId) {
-      throw new BadRequestException('Invalid ID');
-    }
     try {
       const user = await this.findUser({ id });
       if (!user) {

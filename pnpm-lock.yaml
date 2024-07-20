@@ -254,6 +254,9 @@ importers:
       cookie-parser:
         specifier: ^1.4.6
         version: 1.4.6
+      express-session:
+        specifier: ^1.18.0
+        version: 1.18.0
       helmet:
         specifier: ^7.1.0
         version: 7.1.0
@@ -300,12 +303,18 @@ importers:
       '@types/express':
         specifier: 4.17.21
         version: 4.17.21
+      '@types/express-session':
+        specifier: ^1.18.0
+        version: 1.18.0
       '@types/jest':
         specifier: ^26.0.15
         version: 26.0.24
       '@types/node':
         specifier: ^14.18.63
         version: 14.18.63
+      '@types/passport':
+        specifier: ^1.0.16
+        version: 1.0.16
       '@types/passport-google-oauth20':
         specifier: ^2.0.16
         version: 2.0.16
@@ -2245,6 +2254,9 @@ packages:
   '@types/express-serve-static-core@4.19.5':
     resolution: {integrity: sha512-y6W03tvrACO72aijJ5uF02FRq5cgDR9lUxddQ8vyF+GvmjJQqbzDcJngEjURc+ZsG31VI3hODNZJ2URj86pzmg==}
 
+  '@types/express-session@1.18.0':
+    resolution: {integrity: sha512-27JdDRgor6PoYlURY+Y5kCakqp5ulC0kmf7y+QwaY+hv9jEFuQOThgkjyA53RP3jmKuBsH5GR6qEfFmvb8mwOA==}
+
   '@types/express@4.17.21':
     resolution: {integrity: sha512-ejlPM315qwLpaQlQDTjPdsUFSc6ZsP4AN6AlWnogPjQ7CVi7PYF3YVz+CY3jE2pwYf7E/7HlDAN0rV2GxTG0HQ==}
 
@@ -3515,6 +3527,9 @@ packages:
   cookie-signature@1.0.6:
     resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
 
+  cookie-signature@1.0.7:
+    resolution: {integrity: sha512-NXdYc3dLr47pBkpUCHtKSwIOQXLVn8dZEuywboCOJY/osA0wFSLlSawr3KN8qXJEyX66FcONTH8EIlVuK0yyFA==}
+
   cookie-signature@1.2.1:
     resolution: {integrity: sha512-78KWk9T26NhzXtuL26cIJ8/qNHANyJ/ZYrmEXFzUmhZdjpBv+DlWlOANRTGBt48YcyslsLrj0bMLFTmXvLRCOw==}
     engines: {node: '>=6.6.0'}
@@ -4384,6 +4399,10 @@ packages:
   expo@51.0.18:
     resolution: {integrity: sha512-QiaNq2XXjfDk009qbyBFd/5CNikcQ0ZucGlOB3ebNf3z9Q9wrfL1A9E4NqPh6sgm0VG486AYT9mNKwAfcOVCIA==}
     hasBin: true
+
+  express-session@1.18.0:
+    resolution: {integrity: sha512-m93QLWr0ju+rOwApSsyso838LQwgfs44QtOP/WBiwtAgPIo/SAh1a5c6nn2BR6mFNZehTpqKDESzP+fRHVbxwQ==}
+    engines: {node: '>= 0.8.0'}
 
   express@4.19.2:
     resolution: {integrity: sha512-5T6nhjsT+EOMzuck8JjBHARTHfMht0POzlA60WV2pMD3gyXw2LZnZ+ueGdNxG+0calOJcWKbpFcuzLZ91YWq9Q==}
@@ -6967,6 +6986,10 @@ packages:
   queue@6.0.2:
     resolution: {integrity: sha512-iHZWu+q3IdFZFX36ro/lKBkSvfkztY5Y7HMiPlOUjhupPcG2JMfst2KKEpu5XndviX/3UhFbRngUPNKtgvtZiA==}
 
+  random-bytes@1.0.0:
+    resolution: {integrity: sha512-iv7LhNVO047HzYR3InF6pUcUsPQiHTM1Qal51DcGSuZFBil1aBBWG5eHPNek7bvILMaYJ/8RU1e8w1AMdHmLQQ==}
+    engines: {node: '>= 0.8'}
+
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
 
@@ -8231,6 +8254,10 @@ packages:
     resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
     engines: {node: '>=0.8.0'}
     hasBin: true
+
+  uid-safe@2.1.5:
+    resolution: {integrity: sha512-KPHm4VL5dDXKz01UuEd88Df+KzynaohSL9fBh096KWAxSKZQDI2uBrVqtvRM4rwrIrRRKsdLNML/lnaaVSRioA==}
+    engines: {node: '>= 0.8'}
 
   uid2@0.0.4:
     resolution: {integrity: sha512-IevTus0SbGwQzYh3+fRsAMTVVPOoIVufzacXcHPmdlle1jUpq7BRL+mw3dgeLanvGZdwwbWhRV6XrcFNdBmjWA==}
@@ -10653,7 +10680,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.2
 
-  '@jest/test-sequencer@26.6.3(ts-node@9.0.0(typescript@4.2.3))':
+  '@jest/test-sequencer@26.6.3':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -10661,11 +10688,7 @@ snapshots:
       jest-runner: 26.6.3(ts-node@9.0.0(typescript@4.2.3))
       jest-runtime: 26.6.3(ts-node@9.0.0(typescript@4.2.3))
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   '@jest/test-sequencer@29.7.0':
     dependencies:
@@ -11598,6 +11621,10 @@ snapshots:
       '@types/qs': 6.9.15
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
+
+  '@types/express-session@1.18.0':
+    dependencies:
+      '@types/express': 4.17.21
 
   '@types/express@4.17.21':
     dependencies:
@@ -13191,6 +13218,8 @@ snapshots:
 
   cookie-signature@1.0.6: {}
 
+  cookie-signature@1.0.7: {}
+
   cookie-signature@1.2.1: {}
 
   cookie@0.4.1: {}
@@ -14385,6 +14414,19 @@ snapshots:
       - encoding
       - supports-color
       - utf-8-validate
+
+  express-session@1.18.0:
+    dependencies:
+      cookie: 0.6.0
+      cookie-signature: 1.0.7
+      debug: 2.6.9
+      depd: 2.0.0
+      on-headers: 1.0.2
+      parseurl: 1.3.3
+      safe-buffer: 5.2.1
+      uid-safe: 2.1.5
+    transitivePeerDependencies:
+      - supports-color
 
   express@4.19.2:
     dependencies:
@@ -15594,7 +15636,7 @@ snapshots:
   jest-config@26.6.3(ts-node@9.0.0(typescript@4.2.3)):
     dependencies:
       '@babel/core': 7.24.7
-      '@jest/test-sequencer': 26.6.3(ts-node@9.0.0(typescript@4.2.3))
+      '@jest/test-sequencer': 26.6.3
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.24.7)
       chalk: 4.1.2
@@ -17742,6 +17784,8 @@ snapshots:
     dependencies:
       inherits: 2.0.4
 
+  random-bytes@1.0.0: {}
+
   randombytes@2.1.0:
     dependencies:
       safe-buffer: 5.2.1
@@ -19222,6 +19266,10 @@ snapshots:
 
   uglify-js@3.17.4:
     optional: true
+
+  uid-safe@2.1.5:
+    dependencies:
+      random-bytes: 1.0.0
 
   uid2@0.0.4: {}
 

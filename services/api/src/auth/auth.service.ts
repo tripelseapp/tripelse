@@ -1,11 +1,12 @@
-import { UserService } from '../user/user.service';
-import { comparePassword } from '../user/utils/password-utils';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { LoginDto } from './dto/login.dto';
-import { LoginRes } from './types/LoginRes.type';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UserDocument } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
+import { comparePassword } from '../user/utils/password-utils';
+import { LoginDto } from './dto/login.dto';
+import { LoginRes } from './types/LoginRes.type';
+import { UserFromGoogle } from './types/User-from-google.type';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,13 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
   async login(loginDto: LoginDto): Promise<LoginRes> {
+    // validate that we have the needed data
+    if (!loginDto.usernameOrEmail || !loginDto.password) {
+      throw new HttpException(
+        'Username or email and password are required',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
     // find user if a user has loginDto.usernameOrEmail as username or email and then select and get the password
     const user = await this.userService.findByUsernameOrEmail(
       loginDto.usernameOrEmail.toLowerCase(),
@@ -62,5 +70,29 @@ export class AuthService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async validateUser(details: UserFromGoogle) {
+    console.log('details', details);
+
+    const user = await this.userService.findUser({
+      email: details.email,
+    });
+
+    if (user) return this.buildResponseWithToken(user);
+
+    // first time user is logging in (and its a google user)
+
+    const newUser = await this.userService.create({
+      email: details.email,
+      username: details.username,
+      password: null,
+    });
+
+    return this.register(newUser);
+  }
+
+  async findById(id: string) {
+    return this.userService.findById(id);
   }
 }
