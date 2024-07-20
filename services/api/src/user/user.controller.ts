@@ -38,6 +38,7 @@ import { NewUserPasswordDto } from './dto/new-password-dto';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { getUserDetails } from './utils/get-users-details';
+import { UserDocument } from './entities/user.entity';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -128,31 +129,9 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async create(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<{ token: string }> {
-    const usernameExists = await this.userService.findByUsernameOrEmail(
-      createUserDto.username,
-    );
-    if (usernameExists) {
-      throw new BadRequestException('Username already exists');
-    }
-
-    const emailExists = await this.userService.findUser({
-      email: createUserDto.email,
-    });
-    if (emailExists) {
-      throw new BadRequestException('Email already exists');
-    }
-    // is pass strong enough?
-    const { strongEnough, reason } = passwordStrongEnough(
-      createUserDto.password,
-    );
-
-    if (!strongEnough && reason?.length) {
-      throw new BadRequestException(reason);
-    }
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserDetails> {
+    const newUser = await this.userService.create(createUserDto);
+    return getUserDetails(newUser);
   }
 
   //  - Update user by id

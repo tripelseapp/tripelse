@@ -4,6 +4,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { LoginRes } from './types/LoginRes.type';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from '@/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +41,18 @@ export class AuthService {
       id: user._id,
       role: user.role,
       username: user.username,
+    });
+
+    return { token };
+  }
+  public async register(
+    createUserDto: CreateUserDto,
+  ): Promise<{ token: string }> {
+    const savedUser = await this.userService.create(createUserDto);
+    const token = this.jwtService.sign({
+      id: savedUser._id,
+      role: savedUser.role,
+      username: savedUser.username,
     });
 
     return { token };

@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoginRes } from './types/LoginRes.type';
+import { CreateUserDto } from '@/user/dto/create-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -16,5 +17,14 @@ export class AuthController {
   })
   login(@Body() loginDto: LoginDto): Promise<LoginRes> {
     return this.authService.login(loginDto);
+  }
+
+  @Post('register')
+  @ApiOperation({
+    summary: 'Register user',
+    description: 'Register a new user with username, email, and password',
+  })
+  register(@Body() createUserDto: CreateUserDto): Promise<LoginRes> {
+    return this.authService.register(createUserDto);
   }
 }

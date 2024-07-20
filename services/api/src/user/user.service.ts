@@ -1,3 +1,4 @@
+import { passwordStrongEnough } from '@/utils/password-checker';
 import {
   BadRequestException,
   Injectable,
@@ -18,7 +19,6 @@ import { UserDocument, UserEntity } from './entities/user.entity';
 import { Role } from './types/role.types';
 import { getUserDetails } from './utils/get-users-details';
 import { comparePassword, hashPassword } from './utils/password-utils';
-import { JwtService } from '@nestjs/jwt';
 
 interface findUserOptions {
   email?: string;
@@ -31,12 +31,35 @@ export class UserService {
   constructor(
     @InjectModel(UserEntity.name)
     private userModel: Model<UserDocument>,
-    private jwtService: JwtService,
   ) {}
 
-  public async create(
-    createUserDto: CreateUserDto,
-  ): Promise<{ token: string }> {
+  public async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+    console.log('Checking if username exists');
+    const usernameExists = await this.findByUsernameOrEmail(
+      createUserDto.username,
+    );
+    if (usernameExists) {
+      throw new BadRequestException('Username already exists');
+    }
+    console.log('Checking if email exists');
+
+    const emailExists = await this.findUser({
+      email: createUserDto.email,
+    });
+    if (emailExists) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    console.log('Checking if password is strong enough');
+
+    // is pass strong enough?
+    const { strongEnough, reason } = passwordStrongEnough(
+      createUserDto.password,
+    );
+
+    if (!strongEnough && reason?.length) {
+      throw new BadRequestException(reason);
+    }
     const now = new Date();
 
     // Create a new user instance
@@ -51,14 +74,7 @@ export class UserService {
     });
 
     try {
-      const savedUser = await newUser.save();
-      const token = this.jwtService.sign({
-        id: savedUser._id,
-        role: savedUser.role,
-        username: savedUser.username,
-      });
-
-      return { token };
+      return await newUser.save();
     } catch (error) {
       console.error('Error saving user:', error);
       throw new Error('Could not save the user.');
