@@ -6,13 +6,16 @@ import configuration from './config/configuration';
 
 const PORT = configuration().port;
 async function bootstrap() {
-  console.log(process.env.CONNECT_STRING);
-
-  const app = await NestFactory.create(AppModule); //
-  // register all plugins and extension
+  const app = await NestFactory.create(AppModule);
   app.enableCors({ origin: '*' });
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
-
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+  app.setGlobalPrefix('api/v1');
   setupSwagger(app);
 
   await app.listen(PORT, () => {

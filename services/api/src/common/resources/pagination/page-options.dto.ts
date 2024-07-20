@@ -8,7 +8,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { PossibleOrders } from 'src/interfaces/pagination.interface';
+import { PossibleOrders } from 'interfaces/pagination.interface';
 
 export class PageOptionsDto {
   @ApiPropertyOptional({
@@ -47,7 +47,7 @@ export class PageOptionsDto {
     description:
       'Array of fields to order by with their respective order (field:order).',
     type: [String],
-    example: ['createdAt:ASC'],
+    example: ['createdAt:DESC'],
   })
   orderBy?: PossibleOrders | PossibleOrders[];
 

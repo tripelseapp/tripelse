@@ -13,8 +13,12 @@
     "strictPropertyInitialization": false,
     "strict": true,
     "esModuleInterop": true,
-    "baseUrl": "./",
-    "incremental": true
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"]
+    },
+    "incremental": true,
+    "forceConsistentCasingInFileNames": true
   },
   "watchOptions": {
     "watchFile": "fixedPollingInterval"
