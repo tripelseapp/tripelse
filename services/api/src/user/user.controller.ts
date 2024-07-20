@@ -6,41 +6,44 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Req,
+  Request,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
+import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
+import { PageDto } from 'common/resources/pagination/page.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserInListDto } from './dto/user-list.dto';
+import { NewUserPasswordDto } from './dto/new-password-dto';
+import { NewUserRoleDto } from './dto/new-role-dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ExampleUserDetailsDto,
   UserDetails,
   UserDetailsDto,
 } from './dto/user-details.dto';
+import { UserInListDto } from './dto/user-list.dto';
 import { UserService } from './user.service';
-import { passwordStrongEnough } from 'utils/password-checker';
-import { UserDto } from './dto/user.dto';
-import { NewUserRoleDto } from './dto/new-role-dto';
-import { NewUserPasswordDto } from './dto/new-password-dto';
-import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
-import { PageDto } from 'common/resources/pagination/page.dto';
 import { getUserDetails } from './utils/get-users-details';
-import { UserDocument } from './entities/user.entity';
+import { AuthGuard } from 'auth/guards/auth.guard';
 
 @Controller('user')
+@ApiCookieAuth()
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Users')
 export class UserController {
@@ -99,6 +102,34 @@ export class UserController {
       throw new BadRequestException(['Invalid ID']);
     }
     return await this.userService.findById(id);
+  }
+  @Get('current')
+  @ApiOperation({
+    summary: 'Get user by id',
+    description: 'Returns a single user with a matching id.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User found',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  @UseGuards(AuthGuard)
+  async currentUser(@Request() req: any): Promise<UserDetails | null> {
+    if (!req.user) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    return req.user;
   }
 
   // - Create user
@@ -188,7 +219,7 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async delete(@Param('id') id: UserDto['id']) {
+  async delete(@Param('id') id: string) {
     const deletedUser = await this.userService.remove(id);
     if (!deletedUser) {
       throw new BadRequestException('This user ID did not exist');

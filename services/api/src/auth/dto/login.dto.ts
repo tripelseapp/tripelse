@@ -16,7 +16,6 @@ export class LoginDto extends PickType(UserDto, ['password'] as const) {
   })
   readonly usernameOrEmail: string;
 }
-export type UserDetails = LoginDto;
 
 export const ExampleLoginDto: LoginDto = {
   usernameOrEmail: 'testuser',

@@ -11,7 +11,12 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
@@ -32,6 +37,7 @@ import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { TripService } from './trip.service';
 
 @Controller('trip')
+@ApiCookieAuth()
 @ApiTags('Trip')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TripController {

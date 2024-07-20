@@ -1,4 +1,3 @@
-import { passwordStrongEnough } from '@/utils/password-checker';
 import {
   BadRequestException,
   Injectable,
@@ -19,6 +18,7 @@ import { UserDocument, UserEntity } from './entities/user.entity';
 import { Role } from './types/role.types';
 import { getUserDetails } from './utils/get-users-details';
 import { comparePassword, hashPassword } from './utils/password-utils';
+import { passwordStrongEnough } from 'utils/password-checker';
 
 interface findUserOptions {
   email?: string;
@@ -171,9 +171,14 @@ export class UserService {
     username,
     id,
   }: findUserOptions): Promise<UserDocument | null> {
+    // Be case sensitive, compare the email and username in lowercase
     const user = await this.userModel
       .findOne({
-        $or: [{ email }, { username }, { _id: id }],
+        $or: [
+          { email: new RegExp(`^${email?.toLowerCase()}$`, 'i') },
+          { username: new RegExp(`^${username?.toLowerCase()}$`, 'i') },
+          { _id: id },
+        ],
       })
       .select('+password')
       .lean()

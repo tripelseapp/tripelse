@@ -1,23 +1,22 @@
-import { UserService } from '@/user/user.service';
-import { comparePassword } from '@/user/utils/password-utils';
+import { UserService } from '../user/user.service';
+import { comparePassword } from '../user/utils/password-utils';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { LoginRes } from './types/LoginRes.type';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from '@/user/dto/create-user.dto';
-import { UserDocument } from '@/user/entities/user.entity';
-import { getUserDetails } from '@/user/utils/get-users-details';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { UserDocument } from '../user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
   ) {}
   async login(loginDto: LoginDto): Promise<LoginRes> {
     // find user if a user has loginDto.usernameOrEmail as username or email and then select and get the password
     const user = await this.userService.findByUsernameOrEmail(
-      loginDto.usernameOrEmail,
+      loginDto.usernameOrEmail.toLowerCase(),
     );
 
     if (!user) {
@@ -38,20 +37,25 @@ export class AuthService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    return this.buildResponseWithToken(user);
+    return await this.buildResponseWithToken(user);
   }
   public async register(createUserDto: CreateUserDto): Promise<LoginRes> {
     const savedUser = await this.userService.create(createUserDto);
-    return this.buildResponseWithToken(savedUser);
+    return await this.buildResponseWithToken(savedUser);
   }
-  private buildResponseWithToken(user: UserDocument): LoginRes {
+  private async buildResponseWithToken(user: UserDocument): Promise<LoginRes> {
     try {
-      const parsedUser = getUserDetails(user);
-      const token = this.jwtService.sign({
-        parsedUser,
-      });
-      const res = { token, username: parsedUser.username, id: parsedUser.id };
-      return res;
+      // Note: we choose a property name of sub to hold our userId value to be consistent with JWT standards.
+      const payload = {
+        sub: user._id,
+        username: user.username,
+        role: user.role,
+      };
+      const access_token = await this.jwtService.signAsync(payload);
+
+      return {
+        access_token,
+      };
     } catch (error) {
       throw new HttpException(
         'Error creating token',

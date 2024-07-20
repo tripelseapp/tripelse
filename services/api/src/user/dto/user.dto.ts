@@ -10,6 +10,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Role, roles } from '../types/role.types';
+import { Transform } from 'class-transformer';
 
 export class UserDto {
   @IsString()
@@ -22,6 +23,7 @@ export class UserDto {
   })
   readonly id: string;
 
+  @Transform(({ value }) => value.trim())
   @IsString()
   @IsNotEmpty()
   @MinLength(4)
@@ -45,6 +47,7 @@ export class UserDto {
   })
   readonly email: string;
 
+  @Transform(({ value }) => value.trim()) // transform is allways the first validation
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
