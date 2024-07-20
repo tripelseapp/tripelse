@@ -1,14 +1,17 @@
 import { PickType } from '@nestjs/swagger';
 import { ProfileDto } from './profile.dto';
 
-export class CreateProfileDto extends PickType(ProfileDto, [
+export class ProfileDetailsDto extends PickType(ProfileDto, [
+  'id',
   'bio',
   'avatar',
-  'createdAt',
+  'updatedAt',
 ] as const) {}
+export type ProfileDetails = ProfileDetailsDto;
 
-export const CreateProfileExample: CreateProfileDto = {
+export const ExampleProfileDetailsDto: ProfileDetailsDto = {
+  id: '12345678',
   bio: "I'm Albert and I love to travel around the world. I'm a software engineer and I love to code.",
   avatar: '',
-  createdAt: new Date(),
+  updatedAt: new Date(),
 };
