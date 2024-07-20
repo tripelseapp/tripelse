@@ -5,6 +5,8 @@ import { LoginDto } from './dto/login.dto';
 import { LoginRes } from './types/LoginRes.type';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '@/user/dto/create-user.dto';
+import { UserDocument } from '@/user/entities/user.entity';
+import { getUserDetails } from '@/user/utils/get-users-details';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +14,6 @@ export class AuthService {
     private readonly userService: UserService,
     private jwtService: JwtService,
   ) {}
-
   async login(loginDto: LoginDto): Promise<LoginRes> {
     // find user if a user has loginDto.usernameOrEmail as username or email and then select and get the password
     const user = await this.userService.findByUsernameOrEmail(
@@ -37,24 +38,25 @@ export class AuthService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    const token = this.jwtService.sign({
-      id: user._id,
-      role: user.role,
-      username: user.username,
-    });
-
-    return { token };
+    return this.buildResponseWithToken(user);
   }
-  public async register(
-    createUserDto: CreateUserDto,
-  ): Promise<{ token: string }> {
+  public async register(createUserDto: CreateUserDto): Promise<LoginRes> {
     const savedUser = await this.userService.create(createUserDto);
-    const token = this.jwtService.sign({
-      id: savedUser._id,
-      role: savedUser.role,
-      username: savedUser.username,
-    });
-
-    return { token };
+    return this.buildResponseWithToken(savedUser);
+  }
+  private buildResponseWithToken(user: UserDocument): LoginRes {
+    try {
+      const parsedUser = getUserDetails(user);
+      const token = this.jwtService.sign({
+        parsedUser,
+      });
+      const res = { token, username: parsedUser.username, id: parsedUser.id };
+      return res;
+    } catch (error) {
+      throw new HttpException(
+        'Error creating token',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
