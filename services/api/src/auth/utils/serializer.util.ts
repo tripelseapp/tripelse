@@ -1,8 +1,7 @@
-import { PassportSerializer } from '@nestjs/passport';
-import { UserEntity } from '../../user/entities/user.entity';
-import { UserService } from '../../user/user.service';
 import { Inject } from '@nestjs/common';
+import { PassportSerializer } from '@nestjs/passport';
 import { AuthService } from 'auth/auth.service';
+import { UserEntity } from '../../user/entities/user.entity';
 
 export class SessionSerializer extends PassportSerializer {
   constructor(
