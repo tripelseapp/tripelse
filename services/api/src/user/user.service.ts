@@ -19,6 +19,9 @@ import { UserDocument, UserEntity } from './entities/user.entity';
 import { Role } from './types/role.types';
 import { getUserDetails } from './utils/get-users-details';
 import { comparePassword, hashPassword } from './utils/password-utils';
+import { JwtService } from '@nestjs/jwt'; // Importa el JwtService
+import { ProfileService } from '../profile/profile.service'; // Importa el ProfileService
+import { CreateProfileDto } from '../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
 
 interface findUserOptions {
   email?: string;
@@ -26,11 +29,14 @@ interface findUserOptions {
   id?: string;
   shy?: boolean;
 }
+
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(UserEntity.name)
     private userModel: Model<UserDocument>,
+    private jwtService: JwtService,
+    private profileService: ProfileService, // Inyecta ProfileService
   ) {}
 
   public async create(createUserDto: CreateUserDto): Promise<UserDocument> {
@@ -65,7 +71,6 @@ export class UserService {
 
     // Create a new user instance
     const newUser = new this.userModel({
-      // ...createUserDto,
       username: createUserDto.username,
       email: createUserDto.email,
       password: createUserDto.password,
@@ -75,10 +80,30 @@ export class UserService {
     });
 
     try {
-      return await newUser.save();
+      // Save the user
+      const savedUser = await newUser.save();
+
+      // Create an empty profile associated with the new user
+      const createProfileDto: CreateProfileDto = {
+        userId: savedUser._id.toString(),
+        bio: '',
+        avatar: '',
+      };
+      await this.profileService.create(createProfileDto);
+
+      // Generate JWT token
+      const token = this.jwtService.sign({
+        id: savedUser._id,
+        role: savedUser.role,
+        username: savedUser.username,
+      });
+
+      return { token };
     } catch (error) {
-      console.error('Error saving user:', error);
-      throw new Error('Could not save the user.');
+      console.error('Error saving user or profile:', error);
+      throw new InternalServerErrorException(
+        'Could not save the user or profile.',
+      );
     }
   }
 
@@ -150,11 +175,12 @@ export class UserService {
     } catch (error) {
       if (error instanceof Error) {
         const message = `Error while fetching users. Error: ${error.message}`;
-        throw new Error(message);
+        throw new InternalServerErrorException(message);
       }
-      throw new Error('Error while fetching users.');
+      throw new InternalServerErrorException('Error while fetching users.');
     }
   }
+
   public async update(id: string, data: UpdateUserDto): Promise<UserDetails> {
     try {
       const newUser = { ...data, updatedAt: new Date() };
@@ -171,6 +197,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
   }
+
   public async remove(id: string): Promise<UserDetailsDto | null> {
     const user = await this.userModel.findByIdAndDelete(id).lean().exec();
     if (!user) {
@@ -179,6 +206,7 @@ export class UserService {
     const parsedUser = getUserDetails(user);
     return parsedUser;
   }
+
   public async findByUsernameOrEmail(
     usernameOrEmail: string,
   ): Promise<UserDocument | null> {
@@ -211,6 +239,7 @@ export class UserService {
       .exec();
     return user;
   }
+
   async findById(id: string): Promise<UserDetails> {
     try {
       const user = await this.findUser({ id });
@@ -223,6 +252,7 @@ export class UserService {
       throw new InternalServerErrorException(err);
     }
   }
+
   public async updateRole(
     id: UserDocument['id'],
     role: Role,
@@ -243,6 +273,7 @@ export class UserService {
 
     return parsedUser;
   }
+
   public async updatePassword(
     id: string,
     password: string,
