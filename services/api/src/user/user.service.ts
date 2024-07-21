@@ -40,7 +40,6 @@ export class UserService {
   ) {}
 
   public async create(createUserDto: CreateUserDto): Promise<UserDocument> {
-    console.log('Checking if username exists');
     const usernameExists = await this.findByUsernameOrEmail(
       createUserDto.username,
     );
@@ -91,14 +90,7 @@ export class UserService {
       };
       await this.profileService.create(createProfileDto);
 
-      // Generate JWT token
-      const token = this.jwtService.sign({
-        id: savedUser._id,
-        role: savedUser.role,
-        username: savedUser.username,
-      });
-
-      return { token };
+      return savedUser;
     } catch (error) {
       console.error('Error saving user or profile:', error);
       throw new InternalServerErrorException(
