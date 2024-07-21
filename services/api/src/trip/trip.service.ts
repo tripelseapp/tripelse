@@ -142,7 +142,7 @@ export class TripService {
       throw new NotFoundException('Trip not found');
     }
     // the return value of findByIdAndUpdate is the document before the update
-    const tripDetails = getTripDetails(trip as TripDocument);
+    const tripDetails = getTripDetails(trip);
     return tripDetails;
   }
 

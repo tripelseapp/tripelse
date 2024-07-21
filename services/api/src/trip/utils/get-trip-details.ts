@@ -1,17 +1,19 @@
 import { TripDetailsDto } from 'trip/dto/trip/trip-details.dto';
 import { TripDocument } from 'trip/entities/trip.entity';
-import { getUserDetails } from 'user/utils/get-users-details';
+import { UserDocument } from 'user/entities/user.entity';
+import { getUserInList } from 'user/utils/get-users-list';
 
 export const getTripDetails = (trip: TripDocument): TripDetailsDto => {
   // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
 
+  const createdAt = trip.createdAt as unknown as UserDocument;
   const updatedDate = trip.updatedAt ?? trip.createdAt;
   return {
     id: String(trip._id),
     name: trip.name,
     description: trip.description,
     thumbnail: trip.thumbnail,
-    createdBy: trip.createdBy,
+    createdBy: getUserInList(createdAt),
     travelers: trip.travelers,
     days: trip.days.map((day: any) => ({
       id: String(day._id),

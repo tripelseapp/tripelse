@@ -25,7 +25,10 @@ export const tripDetailsExample: TripDetailsDto = {
   createdAt: new Date(),
   updatedAt: new Date(),
   expenses: [],
-  createdBy: '6695aebd76dcb559c2f56d17',
+  createdBy: {
+    id: '6695aebd76dcb559c2f56d17',
+    username: 'John Doe',
+  },
   days: [DayExample1, DayExample2],
   categories: [CategoriesEnum.ENTERTAINMENT],
   travelers: [],

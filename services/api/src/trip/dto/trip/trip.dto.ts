@@ -92,9 +92,9 @@ export class TripDto extends PickType(CommonDto, [
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'The user ID of the creator of the trip.',
+    description: 'The user in list of the creator of the trip.',
     type: 'string',
-    default: '6695aebd76dcb559c2f56d17',
+    default: UserInListDto,
   })
-  readonly createdBy: string;
+  readonly createdBy: UserInListDto;
 }
