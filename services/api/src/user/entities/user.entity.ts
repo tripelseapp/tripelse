@@ -28,9 +28,6 @@ export class UserEntity {
 
   @Prop({ required: true })
   updatedAt: Date;
-
-  //para populate
-  // @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Profile' })
 }
 
 export type UserDocument = HydratedDocument<UserEntity>;

@@ -20,7 +20,7 @@ export class Profile {
   @Prop({ required: true, default: now() })
   updatedAt: Date;
 
-  @Prop({ required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   userId: string; // This is the reference to the user
 }
 
