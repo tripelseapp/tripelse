@@ -17,6 +17,7 @@ import { UserService } from 'user/user.service';
 import { UserDetails } from 'user/dto/user-details.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Request } from 'express';
+import { getUserDetails } from 'user/utils/get-users-details';
 
 @ApiTags('auth')
 @ApiCookieAuth('Access token')
@@ -47,11 +48,11 @@ export class AuthController {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const userById = await this.userService.findById(user.sub);
+    const userById = await this.userService.findUser({ id: user.sub });
     if (!userById) {
       throw new NotFoundException('User not found');
     }
-    return userById;
+    return getUserDetails(userById);
   }
 
   @Get('status')

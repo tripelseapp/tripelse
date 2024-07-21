@@ -1,5 +1,6 @@
 import { TripDetailsDto } from 'trip/dto/trip/trip-details.dto';
 import { TripDocument } from 'trip/entities/trip.entity';
+import { getUserDetails } from 'user/utils/get-users-details';
 
 export const getTripDetails = (trip: TripDocument): TripDetailsDto => {
   // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
