@@ -18,8 +18,9 @@ import { UserDetails } from 'user/dto/user-details.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Request } from 'express';
 import { getUserDetails } from 'user/utils/get-users-details';
+import { ReqWithUser } from './types/token-payload.type';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @ApiCookieAuth('Access token')
 @Controller('auth')
 export class AuthController {
@@ -43,7 +44,7 @@ export class AuthController {
     summary: 'Get user profile',
     description: 'Get the user profile for the currently authenticated user',
   })
-  async profile(@Req() req: any): Promise<UserDetails> {
+  async profile(@Req() req: ReqWithUser): Promise<UserDetails> {
     const user = req.user;
     if (!user) {
       throw new NotFoundException('User not found');

@@ -40,7 +40,7 @@ export class CreateTripDto extends PickType(TripDto, [
       example: '6695aebd76dcb559c2f56d17',
     },
   })
-  readonly travelers: Types.ObjectId[];
+  readonly travelers: string[];
 }
 
 export const CreateTripExample: CreateTripDto = {

@@ -14,7 +14,8 @@ import {
   PageMetaDto,
   PageOptionsDto,
 } from 'common/resources/pagination';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
+import { UserDto } from 'user/dto/user.dto';
 import { buildQuery, buildSorting } from 'utils/query-utils';
 import { CreateTripDto } from './dto/trip/create-trip.dto';
 import { TripDetailsDto } from './dto/trip/trip-details.dto';
@@ -22,6 +23,7 @@ import { TripInListDto } from './dto/trip/trip-list.dto';
 import { TripDto } from './dto/trip/trip.dto';
 import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { Trip, TripDocument } from './entities/trip.entity';
+import { ResDeleteTrip } from './types/res-delete-trip.type';
 import { getDays } from './utils/create-days';
 import { getTripDetails } from './utils/get-trip-details';
 
@@ -56,7 +58,7 @@ export class TripService {
         throw new Error('Id not generated');
       }
 
-      const tripDetails = getTripDetails(savedTrip);
+      const tripDetails = this.buildTripDetails(savedTrip, createdById);
 
       return plainToInstance(TripDto, tripDetails);
     } catch (error) {
@@ -116,7 +118,7 @@ export class TripService {
     }
   }
 
-  public async findOne(id: string) {
+  public async findOne(id: string, userId: string): Promise<TripDetailsDto> {
     const trip = await this.tripModel
       .findById(id)
       .populate('createdBy')
@@ -125,7 +127,8 @@ export class TripService {
     if (!trip) {
       throw new NotFoundException('Trip not found');
     }
-    const tripDetails = getTripDetails(trip);
+
+    const tripDetails = this.buildTripDetails(trip, userId);
 
     return tripDetails;
   }
@@ -133,6 +136,7 @@ export class TripService {
   public async update(
     id: string,
     updateTripDto: Partial<UpdateTripDto>,
+    currentUserId: UserDto['id'],
   ): Promise<TripDetailsDto> {
     const trip = await this.tripModel
       .findByIdAndUpdate(id, updateTripDto, { new: true })
@@ -142,17 +146,28 @@ export class TripService {
       throw new NotFoundException('Trip not found');
     }
     // the return value of findByIdAndUpdate is the document before the update
-    const tripDetails = getTripDetails(trip);
+    const tripDetails = this.buildTripDetails(trip, currentUserId);
     return tripDetails;
   }
 
-  public async remove(id: TripDto['id']): Promise<TripDetailsDto> {
-    const trip = await this.tripModel.findByIdAndDelete(id).lean().exec();
-    if (!trip) {
-      throw new NotFoundException('Trip not found');
+  public async remove(id: TripDto['id']): Promise<ResDeleteTrip> {
+    try {
+      const trip = await this.tripModel.deleteOne({ _id: id }).lean().exec();
+      if (!trip) {
+        throw new NotFoundException('Trip not found');
+      }
+      const response = {
+        ok: true,
+        message: 'Trip deleted successfully',
+      };
+      return response;
+    } catch (error) {
+      const response = {
+        ok: false,
+        message: 'Error deleting trip',
+      };
+      return response;
     }
-    const tripDetails = getTripDetails(trip as TripDocument);
-    return tripDetails;
   }
 
   public async getExpenses(id: string): Promise<ExpenseDto[]> {
@@ -207,6 +222,7 @@ export class TripService {
   public async createExpense(
     tripId: string,
     createExpenseDto: CreateExpenseDto,
+    creatorId: string,
   ): Promise<ExpenseDto> {
     // update the trip with the new expense
 
@@ -222,6 +238,7 @@ export class TripService {
     const newTrip = await this.update(
       tripId,
       trip.toObject() as Partial<UpdateTripDto>,
+      creatorId,
     );
 
     const newExpense = newTrip.expenses[newTrip.expenses.length - 1];
@@ -231,10 +248,29 @@ export class TripService {
     return parsedExpense;
   }
   public async findByUserId(userId: string): Promise<Trip[]> {
+    // search the trips that the user is a traveler
     const trips = await this.tripModel.find({ travelers: userId }).exec();
     if (!trips || trips.length === 0) {
       throw new NotFoundException(`No trips found for user with ID ${userId}`);
     }
     return trips;
+  }
+
+  public buildTripDetails(
+    trip: TripDocument,
+    currentUserId: string,
+  ): TripDetailsDto {
+    const firstDay = trip.days[0].date;
+    const lastDay = trip.days[trip.days.length - 1].date;
+    const isTodayInTrip = firstDay <= new Date() && new Date() <= lastDay;
+
+    const areYouMember = trip.travelers.includes(currentUserId);
+
+    const metadata = {
+      active: isTodayInTrip,
+      areYouMember: areYouMember,
+    };
+
+    return getTripDetails(trip, metadata);
   }
 }

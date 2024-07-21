@@ -15,6 +15,9 @@ export class TripDetailsDto extends PickType(TripDto, [
   'categories',
   'travelers',
   'createdBy',
+  'areYouMember',
+  'public',
+  'active',
 ] as const) {}
 
 export const tripDetailsExample: TripDetailsDto = {
@@ -32,4 +35,7 @@ export const tripDetailsExample: TripDetailsDto = {
   days: [DayExample1, DayExample2],
   categories: [CategoriesEnum.ENTERTAINMENT],
   travelers: [],
+  areYouMember: true,
+  public: true,
+  active: true,
 };

@@ -2,8 +2,14 @@ import { TripDetailsDto } from 'trip/dto/trip/trip-details.dto';
 import { TripDocument } from 'trip/entities/trip.entity';
 import { UserDocument } from 'user/entities/user.entity';
 import { getUserInList } from 'user/utils/get-users-list';
-
-export const getTripDetails = (trip: TripDocument): TripDetailsDto => {
+export interface TripDetailMetadata {
+  active: boolean;
+  areYouMember: boolean;
+}
+export const getTripDetails = (
+  trip: TripDocument,
+  metadata: TripDetailMetadata,
+): TripDetailsDto => {
   // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
 
   const createdAt = trip.createdAt as unknown as UserDocument;
@@ -11,6 +17,9 @@ export const getTripDetails = (trip: TripDocument): TripDetailsDto => {
   return {
     id: String(trip._id),
     name: trip.name,
+    public: false,
+    active: metadata.active,
+    areYouMember: metadata.areYouMember,
     description: trip.description,
     thumbnail: trip.thumbnail,
     createdBy: getUserInList(createdAt),

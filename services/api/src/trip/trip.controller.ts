@@ -20,7 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from 'auth/guards/auth.guard';
-import { TokenPayload } from 'auth/types/token-payload.type';
+import { ReqWithUser, TokenPayload } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
@@ -40,6 +40,7 @@ import {
 import { TripInListDto } from './dto/trip/trip-list.dto';
 import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { TripService } from './trip.service';
+import { ResDeleteTrip } from './types/res-delete-trip.type';
 
 @Controller('trip')
 @ApiCookieAuth()
@@ -69,7 +70,7 @@ export class TripController {
       // Should never happen because of the AuthGuard
       throw new BadRequestException('User not found');
     }
-    const currentUserId = new Types.ObjectId(currentUser.sub);
+    const currentUserId = currentUser.sub;
 
     // add your Id to the travelers array
     const travelers = createTripDto.travelers || [];
@@ -119,8 +120,10 @@ export class TripController {
     description: 'The trip has been successfully found.',
     type: TripDetailsDto,
   })
-  findOne(@Param('id', ParseObjectIdPipe) id: string) {
-    return this.tripService.findOne(id);
+  @UseGuards(AuthGuard)
+  findOne(@Param('id', ParseObjectIdPipe) id: string, @Req() req: ReqWithUser) {
+    const current = req.user?.sub;
+    return this.tripService.findOne(id, current);
   }
 
   @Patch(':id')
@@ -133,11 +136,13 @@ export class TripController {
     description: 'The trip has been successfully updated.',
     type: TripDetailsDto,
   })
+  @UseGuards(AuthGuard)
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateTripDto: UpdateTripDto,
+    @Req() req: ReqWithUser,
   ): Promise<TripDetailsDto> {
-    return this.tripService.update(id, updateTripDto);
+    return this.tripService.update(id, updateTripDto, req.user.sub);
   }
 
   @Delete(':id')
@@ -151,7 +156,8 @@ export class TripController {
     description: 'The trip has been successfully created.',
     type: TripInListDto,
   })
-  remove(@Param('id', ParseObjectIdPipe) id: string): Promise<TripDetailsDto> {
+  @UseGuards(AuthGuard)
+  remove(@Param('id', ParseObjectIdPipe) id: string): Promise<ResDeleteTrip> {
     return this.tripService.remove(id);
   }
 
@@ -186,16 +192,27 @@ export class TripController {
     description: 'The expense has been successfully created.',
     type: Expense,
   })
+  @UseGuards(AuthGuard)
   async createExpense(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() createExpenseDto: CreateExpenseDto,
+    @Req() req: ReqWithUser,
   ): Promise<ExpenseDto> {
-    return this.tripService.createExpense(id, createExpenseDto);
+    return this.tripService.createExpense(id, createExpenseDto, req.user.sub);
   }
 
   @Get('user/:userId')
-  async getTripsByUserId(@Param('userId') userId: string) {
+  @UseGuards(AuthGuard)
+  async getTripsByUserId(@Param('userId', ParseObjectIdPipe) userId: string) {
     const trips = await this.tripService.findByUserId(userId);
     return trips;
+  }
+  @Get('mine')
+  @UseGuards(AuthGuard)
+  async getMyTrips(@Req() req: ReqWithUser) {
+    console.log(req);
+    // const trips = await this.tripService.findByUserId(req.user.sub);
+    return 'trips';
+    // return trips;
   }
 }

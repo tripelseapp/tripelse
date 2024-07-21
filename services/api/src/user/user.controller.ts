@@ -12,6 +12,7 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -37,6 +38,10 @@ import {
 import { UserInListDto } from './dto/user-list.dto';
 import { UserService } from './user.service';
 import { getUserDetails } from './utils/get-users-details';
+import { Roles } from 'auth/decorators/roles.decorator';
+import { RolesEnum } from './types/role.types';
+import { AuthGuard } from 'auth/guards/auth.guard';
+import { RolesGuard } from 'auth/guards/roles.guard';
 
 @Controller('user')
 @ApiCookieAuth()
@@ -250,13 +255,15 @@ export class UserController {
       statusCode: 400,
     },
   })
+  @Roles(RolesEnum.USER)
+  @UseGuards(AuthGuard, RolesGuard)
   async updateRole(
     @Param('id') id: string,
     @Body() newUserRoleDto: NewUserRoleDto,
   ) {
-    const role = newUserRoleDto.role;
+    const roles = newUserRoleDto.roles;
 
-    const updatedUser = await this.userService.updateRole(id, role);
+    const updatedUser = await this.userService.updateRole(id, roles);
     if (!updatedUser) {
       throw new BadRequestException('This user ID did not exist');
     }

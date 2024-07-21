@@ -255,7 +255,7 @@ export class UserService {
       throw new BadRequestException('Invalid ID');
     }
 
-    if (user.role !== role) {
+    if (user.roles !== role) {
       throw new InternalServerErrorException('Could not update user role');
     }
 

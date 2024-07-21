@@ -2,6 +2,7 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsNotEmpty,
   IsString,
@@ -11,7 +12,7 @@ import {
 import { CommonDto } from 'common/common.dto';
 import { Types } from 'mongoose';
 import { Day } from 'trip/entities/day.entity';
-import { UserInListDto } from 'user/dto/user-list.dto';
+import { UserInList } from 'user/dto/user-list.dto';
 
 export class TripDto extends PickType(CommonDto, [
   'id',
@@ -87,14 +88,38 @@ export class TripDto extends PickType(CommonDto, [
     type: [Types.ObjectId],
     default: [],
   })
-  readonly travelers: Types.ObjectId[];
+  readonly travelers: string[];
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
     description: 'The user in list of the creator of the trip.',
     type: 'string',
-    default: UserInListDto,
+    // default: UserInListDto,
   })
-  readonly createdBy: UserInListDto;
+  readonly createdBy: UserInList;
+
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'Flag to indicate if the trip is active or not.',
+    type: 'boolean',
+    default: true,
+  })
+  readonly active: boolean;
+
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'Flag to indicate if the trip is public or not.',
+    type: 'boolean',
+    default: false,
+  })
+  readonly public: boolean;
+
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'A flag that indicates if you are part of the trip.',
+    type: 'boolean',
+    default: false,
+  })
+  readonly areYouMember: boolean;
 }

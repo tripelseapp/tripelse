@@ -26,8 +26,8 @@ export class Trip {
   @Prop()
   thumbnail: string;
 
-  @Prop({ type: MonogoseSchema.Types.ObjectId, ref: 'User' })
-  travelers: Types.ObjectId[];
+  @Prop({ type: MonogoseSchema.Types.ObjectId, ref: UserEntity.name })
+  travelers: string[];
 
   @Prop({ required: true, default: now() })
   createdAt: Date;

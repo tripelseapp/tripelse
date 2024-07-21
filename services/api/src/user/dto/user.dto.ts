@@ -1,6 +1,7 @@
 // user.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsDateString,
   IsEmail,
   IsIn,
@@ -60,9 +61,18 @@ export class UserDto {
   })
   readonly password: string | null;
 
-  @ApiProperty({ enum: roles })
-  @IsIn(roles)
-  readonly role: Role;
+  @IsArray()
+  @IsIn(roles, { each: true })
+  @ApiProperty({
+    description: 'The roles of a user.',
+    type: 'array',
+    items: {
+      type: 'string',
+      enum: roles,
+    },
+    default: ['user'],
+  })
+  readonly roles: Role[];
 
   @IsDateString()
   @ApiProperty({

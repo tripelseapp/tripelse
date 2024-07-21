@@ -21,7 +21,7 @@ export class UserEntity {
   email: string;
 
   @Prop({ required: true })
-  role: Role;
+  roles: Role[];
 
   @Prop({ required: true })
   createdAt: Date;
