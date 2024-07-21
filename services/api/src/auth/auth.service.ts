@@ -7,6 +7,7 @@ import { comparePassword } from '../user/utils/password-utils';
 import { LoginDto } from './dto/login.dto';
 import { LoginRes } from './types/LoginRes.type';
 import { UserFromGoogle } from './types/User-from-google.type';
+import { TokenPayload } from './types/token-payload.type';
 
 @Injectable()
 export class AuthService {
@@ -54,8 +55,8 @@ export class AuthService {
   private async buildResponseWithToken(user: UserDocument): Promise<LoginRes> {
     try {
       // Note: we choose a property name of sub to hold our userId value to be consistent with JWT standards.
-      const payload = {
-        sub: user._id,
+      const payload: TokenPayload = {
+        sub: user._id.toString(),
         username: user.username,
         role: user.role,
       };

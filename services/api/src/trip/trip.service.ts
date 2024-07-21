@@ -27,17 +27,21 @@ import { getTripDetails } from './utils/get-trip-details';
 
 @Injectable()
 export class TripService {
-  constructor(@InjectModel(Trip.name) private tripModel: Model<TripDocument>) {}
+  constructor(
+    @InjectModel(Trip.name) private readonly tripModel: Model<TripDocument>,
+  ) {}
 
-  public async create(createTripDto: CreateTripDto): Promise<TripDetailsDto> {
+  public async create(
+    createTripDto: CreateTripDto,
+    createdById: string,
+  ): Promise<TripDetailsDto> {
     const days = getDays(createTripDto.startDate, createTripDto.endDate);
 
     const completeTrip: Trip = {
       ...createTripDto,
       days,
-      travelers: [],
       thumbnail: '',
-      expenses: [],
+      createdBy: createdById,
       attachments: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -47,9 +51,11 @@ export class TripService {
 
     try {
       const savedTrip: TripDocument = await newTrip.save();
+
       if (!savedTrip._id) {
         throw new Error('Id not generated');
       }
+
       const tripDetails = getTripDetails(savedTrip);
 
       return plainToInstance(TripDto, tripDetails);
@@ -113,13 +119,13 @@ export class TripService {
   public async findOne(id: string) {
     const trip = await this.tripModel
       .findById(id)
-      .populate({ path: 'travelers', model: 'User' })
+      .populate('createdBy')
       .lean()
       .exec();
     if (!trip) {
       throw new NotFoundException('Trip not found');
     }
-    const tripDetails = getTripDetails(trip as TripDocument);
+    const tripDetails = getTripDetails(trip);
 
     return tripDetails;
   }
@@ -223,5 +229,12 @@ export class TripService {
     const parsedExpense = plainToInstance(ExpenseDto, newExpense);
 
     return parsedExpense;
+  }
+  public async findByUserId(userId: string): Promise<Trip[]> {
+    const trips = await this.tripModel.find({ travelers: userId }).exec();
+    if (!trips || trips.length === 0) {
+      throw new NotFoundException(`No trips found for user with ID ${userId}`);
+    }
+    return trips;
   }
 }

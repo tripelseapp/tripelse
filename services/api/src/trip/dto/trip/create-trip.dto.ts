@@ -1,7 +1,8 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { TripDto } from './trip.dto';
-import { CategoriesEnum } from 'common/enums/category.enum';
 import { IsArray, IsDateString, IsNotEmpty } from 'class-validator';
+import { CategoriesEnum } from 'common/enums/category.enum';
+import { Types } from 'mongoose';
+import { TripDto } from './trip.dto';
 
 export class CreateTripDto extends PickType(TripDto, [
   'name',
@@ -10,14 +11,6 @@ export class CreateTripDto extends PickType(TripDto, [
   'expenses',
   'thumbnail',
 ] as const) {
-  @IsArray()
-  @IsNotEmpty({ each: true })
-  @ApiProperty({
-    description: 'The list of user IDs that are part of the trip.',
-    type: [String],
-    default: [],
-  })
-  readonly travelers: string[];
   @IsDateString()
   @IsNotEmpty()
   @ApiProperty({
@@ -35,6 +28,19 @@ export class CreateTripDto extends PickType(TripDto, [
     default: '2024-06-10T00:00:00.000Z',
   })
   readonly endDate: string;
+
+  @IsArray()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'List of users that will participate in the trip.',
+    type: 'array',
+    default: [],
+    items: {
+      type: 'string',
+      example: '6695aebd76dcb559c2f56d17',
+    },
+  })
+  readonly travelers: Types.ObjectId[];
 }
 
 export const CreateTripExample: CreateTripDto = {

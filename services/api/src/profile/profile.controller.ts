@@ -64,22 +64,6 @@ export class ProfileController {
     return getProfileDetails(profile);
   }
 
-  @Get(':userId')
-  async findWithUser(
-    @Param('userId') userId: string,
-  ): Promise<ProfileDetailsDto> {
-    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
-      throw new BadRequestException('Invalid User ID');
-    }
-
-    const profile = await this.profileService.findWithUserId(userId);
-    if (!profile) {
-      throw new NotFoundException('Profile not found for this user');
-    }
-
-    return getProfileDetails(profile);
-  }
-
   @Patch('user/:userId')
   @ApiOperation({
     summary: 'Update profile by user id',

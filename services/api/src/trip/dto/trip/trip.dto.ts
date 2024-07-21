@@ -9,6 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { CommonDto } from 'common/common.dto';
+import { Types } from 'mongoose';
 import { Day } from 'trip/entities/day.entity';
 import { UserInListDto } from 'user/dto/user-list.dto';
 
@@ -83,8 +84,17 @@ export class TripDto extends PickType(CommonDto, [
   @IsNotEmpty({ each: true })
   @ApiProperty({
     description: 'The list of user IDs that are part of the trip.',
-    type: [UserInListDto],
+    type: [Types.ObjectId],
     default: [],
   })
-  readonly travelers: UserInListDto[];
+  readonly travelers: Types.ObjectId[];
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'The user ID of the creator of the trip.',
+    type: 'string',
+    default: '6695aebd76dcb559c2f56d17',
+  })
+  readonly createdBy: string;
 }

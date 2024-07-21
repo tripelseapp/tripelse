@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { TripService } from './trip.service';
-import { TripController } from './trip.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Trip, TripSchema } from './entities/trip.entity';
+import { TripController } from './trip.controller';
+import { TripService } from './trip.service';
+import { UserModule } from 'user/user.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { Trip, TripSchema } from './entities/trip.entity';
         schema: TripSchema,
       },
     ]),
+    UserModule,
   ],
   controllers: [TripController],
   providers: [TripService],

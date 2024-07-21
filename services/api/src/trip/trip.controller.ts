@@ -9,6 +9,8 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -17,6 +19,8 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthGuard } from 'auth/guards/auth.guard';
+import { TokenPayload } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
@@ -26,6 +30,7 @@ import {
 } from 'common/resources/expenses/entities/expense.entity';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
+import { Types } from 'mongoose';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { CreateTripDto, CreateTripExample } from './dto/trip/create-trip.dto';
 import {
@@ -54,8 +59,31 @@ export class TripController {
     description: 'The trip has been successfully created.',
     type: TripDetailsDto,
   })
-  async create(@Body() createTripDto: CreateTripDto): Promise<TripDetailsDto> {
-    return this.tripService.create(createTripDto);
+  @UseGuards(AuthGuard)
+  async create(
+    @Body() createTripDto: CreateTripDto,
+    @Req() req: any,
+  ): Promise<TripDetailsDto> {
+    const currentUser: TokenPayload = req.user;
+    if (!currentUser.sub) {
+      // Should never happen because of the AuthGuard
+      throw new BadRequestException('User not found');
+    }
+    const currentUserId = new Types.ObjectId(currentUser.sub);
+
+    // add your Id to the travelers array
+    const travelers = createTripDto.travelers || [];
+    // check if the user is already in the travelers array
+    if (!travelers.includes(currentUserId)) {
+      travelers.push(currentUserId);
+    }
+
+    const newTrip = {
+      ...createTripDto,
+      travelers: travelers,
+    };
+
+    return this.tripService.create(newTrip, currentUser.sub);
   }
 
   // Find all paginated trips
@@ -163,5 +191,11 @@ export class TripController {
     @Body() createExpenseDto: CreateExpenseDto,
   ): Promise<ExpenseDto> {
     return this.tripService.createExpense(id, createExpenseDto);
+  }
+
+  @Get('user/:userId')
+  async getTripsByUserId(@Param('userId') userId: string) {
+    const trips = await this.tripService.findByUserId(userId);
+    return trips;
   }
 }

@@ -5,16 +5,13 @@ export const getTripDetails = (trip: TripDocument): TripDetailsDto => {
   // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
 
   const updatedDate = trip.updatedAt ?? trip.createdAt;
-
   return {
     id: String(trip._id),
     name: trip.name,
     description: trip.description,
     thumbnail: trip.thumbnail,
-    travelers: trip.travelers.map((traveler: any) => ({
-      id: traveler._id,
-      username: traveler.name,
-    })),
+    createdBy: trip.createdBy,
+    travelers: trip.travelers,
     days: trip.days.map((day: any) => ({
       id: String(day._id),
       name: day.name,

@@ -14,6 +14,7 @@ export class TripDetailsDto extends PickType(TripDto, [
   'days',
   'categories',
   'travelers',
+  'createdBy',
 ] as const) {}
 
 export const tripDetailsExample: TripDetailsDto = {
@@ -24,6 +25,7 @@ export const tripDetailsExample: TripDetailsDto = {
   createdAt: new Date(),
   updatedAt: new Date(),
   expenses: [],
+  createdBy: '6695aebd76dcb559c2f56d17',
   days: [DayExample1, DayExample2],
   categories: [CategoriesEnum.ENTERTAINMENT],
   travelers: [],

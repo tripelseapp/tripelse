@@ -30,6 +30,7 @@ export class CommonDto {
     type: Expense,
     isArray: true,
     description: 'Expenses associated with the event.',
+    default: [],
   })
   readonly expenses: Expense[];
 
