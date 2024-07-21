@@ -25,12 +25,10 @@ export class ProfileService {
     }
   }
 
-  async findByUserId(userId: string): Promise<Profile> {
+  async findByUserId(userId: string): Promise<Profile | null> {
     try {
       const profile = await this.profileModel.findOne({ userId }).exec();
-      if (!profile) {
-        throw new NotFoundException('Profile not found for this user');
-      }
+
       return profile;
     } catch (error) {
       console.error('Error finding profile by userId:', error);

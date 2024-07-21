@@ -73,8 +73,6 @@ export class AuthService {
   }
 
   async validateUser(details: UserFromGoogle) {
-    console.log('details', details);
-
     const user = await this.userService.findUser({
       email: details.email,
     });
@@ -87,6 +85,7 @@ export class AuthService {
       email: details.email,
       username: details.username,
       password: null,
+      avatar: details.avatar,
     });
 
     return this.register(newUser);

@@ -11,6 +11,8 @@ import { PageDto } from 'common/resources/pagination/page.dto';
 import { FilterQuery, Model } from 'mongoose';
 import { passwordStrongEnough } from 'utils/password-checker';
 import { buildQuery, buildSorting } from 'utils/query-utils';
+import { CreateProfileDto } from '../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
+import { ProfileService } from '../profile/profile.service'; // Importa el ProfileService
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
@@ -19,9 +21,6 @@ import { UserDocument, UserEntity } from './entities/user.entity';
 import { Role } from './types/role.types';
 import { getUserDetails } from './utils/get-users-details';
 import { comparePassword, hashPassword } from './utils/password-utils';
-import { JwtService } from '@nestjs/jwt'; // Importa el JwtService
-import { ProfileService } from '../profile/profile.service'; // Importa el ProfileService
-import { CreateProfileDto } from '../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
 
 interface findUserOptions {
   email?: string;
@@ -35,8 +34,7 @@ export class UserService {
   constructor(
     @InjectModel(UserEntity.name)
     private userModel: Model<UserDocument>,
-    private jwtService: JwtService,
-    private profileService: ProfileService, // Inyecta ProfileService
+    private profileService: ProfileService,
   ) {}
 
   public async create(createUserDto: CreateUserDto): Promise<UserDocument> {
@@ -85,8 +83,8 @@ export class UserService {
       // Create an empty profile associated with the new user
       const createProfileDto: CreateProfileDto = {
         userId: savedUser._id.toString(),
-        bio: '',
-        avatar: '',
+        bio: null,
+        avatar: createUserDto.avatar ?? null,
       };
       await this.profileService.create(createProfileDto);
 

@@ -14,7 +14,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(accesToken: string, refreshToken: string, profile: Profile) {
+  async validate(_accesToken: string, _refreshToken: string, profile: Profile) {
     if (!profile) {
       throw new Error('Google profile is required');
     }

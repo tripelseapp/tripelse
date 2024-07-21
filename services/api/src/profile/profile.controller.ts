@@ -1,28 +1,27 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
   Get,
-  Patch,
-  Body,
-  Param,
   HttpStatus,
-  BadRequestException,
   NotFoundException,
-  InternalServerErrorException,
+  Param,
+  Patch,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiOkResponse,
   ApiBadRequestResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
-import { ProfileService } from './profile.service';
-import { CreateProfileDto } from './dto/create-profile.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
 import {
-  ProfileDetailsDto,
   ExampleProfileDetailsDto,
+  ProfileDetailsDto,
 } from './dto/profile-details.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ProfileService } from './profile.service';
+import { getProfileDetails } from './utils/getProfileDetails.util';
 
 @Controller('profile')
 @ApiTags('Profiles')
@@ -62,14 +61,7 @@ export class ProfileController {
       throw new NotFoundException('Profile not found for this user');
     }
 
-    return {
-      bio: profile.bio,
-      avatar: profile.avatar,
-      followers: profile.followers.map((id) => id.toString()),
-      following: profile.following.map((id) => id.toString()),
-      updatedAt: profile.updatedAt,
-      userId: profile.userId,
-    };
+    return getProfileDetails(profile);
   }
 
   @Patch('user/:userId')
@@ -109,14 +101,6 @@ export class ProfileController {
       throw new NotFoundException('Profile not found for this user');
     }
 
-    return {
-      bio: updatedProfile.bio,
-      avatar: updatedProfile.avatar,
-      followers: updatedProfile.followers.map((id) => id.toString()),
-      following: updatedProfile.following.map((id) => id.toString()),
-
-      updatedAt: updatedProfile.updatedAt,
-      userId: updatedProfile.userId,
-    };
+    return getProfileDetails(updatedProfile);
   }
 }

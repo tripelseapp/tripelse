@@ -3,11 +3,11 @@ import { HydratedDocument, Schema as MongooseSchema, now } from 'mongoose';
 
 @Schema()
 export class Profile {
-  @Prop({ required: false })
-  bio: string;
+  @Prop({ type: String })
+  bio: string | null;
 
-  @Prop({ required: false })
-  avatar: string;
+  @Prop({ type: String })
+  avatar: string | null;
 
   @Prop({ required: true })
   followers: MongooseSchema.Types.ObjectId[];

@@ -12,17 +12,16 @@ import { CommonDto } from 'common/common.dto';
 export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
   //bio
   @IsString()
-  @IsNotEmpty()
   @MaxLength(500)
   @ApiProperty({
     description:
       'Short biography of the profile owner, including the name, age interests...',
     title: 'Biography',
     maximum: 500,
-    type: 'string',
-    default: 'A summer profile to the beach',
+    default:
+      "I'm Albert and I love to travel around the world. I'm a software engineer and I love to code.",
   })
-  readonly bio: string;
+  readonly bio: string | null;
 
   //
   @IsString()
@@ -34,7 +33,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string',
     default: 'image-avatar.jpg',
   })
-  readonly avatar: string;
+  readonly avatar: string | null;
 
   @IsArray()
   @ApiPropertyOptional({

@@ -6,15 +6,12 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Req,
-  Request,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -40,7 +37,6 @@ import {
 import { UserInListDto } from './dto/user-list.dto';
 import { UserService } from './user.service';
 import { getUserDetails } from './utils/get-users-details';
-import { AuthGuard } from 'auth/guards/auth.guard';
 
 @Controller('user')
 @ApiCookieAuth()
