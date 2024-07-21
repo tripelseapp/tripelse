@@ -4,7 +4,9 @@ import {
   IsArray,
   IsDateString,
   IsNotEmpty,
+  IsOptional,
   IsString,
+  IsUrl,
   MaxLength,
 } from 'class-validator';
 import { CommonDto } from 'common/common.dto';
@@ -24,14 +26,15 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
   readonly bio: string | null;
 
   //
-  @IsString()
   @MaxLength(250)
+  @IsUrl()
+  @IsOptional()
   @ApiPropertyOptional({
     description: 'Avatar photo',
     title: 'Avatar',
     maximum: 250,
     type: 'string',
-    default: 'image-avatar.jpg',
+    default: null,
   })
   readonly avatar: string | null;
 

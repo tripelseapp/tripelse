@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, now } from 'mongoose';
+import { UserDetails } from 'user/dto/user-details.dto';
 
 @Schema()
 export class Profile {
@@ -22,6 +23,9 @@ export class Profile {
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   userId: string; // This is the reference to the user
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  user: UserDetails;
 }
 
 export type ProfileDocument = HydratedDocument<Profile>;

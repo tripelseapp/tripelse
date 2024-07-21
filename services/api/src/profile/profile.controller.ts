@@ -28,7 +28,7 @@ import { getProfileDetails } from './utils/getProfileDetails.util';
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @Get('user/:userId')
+  @Get('only/:userId')
   @ApiOperation({
     summary: 'Get profile by user id',
     description: 'Returns a profile associated with the user id.',
@@ -57,6 +57,22 @@ export class ProfileController {
     }
 
     const profile = await this.profileService.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException('Profile not found for this user');
+    }
+
+    return getProfileDetails(profile);
+  }
+
+  @Get(':userId')
+  async findWithUser(
+    @Param('userId') userId: string,
+  ): Promise<ProfileDetailsDto> {
+    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+      throw new BadRequestException('Invalid User ID');
+    }
+
+    const profile = await this.profileService.findWithUserId(userId);
     if (!profile) {
       throw new NotFoundException('Profile not found for this user');
     }

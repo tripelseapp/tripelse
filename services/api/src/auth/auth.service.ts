@@ -81,14 +81,22 @@ export class AuthService {
 
     // first time user is logging in (and its a google user)
 
-    const newUser = await this.userService.create({
+    const newUserToCreate = {
       email: details.email,
       username: details.username,
-      password: null,
       avatar: details.avatar,
-    });
+      password: null,
+    };
+    try {
+      await this.userService.create(newUserToCreate);
 
-    return this.register(newUser);
+      return this.register(newUserToCreate);
+    } catch (error) {
+      throw new HttpException(
+        'Error creating user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findById(id: string) {

@@ -36,6 +36,22 @@ export class ProfileService {
     }
   }
 
+  async findWithUserId(userId: string): Promise<Profile | null> {
+    // find the profile but instead of returning the userID:string, we should populate the user object with the user details
+    // from the user collection, return the one that matches the userId
+    try {
+      const profile = await this.profileModel
+        .findOne({ userId })
+        .populate('user', 'username email')
+        .exec();
+
+      return profile;
+    } catch (error) {
+      console.error('Error finding profile with userId:', error);
+      throw new InternalServerErrorException('Could not find the profile.');
+    }
+  }
+
   async update(
     userId: string,
     updateProfileDto: UpdateProfileDto,
