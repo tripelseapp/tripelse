@@ -24,7 +24,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       throw new Error('Google profile email is required');
     }
 
-    const userDetails = await this.authService.validateUser({
+    const userDetails = await this.authService.validateGoogleUser({
       email,
       id: profile.id,
       username: profile.displayName,

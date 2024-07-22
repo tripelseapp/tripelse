@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
 import { plainToInstance } from 'class-transformer';
@@ -14,7 +14,7 @@ import {
   PageMetaDto,
   PageOptionsDto,
 } from 'common/resources/pagination';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { UserDto } from 'user/dto/user.dto';
 import { buildQuery, buildSorting } from 'utils/query-utils';
 import { CreateTripDto } from './dto/trip/create-trip.dto';
@@ -23,7 +23,7 @@ import { TripInListDto } from './dto/trip/trip-list.dto';
 import { TripDto } from './dto/trip/trip.dto';
 import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { Trip, TripDocument } from './entities/trip.entity';
-import { ResDeleteTrip } from './types/res-delete-trip.type';
+import { ResponseTripOperation } from './types/response-trip-operation.type';
 import { getDays } from './utils/create-days';
 import { getTripDetails } from './utils/get-trip-details';
 
@@ -36,7 +36,7 @@ export class TripService {
   public async create(
     createTripDto: CreateTripDto,
     createdById: string,
-  ): Promise<TripDetailsDto> {
+  ): Promise<ResponseTripOperation> {
     const days = getDays(createTripDto.startDate, createTripDto.endDate);
 
     const completeTrip: Trip = {
@@ -55,15 +55,17 @@ export class TripService {
       const savedTrip: TripDocument = await newTrip.save();
 
       if (!savedTrip._id) {
-        throw new Error('Id not generated');
+        throw new HttpException('Error creating trip', 500);
       }
 
-      const tripDetails = this.buildTripDetails(savedTrip, createdById);
-
-      return plainToInstance(TripDto, tripDetails);
+      return {
+        ok: true,
+        message: 'Trip created successfully',
+        id: savedTrip._id.toString(),
+      };
     } catch (error) {
-      console.error('Error saving trip:', error);
-      throw new Error('Error saving trip');
+      console.error('Error creating trip:', error);
+      throw new HttpException('Error creating trip', 500);
     }
   }
 
@@ -150,7 +152,7 @@ export class TripService {
     return tripDetails;
   }
 
-  public async remove(id: TripDto['id']): Promise<ResDeleteTrip> {
+  public async remove(id: TripDto['id']): Promise<ResponseTripOperation> {
     try {
       const trip = await this.tripModel.deleteOne({ _id: id }).lean().exec();
       if (!trip) {
@@ -159,12 +161,14 @@ export class TripService {
       const response = {
         ok: true,
         message: 'Trip deleted successfully',
+        id: id.toString(),
       };
       return response;
     } catch (error) {
       const response = {
         ok: false,
         message: 'Error deleting trip',
+        id: id.toString(),
       };
       return response;
     }
@@ -263,8 +267,9 @@ export class TripService {
     const firstDay = trip.days[0].date;
     const lastDay = trip.days[trip.days.length - 1].date;
     const isTodayInTrip = firstDay <= new Date() && new Date() <= lastDay;
-
-    const areYouMember = trip.travelers.includes(currentUserId);
+    console.log(trip.travelers);
+    const tripMembers = trip.travelers.map((member) => member.toString()) || [];
+    const areYouMember = tripMembers.includes(currentUserId);
 
     const metadata = {
       active: isTodayInTrip,

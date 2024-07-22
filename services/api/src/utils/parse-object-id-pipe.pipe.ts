@@ -14,7 +14,10 @@ export class ParseObjectIdPipe
   transform(value: any): mongoose.Types.ObjectId {
     const validObjectId: boolean = mongoose.isObjectIdOrHexString(value);
     if (!validObjectId) {
-      throw new BadRequestException('Invalid ObjectId', value);
+      throw new BadRequestException(
+        'Invalid ObjectId',
+        `'${value}' doesn't follow the Tripelse standard ID format, please provide a valid ID.`,
+      );
     }
     return value;
   }

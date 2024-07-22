@@ -12,8 +12,9 @@ export const getTripDetails = (
 ): TripDetailsDto => {
   // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
 
-  const createdAt = trip.createdAt as unknown as UserDocument;
+  const createdBy = trip.createdBy as unknown as UserDocument;
   const updatedDate = trip.updatedAt ?? trip.createdAt;
+  console.log(createdBy);
   return {
     id: String(trip._id),
     name: trip.name,
@@ -22,7 +23,7 @@ export const getTripDetails = (
     areYouMember: metadata.areYouMember,
     description: trip.description,
     thumbnail: trip.thumbnail,
-    createdBy: getUserInList(createdAt),
+    createdBy: getUserInList(createdBy),
     travelers: trip.travelers,
     days: trip.days.map((day: any) => ({
       id: String(day._id),

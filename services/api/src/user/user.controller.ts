@@ -23,12 +23,13 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { Roles } from 'auth/decorators/roles.decorator';
+import { RolesGuard } from 'auth/guards/roles.guard';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { NewUserPasswordDto } from './dto/new-password-dto';
-import { NewUserRoleDto } from './dto/new-role-dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ExampleUserDetailsDto,
@@ -36,12 +37,10 @@ import {
   UserDetailsDto,
 } from './dto/user-details.dto';
 import { UserInListDto } from './dto/user-list.dto';
+import { Role, RolesEnum } from './types/role.types';
 import { UserService } from './user.service';
 import { getUserDetails } from './utils/get-users-details';
-import { Roles } from 'auth/decorators/roles.decorator';
-import { RolesEnum } from './types/role.types';
-import { AuthGuard } from 'auth/guards/auth.guard';
-import { RolesGuard } from 'auth/guards/roles.guard';
+import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 
 @Controller('user')
 @ApiCookieAuth()
@@ -172,7 +171,10 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     const updatedUser = this.userService.update(id, updateUserDto);
     if (!updatedUser) {
       throw new BadRequestException('This user ID did not exist');
@@ -203,7 +205,7 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', ParseObjectIdPipe) id: string) {
     const deletedUser = await this.userService.remove(id);
     if (!deletedUser) {
       throw new BadRequestException('This user ID did not exist');
@@ -234,10 +236,10 @@ export class UserController {
   }
 
   //  - Update User Role by id
-  @Patch(':id/role')
+  @Patch(':id/roles/add')
   @ApiOperation({
-    summary: 'Update user role by id',
-    description: 'Updates a single user role with a matching id.',
+    summary: 'Add a role to user',
+    description: 'Adds a role to a single user with a matching id.',
   })
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -256,14 +258,18 @@ export class UserController {
     },
   })
   @Roles(RolesEnum.USER)
-  @UseGuards(AuthGuard, RolesGuard)
-  async updateRole(
-    @Param('id') id: string,
-    @Body() newUserRoleDto: NewUserRoleDto,
+  @UseGuards(RolesGuard)
+  async addRole(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('role') role: Role,
   ) {
-    const roles = newUserRoleDto.roles;
+    if (!Object.values(RolesEnum).includes(role as RolesEnum)) {
+      throw new BadRequestException(
+        `Invalid role: ${role}, valid roles are: ${Object.values(RolesEnum)}`,
+      );
+    }
 
-    const updatedUser = await this.userService.updateRole(id, roles);
+    const updatedUser = await this.userService.addRole(id, role);
     if (!updatedUser) {
       throw new BadRequestException('This user ID did not exist');
     }
@@ -293,7 +299,7 @@ export class UserController {
     },
   })
   async updatePassword(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() body: NewUserPasswordDto,
   ) {
     const newPassword = body.password;

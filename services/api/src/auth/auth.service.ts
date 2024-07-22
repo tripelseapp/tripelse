@@ -52,13 +52,13 @@ export class AuthService {
     const savedUser = await this.userService.create(createUserDto);
     return await this.buildResponseWithToken(savedUser);
   }
-  private async buildResponseWithToken(user: UserDocument): Promise<LoginRes> {
+  async buildResponseWithToken(user: UserDocument): Promise<LoginRes> {
     try {
       // Note: we choose a property name of sub to hold our userId value to be consistent with JWT standards.
       const payload: TokenPayload = {
-        sub: user._id.toString(),
+        id: user._id.toString(),
         username: user.username,
-        role: user.role,
+        roles: user.roles,
       };
       const access_token = await this.jwtService.signAsync(payload);
 
@@ -73,7 +73,7 @@ export class AuthService {
     }
   }
 
-  async validateUser(details: UserFromGoogle) {
+  async validateGoogleUser(details: UserFromGoogle) {
     const user = await this.userService.findUser({
       email: details.email,
     });
@@ -82,10 +82,10 @@ export class AuthService {
 
     // first time user is logging in (and its a google user)
 
-    const newUserToCreate = {
+    const newUserToCreate: CreateUserDto = {
       email: details.email,
       username: details.username,
-      avatar: details.avatar,
+      avatar: details.avatar ?? null,
       password: null,
     };
     try {
@@ -102,5 +102,14 @@ export class AuthService {
 
   async findById(id: string) {
     return this.userService.findById(id);
+  }
+
+  async validateUser(usernameOrEmail: string, pass: string): Promise<any> {
+    const user = await this.userService.findByUsernameOrEmail(usernameOrEmail);
+    if (user && (await comparePassword(pass, user.password))) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 }

@@ -7,6 +7,8 @@ import { jwtConstants } from './constants/jwt.constants';
 import { GoogleStrategy } from './utils/googleStrategy.util';
 import { PassportModule } from '@nestjs/passport';
 import { SessionSerializer } from './utils/serializer.util';
+import { LocalStrategy } from './strategies/local.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -22,7 +24,9 @@ import { SessionSerializer } from './utils/serializer.util';
   providers: [
     AuthService,
     GoogleStrategy,
+    JwtStrategy,
     SessionSerializer,
+    LocalStrategy,
     {
       provide: 'AUTH_SERVICE',
       useClass: AuthService,

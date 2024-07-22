@@ -19,7 +19,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from 'auth/guards/auth.guard';
 import { ReqWithUser, TokenPayload } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
@@ -30,7 +29,6 @@ import {
 } from 'common/resources/expenses/entities/expense.entity';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
-import { Types } from 'mongoose';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { CreateTripDto, CreateTripExample } from './dto/trip/create-trip.dto';
 import {
@@ -40,7 +38,8 @@ import {
 import { TripInListDto } from './dto/trip/trip-list.dto';
 import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { TripService } from './trip.service';
-import { ResDeleteTrip } from './types/res-delete-trip.type';
+import { ResponseTripOperation } from './types/response-trip-operation.type';
+import { JwtAuthGuard } from 'auth/guards/jwt.guard';
 
 @Controller('trip')
 @ApiCookieAuth()
@@ -50,6 +49,7 @@ export class TripController {
   constructor(private readonly tripService: TripService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Create a new trip',
     description: 'Creates a new trip with the provided data',
@@ -60,17 +60,16 @@ export class TripController {
     description: 'The trip has been successfully created.',
     type: TripDetailsDto,
   })
-  @UseGuards(AuthGuard)
   async create(
     @Body() createTripDto: CreateTripDto,
-    @Req() req: any,
-  ): Promise<TripDetailsDto> {
+    @Req() req: ReqWithUser,
+  ): Promise<ResponseTripOperation> {
     const currentUser: TokenPayload = req.user;
-    if (!currentUser.sub) {
+    if (!currentUser.id) {
       // Should never happen because of the AuthGuard
       throw new BadRequestException('User not found');
     }
-    const currentUserId = currentUser.sub;
+    const currentUserId = currentUser.id;
 
     // add your Id to the travelers array
     const travelers = createTripDto.travelers || [];
@@ -84,7 +83,7 @@ export class TripController {
       travelers: travelers,
     };
 
-    return this.tripService.create(newTrip, currentUser.sub);
+    return this.tripService.create(newTrip, currentUser.id);
   }
 
   // Find all paginated trips
@@ -120,9 +119,8 @@ export class TripController {
     description: 'The trip has been successfully found.',
     type: TripDetailsDto,
   })
-  @UseGuards(AuthGuard)
   findOne(@Param('id', ParseObjectIdPipe) id: string, @Req() req: ReqWithUser) {
-    const current = req.user?.sub;
+    const current = req.user?.id;
     return this.tripService.findOne(id, current);
   }
 
@@ -136,13 +134,12 @@ export class TripController {
     description: 'The trip has been successfully updated.',
     type: TripDetailsDto,
   })
-  @UseGuards(AuthGuard)
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateTripDto: UpdateTripDto,
     @Req() req: ReqWithUser,
   ): Promise<TripDetailsDto> {
-    return this.tripService.update(id, updateTripDto, req.user.sub);
+    return this.tripService.update(id, updateTripDto, req.user.id);
   }
 
   @Delete(':id')
@@ -156,8 +153,9 @@ export class TripController {
     description: 'The trip has been successfully created.',
     type: TripInListDto,
   })
-  @UseGuards(AuthGuard)
-  remove(@Param('id', ParseObjectIdPipe) id: string): Promise<ResDeleteTrip> {
+  remove(
+    @Param('id', ParseObjectIdPipe) id: string,
+  ): Promise<ResponseTripOperation> {
     return this.tripService.remove(id);
   }
 
@@ -192,26 +190,23 @@ export class TripController {
     description: 'The expense has been successfully created.',
     type: Expense,
   })
-  @UseGuards(AuthGuard)
   async createExpense(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() createExpenseDto: CreateExpenseDto,
     @Req() req: ReqWithUser,
   ): Promise<ExpenseDto> {
-    return this.tripService.createExpense(id, createExpenseDto, req.user.sub);
+    return this.tripService.createExpense(id, createExpenseDto, req.user.id);
   }
 
   @Get('user/:userId')
-  @UseGuards(AuthGuard)
   async getTripsByUserId(@Param('userId', ParseObjectIdPipe) userId: string) {
     const trips = await this.tripService.findByUserId(userId);
     return trips;
   }
   @Get('mine')
-  @UseGuards(AuthGuard)
   async getMyTrips(@Req() req: ReqWithUser) {
     console.log(req);
-    // const trips = await this.tripService.findByUserId(req.user.sub);
+    // const trips = await this.tripService.findByUserId(req.user.id);
     return 'trips';
     // return trips;
   }

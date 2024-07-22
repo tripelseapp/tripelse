@@ -11,7 +11,7 @@ export const getUserDetails = (user: UserDocument): UserDetails => {
     id: String(user._id),
     username: user.username,
     email: user.email,
-    roles: user.roles,
+    roles: user.roles ?? [],
     createdAt: user.createdAt.toISOString(),
     updatedAt: updatedDate,
   };

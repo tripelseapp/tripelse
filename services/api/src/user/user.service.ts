@@ -18,9 +18,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { UserInListDto } from './dto/user-list.dto';
 import { UserDocument, UserEntity } from './entities/user.entity';
-import { Role } from './types/role.types';
+import { Role, RolesEnum } from './types/role.types';
 import { getUserDetails } from './utils/get-users-details';
 import { comparePassword, hashPassword } from './utils/password-utils';
+import { UserBeforeCreate } from './types/user-before-create.type';
 
 interface findUserOptions {
   email?: string;
@@ -66,19 +67,19 @@ export class UserService {
     }
     const now = new Date();
 
-    // Create a new user instance
-    const newUser = new this.userModel({
+    const newUser: UserBeforeCreate = {
       username: createUserDto.username,
       email: createUserDto.email,
       password: createUserDto.password,
       createdAt: now,
       updatedAt: now,
-      role: 'user',
-    });
-
+      roles: [RolesEnum.USER],
+    };
+    // Create a new user instance
+    const newUserDocument = new this.userModel(newUser);
     try {
       // Save the user
-      const savedUser = await newUser.save();
+      const savedUser = await newUserDocument.save();
 
       // Create an empty profile associated with the new user
       const createProfileDto: CreateProfileDto = {
@@ -232,7 +233,7 @@ export class UserService {
 
   async findById(id: string): Promise<UserDetails> {
     try {
-      const user = await this.findUser({ id });
+      const user = await this.userModel.findById(id).lean().exec();
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -243,20 +244,17 @@ export class UserService {
     }
   }
 
-  public async updateRole(
+  public async addRole(
     id: UserDocument['id'],
     role: Role,
   ): Promise<UserDetails> {
+    // add the new role to the user roles array only if it does not exist
     const user = await this.userModel
-      .findByIdAndUpdate(id, { role }, { new: true })
+      .findByIdAndUpdate(id, { $addToSet: { roles: role } }, { new: true })
       .lean()
       .exec();
     if (!user) {
       throw new BadRequestException('Invalid ID');
-    }
-
-    if (user.roles !== role) {
-      throw new InternalServerErrorException('Could not update user role');
     }
 
     const parsedUser = getUserDetails(user);

@@ -4,20 +4,20 @@ import {
   Get,
   NotFoundException,
   Post,
-  Req,
+  Request,
   UseGuards,
 } from '@nestjs/common';
+import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserDetails } from 'user/dto/user-details.dto';
+import { UserService } from 'user/user.service';
+import { getUserDetails } from 'user/utils/get-users-details';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { LoginRes } from './types/LoginRes.type';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { AuthGuard } from './guards/auth.guard';
-import { UserService } from 'user/user.service';
-import { UserDetails } from 'user/dto/user-details.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { Request } from 'express';
-import { getUserDetails } from 'user/utils/get-users-details';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { LocalAuthGuard } from './guards/local.guard';
+import { LoginRes } from './types/LoginRes.type';
 import { ReqWithUser } from './types/token-payload.type';
 
 @ApiTags('Auth')
@@ -39,17 +39,18 @@ export class AuthController {
   }
 
   @Get('profile')
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get user profile',
     description: 'Get the user profile for the currently authenticated user',
   })
-  async profile(@Req() req: ReqWithUser): Promise<UserDetails> {
+  async getProfile(@Request() req: ReqWithUser): Promise<UserDetails> {
     const user = req.user;
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const userById = await this.userService.findUser({ id: user.sub });
+    const { id } = user;
+    const userById = await this.userService.findUser({ id });
     if (!userById) {
       throw new NotFoundException('User not found');
     }
@@ -61,7 +62,7 @@ export class AuthController {
     summary: 'Get status',
     description: 'Get the status of the API',
   })
-  getStatus(@Req() request: Request) {
+  getStatus(@Request() request: ReqWithUser) {
     if (request.user) {
       return { status: 'authorized', user: request.user };
     }
@@ -69,6 +70,7 @@ export class AuthController {
   }
 
   //  Logins section
+  @UseGuards(LocalAuthGuard)
   @Post('login/credentials')
   @ApiOperation({
     summary: 'Login user',

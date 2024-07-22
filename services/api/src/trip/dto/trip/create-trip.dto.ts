@@ -1,7 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsArray, IsDateString, IsNotEmpty } from 'class-validator';
 import { CategoriesEnum } from 'common/enums/category.enum';
-import { Types } from 'mongoose';
 import { TripDto } from './trip.dto';
 
 export class CreateTripDto extends PickType(TripDto, [

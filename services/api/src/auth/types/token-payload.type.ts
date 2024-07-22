@@ -1,9 +1,10 @@
 import { Request } from 'express';
+import { Role } from 'user/types/role.types';
 
 export type TokenPayload = {
-  sub: string;
+  id: string;
   username: string;
-  role: string;
+  roles: Role[];
 };
 
 export type ReqWithUser = Request & {
