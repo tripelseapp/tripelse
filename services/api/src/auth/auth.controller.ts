@@ -17,8 +17,11 @@ import { LoginDto } from './dto/login.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { LocalAuthGuard } from './guards/local.guard';
-import { LoginRes } from './types/LoginRes.type';
+import { TokensRes } from './types/LoginRes.type';
 import { ReqWithUser } from './types/token-payload.type';
+import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { Public } from 'common/decorators/publicRoute.decorator';
 
 @ApiTags('Auth')
 @ApiCookieAuth('Access token')
@@ -28,13 +31,13 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {}
-
+  @Public()
   @Post('register')
   @ApiOperation({
     summary: 'Register user',
     description: 'Register a new user with username, email, and password',
   })
-  register(@Body() createUserDto: CreateUserDto): Promise<LoginRes> {
+  register(@Body() createUserDto: CreateUserDto): Promise<TokensRes> {
     return this.authService.register(createUserDto);
   }
 
@@ -70,16 +73,16 @@ export class AuthController {
   }
 
   //  Logins section
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login/credentials')
   @ApiOperation({
     summary: 'Login user',
     description: 'Get a JWT token for a user by username or email and password',
   })
-  login(@Body() loginDto: LoginDto): Promise<LoginRes> {
+  login(@Body() loginDto: LoginDto): Promise<TokensRes> {
     return this.authService.login(loginDto);
   }
-
   @Get('login/social/google')
   @UseGuards(GoogleAuthGuard)
   googleLogin() {
@@ -90,5 +93,23 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   googleLoginCallback() {
     return { msg: 'ok' };
+  }
+
+  @Post('refresh')
+  @ApiOperation({
+    summary: 'Refresh JWT token',
+    description: 'Refresh the JWT token',
+  })
+  @UseGuards(RefreshJwtAuthGuard)
+  async refreshToken(
+    @Body() body: RefreshTokenDto,
+    @Request() req: ReqWithUser,
+  ) {
+    const refresh = body.refreshToken;
+    if (!refresh) {
+      throw new NotFoundException('Refresh token not found');
+    }
+
+    return this.authService.refreshToken(req.user);
   }
 }

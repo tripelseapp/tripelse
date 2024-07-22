@@ -1,13 +1,13 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { setupSwagger } from './utils/setupSwagger';
-import configuration from './config/configuration';
-import helmet from 'helmet';
+import { NestFactory } from '@nestjs/core';
 import { constants } from 'constants/constants';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import helmet from 'helmet';
 import passport from 'passport';
+import { AppModule } from './app.module';
+import configuration from './config/configuration';
+import { setupSwagger } from './utils/setupSwagger';
 
 const PORT = configuration().port;
 async function bootstrap() {
@@ -22,6 +22,7 @@ async function bootstrap() {
   );
   app.setGlobalPrefix(`${constants.api.prefix}/${constants.api.version}`);
   app.use(helmet());
+
   app.use(cookieParser());
   app.use(
     session({

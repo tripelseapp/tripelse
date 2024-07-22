@@ -5,9 +5,10 @@ import { UserDocument } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { comparePassword } from '../user/utils/password-utils';
 import { LoginDto } from './dto/login.dto';
-import { LoginRes } from './types/LoginRes.type';
+import { TokensRes } from './types/LoginRes.type';
 import { UserFromGoogle } from './types/User-from-google.type';
 import { TokenPayload } from './types/token-payload.type';
+import { jwtConstants } from './constants/jwt.constants';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
-  async login(loginDto: LoginDto): Promise<LoginRes> {
+  async login(loginDto: LoginDto): Promise<TokensRes> {
     // validate that we have the needed data
     if (!loginDto.usernameOrEmail || !loginDto.password) {
       throw new HttpException(
@@ -48,11 +49,11 @@ export class AuthService {
     }
     return await this.buildResponseWithToken(user);
   }
-  public async register(createUserDto: CreateUserDto): Promise<LoginRes> {
+  public async register(createUserDto: CreateUserDto): Promise<TokensRes> {
     const savedUser = await this.userService.create(createUserDto);
     return await this.buildResponseWithToken(savedUser);
   }
-  async buildResponseWithToken(user: UserDocument): Promise<LoginRes> {
+  async buildResponseWithToken(user: UserDocument): Promise<TokensRes> {
     try {
       // Note: we choose a property name of sub to hold our userId value to be consistent with JWT standards.
       const payload: TokenPayload = {
@@ -61,9 +62,14 @@ export class AuthService {
         roles: user.roles,
       };
       const access_token = await this.jwtService.signAsync(payload);
+      const refreshToken = this.jwtService.sign(payload, {
+        // secret: jwtConstants.refreshSecret,
+        expiresIn: jwtConstants.refreshExpire,
+      });
 
       return {
         access_token,
+        refreshToken,
       };
     } catch (error) {
       throw new HttpException(
@@ -111,5 +117,12 @@ export class AuthService {
       return result;
     }
     return null;
+  }
+
+  async refreshToken(tokenPayload: TokenPayload) {
+    const new_access_token = await this.jwtService.signAsync(tokenPayload);
+    return {
+      access_token: new_access_token,
+    };
   }
 }

@@ -7,6 +7,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ProfileModule } from '../profile/profile.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from 'auth/guards/jwt.guard';
 
 @Module({
   imports: [
@@ -29,7 +31,13 @@ import { ProfileModule } from '../profile/profile.module';
     ProfileModule,
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [
+    UserService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
   exports: [UserService],
 })
 export class UserModule {}

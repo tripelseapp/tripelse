@@ -5,7 +5,7 @@ import { TokenPayload } from 'auth/types/token-payload.type';
 import { constants } from 'constants/constants';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     super({
       // I have my jwt in cookies
