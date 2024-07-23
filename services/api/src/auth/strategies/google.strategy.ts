@@ -23,6 +23,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     if (!profile) {
       throw new Error('Google profile is required');
     }
+    const { name, emails, photos } = profile;
 
     const email = profile.emails?.[0].value;
     if (!email) {

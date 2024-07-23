@@ -20,6 +20,9 @@ export class UserEntity {
   @Prop({ required: true, unique: true })
   email: string;
 
+  @Prop({ default: null, select: false, type: Date })
+  emailVerified: null | Date;
+
   @Prop({ type: [String], enum: roles, default: [RolesEnum.USER] })
   roles: Role[];
 
