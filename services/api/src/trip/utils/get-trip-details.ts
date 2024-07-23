@@ -14,7 +14,6 @@ export const getTripDetails = (
 
   const createdBy = trip.createdBy as unknown as UserDocument;
   const updatedDate = trip.updatedAt ?? trip.createdAt;
-  console.log(createdBy);
   return {
     id: String(trip._id),
     name: trip.name,

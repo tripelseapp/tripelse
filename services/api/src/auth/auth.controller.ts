@@ -89,7 +89,7 @@ export class AuthController {
   @Public()
   @UseGuards(GoogleAuthGuard)
   async googleAuth(@Req() req: Request) {
-    console.log('req', req);
+    return req.user;
   }
 
   @Get('login/social/google/redirect')

@@ -99,19 +99,15 @@ export class UserService {
     }
   }
   async createWithProvider(data: UserFromProvider): Promise<UserDocument> {
-    console.log('createWithProvider');
-
     const newProfile: CreateProfileDto = {
       givenName: data.givenName,
       familyName: data.familyName,
       avatar: data.avatar,
       bio: null,
     };
-    console.log('newProfile', newProfile);
     try {
       const savedProfile = await this.profileService.create(newProfile);
 
-      console.log('savedProfile', savedProfile);
       const newUser = new this.userModel({
         username: data.username,
         email: data.email,
@@ -127,7 +123,6 @@ export class UserService {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      console.log('newUser', newUser);
 
       return await newUser.save();
     } catch (error) {
