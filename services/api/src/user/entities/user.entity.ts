@@ -15,7 +15,7 @@ export class UserEntity {
   @Prop({ unique: true })
   username: string;
 
-  @Prop({ select: false })
+  @Prop({ select: false, default: null, type: String })
   password: string | null;
 
   @Prop({ required: true, unique: true })

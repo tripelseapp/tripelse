@@ -69,14 +69,14 @@ export class AuthService {
         username: user.username,
         roles: user.roles,
       };
-      const access_token = await this.jwtService.signAsync(payload);
+      const accessToken = await this.jwtService.signAsync(payload);
       const refreshToken = this.jwtService.sign(payload, {
         // secret: jwtConstants.refreshSecret,
         expiresIn: jwtConstants.refreshExpire,
       });
 
       return {
-        access_token,
+        accessToken,
         refreshToken,
       };
     } catch (error) {
@@ -143,5 +143,17 @@ export class AuthService {
     }
 
     return req.user;
+  }
+
+  async descerializeToken(token: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      return payload;
+    } catch (error) {
+      throw new HttpException(
+        'Error descerializing token',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
