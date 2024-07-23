@@ -6,7 +6,7 @@ import { UserService } from '../user/user.service';
 import { comparePassword } from '../user/utils/password-utils';
 import { LoginDto } from './dto/login.dto';
 import { TokensRes } from './types/LoginRes.type';
-import { UserFromGoogle } from './types/User-from-google.type';
+import { UserFromProvider } from './types/User-from-google.type';
 import { ReqWithUser, TokenPayload } from './types/token-payload.type';
 import { jwtConstants } from './constants/jwt.constants';
 
@@ -32,6 +32,14 @@ export class AuthService {
     if (!user) {
       throw new HttpException(
         'User not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    // check if the user has a password, if not then he might be a social login user
+    if (!user.password) {
+      throw new HttpException(
+        'User has no password, try logging in with google',
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
@@ -79,26 +87,22 @@ export class AuthService {
     }
   }
 
-  async validateGoogleUser(details: UserFromGoogle) {
-    console.log('Validating user with google');
+  async validateGoogleUser(details: UserFromProvider) {
     const user = await this.userService.findUser({
       email: details.email,
     });
 
-    if (user) return this.buildResponseWithToken(user);
+    if (user) {
+      console.log('User found with google details', details);
+      return this.buildResponseWithToken(user);
+    }
 
     // first time user is logging in (and its a google user)
 
-    const newUserToCreate: CreateUserDto = {
-      email: details.email,
-      username: details.username,
-      avatar: details.avatar ?? null,
-      password: '', // google users don't have passwords
-    };
     try {
-      console.log('Creating new user with google details', newUserToCreate);
-
-      const userCreated = await this.userService.create(newUserToCreate);
+      console.log('Creating new user with google details', details);
+      const userCreated = await this.userService.createWithProvider(details);
+      console.log('User created with google details');
       return this.buildResponseWithToken(userCreated);
     } catch (error) {
       throw new HttpException(
@@ -114,6 +118,11 @@ export class AuthService {
 
   async validateUser(usernameOrEmail: string, pass: string): Promise<any> {
     const user = await this.userService.findByUsernameOrEmail(usernameOrEmail);
+    // check if user has not password, then he might be a social login user
+    if (!user || !user.password) {
+      return null;
+    }
+
     if (user && (await comparePassword(pass, user.password))) {
       const { password, ...result } = user;
       return result;

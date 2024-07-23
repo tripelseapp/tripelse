@@ -6,7 +6,6 @@ export class ProfileDetailsDto extends PickType(ProfileDto, [
   'avatar',
   'followers',
   'following',
-  'userId',
 ] as const) {}
 export type ProfileDetails = ProfileDetailsDto;
 
@@ -15,5 +14,4 @@ export const ExampleProfileDetailsDto: ProfileDetailsDto = {
   avatar: '',
   followers: ['user1', 'user2', 'user3'],
   following: ['user5', 'user4'],
-  userId: '12345',
 };

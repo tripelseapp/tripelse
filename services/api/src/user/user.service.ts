@@ -5,29 +5,29 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { UserFromProvider } from 'auth/types/User-from-google.type';
 import { PageMetaDto } from 'common/resources/pagination';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { FilterQuery, Model } from 'mongoose';
+import { ProfileService } from 'profile/profile.service';
 import { passwordStrongEnough } from 'utils/password-checker';
 import { buildQuery, buildSorting } from 'utils/query-utils';
 import { CreateProfileDto } from '../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
-import { ProfileService } from '../profile/profile.service'; // Importa el ProfileService
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { UserInListDto } from './dto/user-list.dto';
 import { UserDocument, UserEntity } from './entities/user.entity';
 import { Role, RolesEnum } from './types/role.types';
+import { UserBeforeCreate } from './types/user-before-create.type';
 import { getUserDetails } from './utils/get-users-details';
 import { comparePassword, hashPassword } from './utils/password-utils';
-import { UserBeforeCreate } from './types/user-before-create.type';
 
 interface findUserOptions {
   email?: string;
   username?: string;
   id?: string;
-  shy?: boolean;
 }
 
 @Injectable()
@@ -83,8 +83,9 @@ export class UserService {
 
       // Create an empty profile associated with the new user
       const createProfileDto: CreateProfileDto = {
-        userId: savedUser._id.toString(),
         bio: null,
+        givenName: null,
+        familyName: null,
         avatar: createUserDto.avatar ?? null,
       };
       await this.profileService.create(createProfileDto);
@@ -97,7 +98,43 @@ export class UserService {
       );
     }
   }
+  async createWithProvider(data: UserFromProvider): Promise<UserDocument> {
+    console.log('createWithProvider');
 
+    const newProfile: CreateProfileDto = {
+      givenName: data.givenName,
+      familyName: data.familyName,
+      avatar: data.avatar,
+      bio: null,
+    };
+    console.log('newProfile', newProfile);
+    try {
+      const savedProfile = await this.profileService.create(newProfile);
+
+      console.log('savedProfile', savedProfile);
+      const newUser = new this.userModel({
+        username: data.username,
+        email: data.email,
+        emailVerified: new Date(),
+        roles: ['user'],
+        socialLogins: [
+          {
+            provider: data.providerName,
+            providerId: data.providerId,
+          },
+        ],
+        profile: savedProfile._id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      console.log('newUser', newUser);
+
+      return await newUser.save();
+    } catch (error) {
+      console.error('Error saving user:', error);
+      throw new InternalServerErrorException('Could not save the user.');
+    }
+  }
   public async createMultiple(
     createUserDtos: CreateUserDto[],
   ): Promise<UserDetails[]> {
@@ -155,7 +192,6 @@ export class UserService {
           usersQuery.exec(),
           this.userModel.countDocuments().exec(),
         ]);
-      console.log(users);
       const formattedUsers: UserInListDto[] = users.map((user) => ({
         id: user._id.toString(),
         username: user.username,
@@ -239,7 +275,7 @@ export class UserService {
       }
       return getUserDetails(user);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw new InternalServerErrorException(err);
     }
   }
@@ -268,7 +304,6 @@ export class UserService {
   ): Promise<UserDetails> {
     // check if the user already had the same password
     const oldUser = await this.userModel.findById(id, { password: 1 }).lean();
-    console.log('oldUser', oldUser);
     if (!oldUser) {
       throw new BadRequestException('Invalid ID');
     }

@@ -18,12 +18,27 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
   @ApiProperty({
     description:
       'Short biography of the profile owner, including the name, age interests...',
-    title: 'Biography',
     maximum: 500,
     default:
       "I'm Albert and I love to travel around the world. I'm a software engineer and I love to code.",
   })
   readonly bio: string | null;
+
+  @IsString()
+  @MaxLength(100)
+  @ApiProperty({
+    description: 'The first name of the profile',
+    default: 'Albert',
+  })
+  readonly givenName: string | null;
+
+  @IsString()
+  @MaxLength(100)
+  @ApiProperty({
+    description: 'The family name of the profile',
+    default: 'Einstein',
+  })
+  readonly familyName: string | null;
 
   //
   @MaxLength(250)
@@ -71,11 +86,4 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     format: 'date-time',
   })
   readonly updatedAt: Date;
-
-  @ApiProperty({
-    description: 'User associated ID',
-    example: '12345',
-  })
-  @IsString()
-  userId: string; // This is the reference to the user
 }

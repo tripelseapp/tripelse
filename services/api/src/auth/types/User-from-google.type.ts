@@ -1,5 +1,9 @@
 import { UserDto } from '../../user/dto/user.dto';
 
-export type UserFromGoogle = Pick<UserDto, 'id' | 'username' | 'email'> & {
+export type UserFromProvider = Pick<UserDto, 'username' | 'email'> & {
   avatar: string | null;
+  familyName: string | null;
+  givenName: string | null;
+  providerName: string;
+  providerId: string;
 };
