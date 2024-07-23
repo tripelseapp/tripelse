@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -22,13 +23,14 @@ import {
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileService } from './profile.service';
 import { getProfileDetails } from './utils/getProfileDetails.util';
+import { ReqWithUser } from 'auth/types/token-payload.type';
 
 @Controller('profile')
 @ApiTags('Profiles')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @Get('only/:userId')
+  @Get('mine')
   @ApiOperation({
     summary: 'Get profile by user id',
     description: 'Returns a profile associated with the user id.',
@@ -39,15 +41,31 @@ export class ProfileController {
     description: 'Profile found',
     example: ExampleProfileDetailsDto,
   })
-  @ApiBadRequestResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Bad Request',
-    type: BadRequestException,
+  async findMineProfile(@Req() req: ReqWithUser): Promise<ProfileDetailsDto> {
+    const userId = req.user.id;
+
+    if (!userId) {
+      throw new BadRequestException('Invalid User ID');
+    }
+
+    const profile = await this.profileService.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException('Profile not found for this user');
+    }
+
+    return getProfileDetails(profile);
+  }
+
+  @Get(':userId')
+  @ApiOperation({
+    summary: 'Get profile by user id',
+    description: 'Returns a profile associated with the user id.',
   })
-  @ApiNotFoundResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Profile not found',
-    type: NotFoundException,
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: ProfileDetailsDto,
+    description: 'Profile found',
+    example: ExampleProfileDetailsDto,
   })
   async findOneByUserId(
     @Param('userId') userId: string,

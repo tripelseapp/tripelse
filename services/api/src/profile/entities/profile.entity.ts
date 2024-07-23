@@ -5,10 +5,10 @@ import { HydratedDocument, Schema as MongooseSchema, now } from 'mongoose';
   timestamps: true,
 })
 export class ProfileEntity {
-  @Prop({ type: String })
+  @Prop({ required: false, default: null, type: String })
   bio: string | null;
 
-  @Prop({ required: true, default: null, type: String })
+  @Prop({ required: false, default: null, type: String })
   givenName: string | null;
 
   @Prop({ required: false, default: null, type: String })

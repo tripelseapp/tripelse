@@ -12,6 +12,7 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -38,6 +39,9 @@ import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
 import { getUserDetails } from '../utils/get-users-details';
 import { ReqWithUser } from 'auth/types/token-payload.type';
+import { JwtAuthGuard } from 'auth/guards/jwt.guard';
+import { UserDocument } from 'user/entities/user.entity';
+import { Types } from 'mongoose';
 
 @Controller('user')
 @ApiCookieAuth()
@@ -72,6 +76,16 @@ export class UserController {
 
   // - Get user by id
 
+  @Get(':id/raw')
+  @ApiOperation({
+    summary: 'Get a complete user by id',
+    description: 'Returns the complete user with a matching id.',
+  })
+  async findOneRaw(@Param('id') id: string): Promise<UserDocument | null> {
+    return await this.userService.findUser({ id });
+  }
+  // - Get user by id
+
   @Get(':id')
   @ApiOperation({
     summary: 'Get user by id',
@@ -94,13 +108,8 @@ export class UserController {
     },
   })
   async findOne(@Param('id') id: string): Promise<UserDetails | null> {
-    // validate the id
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      throw new BadRequestException(['Invalid ID']);
-    }
     return await this.userService.findById(id);
   }
-
   // - Create user
 
   @Post('')
@@ -212,7 +221,7 @@ export class UserController {
 
   //  - Get user by username or email
 
-  @Get('findByUsernameOrEmail/:userNameOrEmail')
+  @Get('byUsernameOrEmail/:userNameOrEmail')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -289,7 +298,9 @@ export class UserController {
     if (!yourId) {
       throw new BadRequestException('User ID not found');
     }
-    console.log('yourId', yourId);
+    if (!Types.ObjectId.isValid(yourId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
     const user = await this.userService.findUserAndProfile(yourId);
     if (!user) {
       throw new BadRequestException('User not found');

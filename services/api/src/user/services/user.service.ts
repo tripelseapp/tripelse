@@ -23,7 +23,6 @@ import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
 import { comparePassword, hashPassword } from '../utils/password-utils';
-import { UserDto } from 'user/dto/user.dto';
 
 interface findUserOptions {
   email?: string;
@@ -70,12 +69,13 @@ export class UserService {
 
     try {
       const createProfileDto: CreateProfileDto = {
-        bio: null,
-        givenName: null,
-        familyName: null,
         avatar: createUserDto.avatar ?? null,
       };
-      const newProrfile = await this.profileService.create(createProfileDto);
+      const newProfile = await this.profileService.create(createProfileDto);
+
+      if (!newProfile._id) {
+        throw new InternalServerErrorException('Could not save the profile');
+      }
 
       const newUser: UserBeforeCreate = {
         username: createUserDto.username,
@@ -83,7 +83,7 @@ export class UserService {
         password: createUserDto.password,
         createdAt: now,
         updatedAt: now,
-        profile: newProrfile._id,
+        profile: newProfile._id,
         roles: [RolesEnum.USER],
       };
       // Create a new user instance
@@ -97,7 +97,7 @@ export class UserService {
     } catch (error) {
       console.error('Error saving user or profile:', error);
       throw new InternalServerErrorException(
-        'Could not save the user or profile.',
+        'Could not save the user or profile: ' + error,
       );
     }
   }
@@ -106,7 +106,6 @@ export class UserService {
       givenName: data.givenName,
       familyName: data.familyName,
       avatar: data.avatar,
-      bio: null,
     };
     try {
       const savedProfile = await this.profileService.create(newProfile);
@@ -348,13 +347,11 @@ export class UserService {
     return parsedUser;
   }
 
-  public async findUserAndProfile(
-    id: UserDto['id'],
-  ): Promise<UserDocument | null> {
+  public async findUserAndProfile(id: string): Promise<UserDocument | null> {
     const user = await this.userModel
       .findById(id)
-      .lean()
       .populate('profile')
+      .lean()
       .exec();
     return user;
   }

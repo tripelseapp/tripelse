@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
+import { ProfileEntity } from 'profile/entities/profile.entity';
 import { hashPassword } from 'user/utils/password-utils';
 import { Role, RolesEnum, roles } from '../types/role.types';
-import { ProfileEntity } from 'profile/entities/profile.entity';
 
 /*
 Entity (User): Represents your MongoDB schema and is directly tied to your database structure. It includes all fields defined in your schema, such as username, email, password, role, createdAt, and potentially other fields.
@@ -30,8 +30,8 @@ export class UserEntity {
   @Prop({ type: [{ provider: String, providerId: String }], default: [] })
   socialLogins: { provider: string; providerId: string }[];
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: ProfileEntity.name })
-  profile: MongooseSchema.Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: ProfileEntity.name })
+  profile: Types.ObjectId;
 
   @Prop({ required: true })
   createdAt: Date;
