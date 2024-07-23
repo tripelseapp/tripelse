@@ -80,6 +80,7 @@ export class AuthService {
   }
 
   async validateGoogleUser(details: UserFromGoogle) {
+    console.log('Validating user with google');
     const user = await this.userService.findUser({
       email: details.email,
     });
@@ -92,12 +93,13 @@ export class AuthService {
       email: details.email,
       username: details.username,
       avatar: details.avatar ?? null,
-      password: null,
+      password: '', // google users don't have passwords
     };
     try {
-      await this.userService.create(newUserToCreate);
+      console.log('Creating new user with google details', newUserToCreate);
 
-      return this.register(newUserToCreate);
+      const userCreated = await this.userService.create(newUserToCreate);
+      return this.buildResponseWithToken(userCreated);
     } catch (error) {
       throw new HttpException(
         'Error creating user',
