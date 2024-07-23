@@ -54,7 +54,7 @@ export class AuthController {
       throw new NotFoundException('User not found');
     }
     const { id } = user;
-    const userById = await this.userService.findUser({ id });
+    const userById = await this.userService.findUserAndProfile(id);
     if (!userById) {
       throw new NotFoundException('User not found');
     }

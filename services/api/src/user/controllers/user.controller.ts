@@ -37,6 +37,7 @@ import {
 import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
 import { getUserDetails } from '../utils/get-users-details';
+import { ReqWithUser } from 'auth/types/token-payload.type';
 
 @Controller('user')
 @ApiCookieAuth()
@@ -266,5 +267,33 @@ export class UserController {
       throw new BadRequestException('This user ID did not exist');
     }
     return updatedUser;
+  }
+
+  @Get('profile')
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+  })
+  @ApiOperation({
+    summary: 'Get your user + profile',
+    description: 'Returns the user profile of the currently logged in user.',
+  })
+  async getMyUserAndProfile(
+    @Req() req: ReqWithUser,
+  ): Promise<UserDetails | null> {
+    console.log(req.user);
+    if (!req.user) {
+      throw new BadRequestException('User not found');
+    }
+    const yourId = req.user.id;
+    if (!yourId) {
+      throw new BadRequestException('User ID not found');
+    }
+    console.log('yourId', yourId);
+    const user = await this.userService.findUserAndProfile(yourId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return getUserDetails(user);
   }
 }

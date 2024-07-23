@@ -1,4 +1,7 @@
-import { ProfileEntity } from 'profile/entities/profile.entity';
+import {
+  ProfileDocument,
+  ProfileEntity,
+} from 'profile/entities/profile.entity';
 import { UserEntity } from '../../user/entities/user.entity';
 
 export type UserBeforeCreate = {
@@ -9,4 +12,5 @@ export type UserBeforeCreate = {
   updatedAt: UserEntity['updatedAt'];
   roles: UserEntity['roles'];
   avatar?: ProfileEntity['avatar'];
+  profile: ProfileDocument['_id'];
 };
