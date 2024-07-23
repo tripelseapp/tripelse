@@ -83,13 +83,16 @@ export class AuthController {
   login(@Body() loginDto: LoginDto): Promise<TokensRes> {
     return this.authService.login(loginDto);
   }
+
   @Get('login/social/google')
+  @Public()
   @UseGuards(GoogleAuthGuard)
   googleLogin() {
     return { msg: 'google auth' };
     // redirect to google, google auths, google sends back to /auth/login/social/google/callback
   }
   @Get('login/social/google/redirect')
+  @Public()
   @UseGuards(GoogleAuthGuard)
   googleLoginCallback() {
     return { msg: 'ok' };

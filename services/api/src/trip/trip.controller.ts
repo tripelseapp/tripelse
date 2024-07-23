@@ -40,6 +40,7 @@ import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { TripService } from './trip.service';
 import { ResponseTripOperation } from './types/response-trip-operation.type';
 import { JwtAuthGuard } from 'auth/guards/jwt.guard';
+import { Public } from 'common/decorators/publicRoute.decorator';
 
 @Controller('trip')
 @ApiCookieAuth()
@@ -89,6 +90,7 @@ export class TripController {
   // Find all paginated trips
 
   @Get()
+  @Public()
   @ApiOperation({
     summary: 'List all trips',
     description: 'Returns an array of all trips. Supports pagination',
