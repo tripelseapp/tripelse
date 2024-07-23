@@ -12,7 +12,6 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -23,29 +22,26 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from 'auth/decorators/roles.decorator';
-import { RolesGuard } from 'auth/guards/roles.guard';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { NewUserPasswordDto } from './dto/new-password-dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { NewUserPasswordDto } from '../dto/new-password-dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import {
   ExampleUserDetailsDto,
   UserDetails,
   UserDetailsDto,
-} from './dto/user-details.dto';
-import { UserInListDto } from './dto/user-list.dto';
-import { Role, RolesEnum } from './types/role.types';
-import { UserService } from './user.service';
-import { getUserDetails } from './utils/get-users-details';
-import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
+} from '../dto/user-details.dto';
+import { UserInListDto } from '../dto/user-list.dto';
+import { UserService } from '../services/user.service';
+import { getUserDetails } from '../utils/get-users-details';
 
 @Controller('user')
 @ApiCookieAuth()
 @UseInterceptors(ClassSerializerInterceptor)
-@ApiTags('Users')
+@ApiTags('User Management / Users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -233,47 +229,6 @@ export class UserController {
       throw new BadRequestException('User not found');
     }
     return getUserDetails(user);
-  }
-
-  //  - Update User Role by id
-  @Patch(':id/roles/add')
-  @ApiOperation({
-    summary: 'Add a role to user',
-    description: 'Adds a role to a single user with a matching id.',
-  })
-  @ApiOkResponse({
-    status: HttpStatus.OK,
-    type: UserDetailsDto,
-    description: 'User role updated',
-    example: ExampleUserDetailsDto,
-  })
-  @ApiBadRequestResponse({
-    status: HttpStatus.BAD_REQUEST,
-    type: BadRequestException,
-    description: 'Bad Request',
-    example: {
-      message: ['Invalid ID'],
-      error: 'Bad Request',
-      statusCode: 400,
-    },
-  })
-  @Roles(RolesEnum.USER)
-  @UseGuards(RolesGuard)
-  async addRole(
-    @Param('id', ParseObjectIdPipe) id: string,
-    @Param('role') role: Role,
-  ) {
-    if (!Object.values(RolesEnum).includes(role as RolesEnum)) {
-      throw new BadRequestException(
-        `Invalid role: ${role}, valid roles are: ${Object.values(RolesEnum)}`,
-      );
-    }
-
-    const updatedUser = await this.userService.addRole(id, role);
-    if (!updatedUser) {
-      throw new BadRequestException('This user ID did not exist');
-    }
-    return updatedUser;
   }
 
   //  - Update an user Password by id

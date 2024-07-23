@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { User } from './entities/user.entity';
+import { User } from '../entities/user.entity';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ExampleUserDetailsDto } from './dto/user-details.dto';
+import { ExampleUserDetailsDto } from '../dto/user-details.dto';
 
 describe('UserService', () => {
   let service: UserService;

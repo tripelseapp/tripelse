@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserDetails } from 'user/dto/user-details.dto';
-import { UserService } from 'user/user.service';
 import { getUserDetails } from 'user/utils/get-users-details';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { AuthService } from './auth.service';
@@ -23,6 +22,7 @@ import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from 'common/decorators/publicRoute.decorator';
 import { Request } from 'express';
+import { UserService } from 'user/services/user.service';
 
 @ApiTags('Auth')
 @ApiCookieAuth('Access token')

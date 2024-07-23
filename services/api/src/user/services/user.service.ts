@@ -13,16 +13,16 @@ import { FilterQuery, Model } from 'mongoose';
 import { ProfileService } from 'profile/profile.service';
 import { passwordStrongEnough } from 'utils/password-checker';
 import { buildQuery, buildSorting } from 'utils/query-utils';
-import { CreateProfileDto } from '../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
-import { UserInListDto } from './dto/user-list.dto';
-import { UserDocument, UserEntity } from './entities/user.entity';
-import { Role, RolesEnum } from './types/role.types';
-import { UserBeforeCreate } from './types/user-before-create.type';
-import { getUserDetails } from './utils/get-users-details';
-import { comparePassword, hashPassword } from './utils/password-utils';
+import { CreateProfileDto } from '../../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { UserDetails, UserDetailsDto } from '../dto/user-details.dto';
+import { UserInListDto } from '../dto/user-list.dto';
+import { UserDocument, UserEntity } from '../entities/user.entity';
+import { Role, RolesEnum } from '../types/role.types';
+import { UserBeforeCreate } from '../types/user-before-create.type';
+import { getUserDetails } from '../utils/get-users-details';
+import { comparePassword, hashPassword } from '../utils/password-utils';
 
 interface findUserOptions {
   email?: string;
@@ -324,6 +324,23 @@ export class UserService {
     }
 
     const parsedUser = getUserDetails(updatedUser);
+
+    return parsedUser;
+  }
+
+  public async deleteRole(
+    id: UserDocument['id'],
+    role: Role,
+  ): Promise<UserDetails> {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, { $pull: { roles: role } }, { new: true })
+      .lean()
+      .exec();
+    if (!user) {
+      throw new BadRequestException('Invalid ID');
+    }
+
+    const parsedUser = getUserDetails(user);
 
     return parsedUser;
   }

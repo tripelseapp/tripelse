@@ -20,6 +20,9 @@ export function setupSwagger(app: INestApplication): void {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
+      tagsSorter: 'alpha', // Sort tags alphabetically for better organization
+      operationsSorter: 'alpha', // Sort operations within each tag alphabetically
+      docExpansion: 'none',
       requestInterceptor: (req: any) => {
         req.credentials = 'include';
         return req;
