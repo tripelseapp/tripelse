@@ -8,17 +8,20 @@ import { InjectModel } from '@nestjs/mongoose';
 import { PageMetaDto } from 'common/resources/pagination';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
-import mongoose, { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
+import { passwordStrongEnough } from 'utils/password-checker';
 import { buildQuery, buildSorting } from 'utils/query-utils';
+import { CreateProfileDto } from '../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
+import { ProfileService } from '../profile/profile.service'; // Importa el ProfileService
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
 import { UserInListDto } from './dto/user-list.dto';
 import { UserDocument, UserEntity } from './entities/user.entity';
-import { Role } from './types/role.types';
+import { Role, RolesEnum } from './types/role.types';
 import { getUserDetails } from './utils/get-users-details';
 import { comparePassword, hashPassword } from './utils/password-utils';
-import { JwtService } from '@nestjs/jwt';
+import { UserBeforeCreate } from './types/user-before-create.type';
 
 interface findUserOptions {
   email?: string;
@@ -26,42 +29,97 @@ interface findUserOptions {
   id?: string;
   shy?: boolean;
 }
+
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(UserEntity.name)
     private userModel: Model<UserDocument>,
-    private jwtService: JwtService,
+    private profileService: ProfileService,
   ) {}
 
-  public async create(
-    createUserDto: CreateUserDto,
-  ): Promise<{ token: string }> {
+  public async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+    const usernameExists = await this.findByUsernameOrEmail(
+      createUserDto.username,
+    );
+    if (usernameExists) {
+      throw new BadRequestException('Username already exists');
+    }
+
+    const emailExists = await this.findUser({
+      email: createUserDto.email,
+    });
+    if (emailExists) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    if (!createUserDto.password) {
+      throw new BadRequestException('Password is required');
+    }
+
+    // is pass strong enough?
+    const { strongEnough, reason } = passwordStrongEnough(
+      createUserDto.password,
+    );
+
+    if (!strongEnough && reason?.length) {
+      throw new BadRequestException(reason);
+    }
     const now = new Date();
 
-    // Create a new user instance
-    const newUser = new this.userModel({
-      // ...createUserDto,
+    const newUser: UserBeforeCreate = {
       username: createUserDto.username,
       email: createUserDto.email,
       password: createUserDto.password,
       createdAt: now,
       updatedAt: now,
-      role: 'user',
+      roles: [RolesEnum.USER],
+    };
+    // Create a new user instance
+    const newUserDocument = new this.userModel(newUser);
+    try {
+      // Save the user
+      const savedUser = await newUserDocument.save();
+
+      // Create an empty profile associated with the new user
+      const createProfileDto: CreateProfileDto = {
+        userId: savedUser._id.toString(),
+        bio: null,
+        avatar: createUserDto.avatar ?? null,
+      };
+      await this.profileService.create(createProfileDto);
+
+      return savedUser;
+    } catch (error) {
+      console.error('Error saving user or profile:', error);
+      throw new InternalServerErrorException(
+        'Could not save the user or profile.',
+      );
+    }
+  }
+
+  public async createMultiple(
+    createUserDtos: CreateUserDto[],
+  ): Promise<UserDetails[]> {
+    const now = new Date();
+    const newUsers = createUserDtos.map((createUserDto) => {
+      return new this.userModel({
+        username: createUserDto.username,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        createdAt: now,
+        updatedAt: now,
+        role: 'user',
+      });
     });
 
     try {
-      const savedUser = await newUser.save();
-      const token = this.jwtService.sign({
-        id: savedUser._id,
-        role: savedUser.role,
-        username: savedUser.username,
-      });
-
-      return { token };
+      const usersInserted = await this.userModel.insertMany(newUsers);
+      const formattedUsers = usersInserted.map((user) => getUserDetails(user));
+      return formattedUsers;
     } catch (error) {
-      console.error('Error saving user:', error);
-      throw new Error('Could not save the user.');
+      console.error('Error saving users:', error);
+      throw new Error('Could not save the users.');
     }
   }
 
@@ -97,7 +155,7 @@ export class UserService {
           usersQuery.exec(),
           this.userModel.countDocuments().exec(),
         ]);
-
+      console.log(users);
       const formattedUsers: UserInListDto[] = users.map((user) => ({
         id: user._id.toString(),
         username: user.username,
@@ -108,11 +166,12 @@ export class UserService {
     } catch (error) {
       if (error instanceof Error) {
         const message = `Error while fetching users. Error: ${error.message}`;
-        throw new Error(message);
+        throw new InternalServerErrorException(message);
       }
-      throw new Error('Error while fetching users.');
+      throw new InternalServerErrorException('Error while fetching users.');
     }
   }
+
   public async update(id: string, data: UpdateUserDto): Promise<UserDetails> {
     try {
       const newUser = { ...data, updatedAt: new Date() };
@@ -129,6 +188,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
   }
+
   public async remove(id: string): Promise<UserDetailsDto | null> {
     const user = await this.userModel.findByIdAndDelete(id).lean().exec();
     if (!user) {
@@ -137,6 +197,7 @@ export class UserService {
     const parsedUser = getUserDetails(user);
     return parsedUser;
   }
+
   public async findByUsernameOrEmail(
     usernameOrEmail: string,
   ): Promise<UserDocument | null> {
@@ -155,22 +216,24 @@ export class UserService {
     username,
     id,
   }: findUserOptions): Promise<UserDocument | null> {
+    // Be case sensitive, compare the email and username in lowercase
     const user = await this.userModel
       .findOne({
-        $or: [{ email }, { username }, { _id: id }],
+        $or: [
+          { email: new RegExp(`^${email?.toLowerCase()}$`, 'i') },
+          { username: new RegExp(`^${username?.toLowerCase()}$`, 'i') },
+          { _id: id },
+        ],
       })
       .select('+password')
       .lean()
       .exec();
     return user;
   }
+
   async findById(id: string): Promise<UserDetails> {
-    const isValidId = mongoose.isValidObjectId(id);
-    if (!isValidId) {
-      throw new BadRequestException('Invalid ID');
-    }
     try {
-      const user = await this.findUser({ id });
+      const user = await this.userModel.findById(id).lean().exec();
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -180,26 +243,25 @@ export class UserService {
       throw new InternalServerErrorException(err);
     }
   }
-  public async updateRole(
+
+  public async addRole(
     id: UserDocument['id'],
     role: Role,
   ): Promise<UserDetails> {
+    // add the new role to the user roles array only if it does not exist
     const user = await this.userModel
-      .findByIdAndUpdate(id, { role }, { new: true })
+      .findByIdAndUpdate(id, { $addToSet: { roles: role } }, { new: true })
       .lean()
       .exec();
     if (!user) {
       throw new BadRequestException('Invalid ID');
     }
 
-    if (user.role !== role) {
-      throw new InternalServerErrorException('Could not update user role');
-    }
-
     const parsedUser = getUserDetails(user);
 
     return parsedUser;
   }
+
   public async updatePassword(
     id: string,
     password: string,

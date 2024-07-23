@@ -5,3 +5,5 @@ export class UserInListDto extends PickType(UserDto, [
   'username',
   'id',
 ] as const) {}
+
+export type UserInList = UserInListDto;

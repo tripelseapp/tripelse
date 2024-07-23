@@ -9,9 +9,17 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { ReqWithUser, TokenPayload } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
@@ -30,14 +38,19 @@ import {
 import { TripInListDto } from './dto/trip/trip-list.dto';
 import { UpdateTripDto } from './dto/trip/update-trip.dto';
 import { TripService } from './trip.service';
+import { ResponseTripOperation } from './types/response-trip-operation.type';
+import { JwtAuthGuard } from 'auth/guards/jwt.guard';
+import { Public } from 'common/decorators/publicRoute.decorator';
 
 @Controller('trip')
+@ApiCookieAuth()
 @ApiTags('Trip')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TripController {
   constructor(private readonly tripService: TripService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Create a new trip',
     description: 'Creates a new trip with the provided data',
@@ -48,13 +61,36 @@ export class TripController {
     description: 'The trip has been successfully created.',
     type: TripDetailsDto,
   })
-  async create(@Body() createTripDto: CreateTripDto): Promise<TripDetailsDto> {
-    return this.tripService.create(createTripDto);
+  async create(
+    @Body() createTripDto: CreateTripDto,
+    @Req() req: ReqWithUser,
+  ): Promise<ResponseTripOperation> {
+    const currentUser: TokenPayload = req.user;
+    if (!currentUser.id) {
+      // Should never happen because of the AuthGuard
+      throw new BadRequestException('User not found');
+    }
+    const currentUserId = currentUser.id;
+
+    // add your Id to the travelers array
+    const travelers = createTripDto.travelers || [];
+    // check if the user is already in the travelers array
+    if (!travelers.includes(currentUserId)) {
+      travelers.push(currentUserId);
+    }
+
+    const newTrip = {
+      ...createTripDto,
+      travelers: travelers,
+    };
+
+    return this.tripService.create(newTrip, currentUser.id);
   }
 
   // Find all paginated trips
 
   @Get()
+  @Public()
   @ApiOperation({
     summary: 'List all trips',
     description: 'Returns an array of all trips. Supports pagination',
@@ -85,8 +121,9 @@ export class TripController {
     description: 'The trip has been successfully found.',
     type: TripDetailsDto,
   })
-  findOne(@Param('id', ParseObjectIdPipe) id: string) {
-    return this.tripService.findOne(id);
+  findOne(@Param('id', ParseObjectIdPipe) id: string, @Req() req: ReqWithUser) {
+    const current = req.user?.id;
+    return this.tripService.findOne(id, current);
   }
 
   @Patch(':id')
@@ -102,8 +139,9 @@ export class TripController {
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateTripDto: UpdateTripDto,
+    @Req() req: ReqWithUser,
   ): Promise<TripDetailsDto> {
-    return this.tripService.update(id, updateTripDto);
+    return this.tripService.update(id, updateTripDto, req.user.id);
   }
 
   @Delete(':id')
@@ -117,7 +155,9 @@ export class TripController {
     description: 'The trip has been successfully created.',
     type: TripInListDto,
   })
-  remove(@Param('id', ParseObjectIdPipe) id: string): Promise<TripDetailsDto> {
+  remove(
+    @Param('id', ParseObjectIdPipe) id: string,
+  ): Promise<ResponseTripOperation> {
     return this.tripService.remove(id);
   }
 
@@ -155,7 +195,21 @@ export class TripController {
   async createExpense(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() createExpenseDto: CreateExpenseDto,
+    @Req() req: ReqWithUser,
   ): Promise<ExpenseDto> {
-    return this.tripService.createExpense(id, createExpenseDto);
+    return this.tripService.createExpense(id, createExpenseDto, req.user.id);
+  }
+
+  @Get('user/:userId')
+  async getTripsByUserId(@Param('userId', ParseObjectIdPipe) userId: string) {
+    const trips = await this.tripService.findByUserId(userId);
+    return trips;
+  }
+  @Get('mine')
+  async getMyTrips(@Req() req: ReqWithUser) {
+    console.log(req);
+    // const trips = await this.tripService.findByUserId(req.user.id);
+    return 'trips';
+    // return trips;
   }
 }

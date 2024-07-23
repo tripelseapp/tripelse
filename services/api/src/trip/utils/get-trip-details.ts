@@ -1,20 +1,30 @@
 import { TripDetailsDto } from 'trip/dto/trip/trip-details.dto';
 import { TripDocument } from 'trip/entities/trip.entity';
-
-export const getTripDetails = (trip: TripDocument): TripDetailsDto => {
+import { UserDocument } from 'user/entities/user.entity';
+import { getUserInList } from 'user/utils/get-users-list';
+export interface TripDetailMetadata {
+  active: boolean;
+  areYouMember: boolean;
+}
+export const getTripDetails = (
+  trip: TripDocument,
+  metadata: TripDetailMetadata,
+): TripDetailsDto => {
   // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
 
+  const createdBy = trip.createdBy as unknown as UserDocument;
   const updatedDate = trip.updatedAt ?? trip.createdAt;
-
+  console.log(createdBy);
   return {
     id: String(trip._id),
     name: trip.name,
+    public: false,
+    active: metadata.active,
+    areYouMember: metadata.areYouMember,
     description: trip.description,
     thumbnail: trip.thumbnail,
-    travelers: trip.travelers.map((traveler: any) => ({
-      id: traveler._id,
-      username: traveler.name,
-    })),
+    createdBy: getUserInList(createdBy),
+    travelers: trip.travelers,
     days: trip.days.map((day: any) => ({
       id: String(day._id),
       name: day.name,

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-import configuration from './config/configuration';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
-import { UserModule } from './user/user.module';
-import { TripModule } from './trip/trip.module';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
+import configuration from './config/configuration';
+import { TripModule } from './trip/trip.module';
+import { UserModule } from './user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
@@ -21,5 +21,3 @@ import { AuthModule } from './auth/auth.module';
   providers: [],
 })
 export class AppModule {}
-
-console.log(process.env.CONNECT_STRING);

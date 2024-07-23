@@ -1,13 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema, now } from 'mongoose';
+import { HydratedDocument, now, Schema as MongooseSchema } from 'mongoose';
 
 import { CategoriesEnum } from 'common/enums/category.enum';
+import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
 import {
   Expense,
   ExpenseSchema,
 } from 'common/resources/expenses/entities/expense.entity';
 import { Day, DaySchema } from './day.entity';
-import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
+import { UserEntity } from 'user/entities/user.entity';
 
 @Schema()
 export class Trip {
@@ -20,7 +21,7 @@ export class Trip {
   @Prop()
   thumbnail: string;
 
-  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User' })
+  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: UserEntity.name })
   travelers: string[];
 
   @Prop({ required: true, default: now() })
@@ -40,6 +41,9 @@ export class Trip {
 
   @Prop({ type: [Attachment], default: [] })
   attachments: Attachment[];
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: UserEntity.name })
+  createdBy: string;
 }
 
 export type TripDocument = HydratedDocument<Trip>;

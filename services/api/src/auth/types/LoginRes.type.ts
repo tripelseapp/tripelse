@@ -1,3 +1,4 @@
-export type LoginRes = {
-  token: string;
+export type TokensRes = {
+  access_token: string;
+  refreshToken: string;
 };

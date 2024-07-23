@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './user.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserEntity, UserSchema } from './entities/user.entity';
+import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ProfileModule } from '../profile/profile.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from 'auth/guards/jwt.guard';
 
 @Module({
   imports: [
@@ -25,9 +28,16 @@ import { ConfigService } from '@nestjs/config';
         };
       },
     }),
+    ProfileModule,
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [
+    UserService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
   exports: [UserService],
 })
 export class UserModule {}
