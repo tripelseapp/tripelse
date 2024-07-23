@@ -21,7 +21,7 @@ const containsSpecialCharacter = (password: string): boolean => {
 };
 
 export const passwordStrongEnough = (
-  password: UserEntity['password'],
+  password: string,
 ): {
   strongEnough: boolean;
   reason?: string[];

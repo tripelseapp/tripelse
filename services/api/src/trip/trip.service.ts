@@ -208,7 +208,6 @@ export class TripService {
     ];
 
     const parseExpense = (expense: ExpenseDocument) => {
-      console.log(expense.contributors[0]);
       return {
         ...plainToInstance(ExpenseDto, expense),
         id: expense._id.toString(),
@@ -267,7 +266,6 @@ export class TripService {
     const firstDay = trip.days[0].date;
     const lastDay = trip.days[trip.days.length - 1].date;
     const isTodayInTrip = firstDay <= new Date() && new Date() <= lastDay;
-    console.log(trip.travelers);
     const tripMembers = trip.travelers.map((member) => member.toString()) || [];
     const areYouMember = tripMembers.includes(currentUserId);
 

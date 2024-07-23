@@ -5,17 +5,18 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Profile, ProfileDocument } from './entities/profile.entity';
+import { ProfileEntity, ProfileDocument } from './entities/profile.entity';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class ProfileService {
   constructor(
-    @InjectModel(Profile.name) private profileModel: Model<ProfileDocument>,
+    @InjectModel(ProfileEntity.name)
+    private profileModel: Model<ProfileDocument>,
   ) {}
 
-  async create(createProfileDto: CreateProfileDto): Promise<Profile> {
+  async create(createProfileDto: CreateProfileDto): Promise<ProfileDocument> {
     try {
       const newProfile = new this.profileModel(createProfileDto);
       return await newProfile.save();
@@ -25,7 +26,7 @@ export class ProfileService {
     }
   }
 
-  async findByUserId(userId: string): Promise<Profile | null> {
+  async findByUserId(userId: string): Promise<ProfileDocument | null> {
     try {
       const profile = await this.profileModel.findOne({ userId }).exec();
 
@@ -39,7 +40,7 @@ export class ProfileService {
   async update(
     userId: string,
     updateProfileDto: UpdateProfileDto,
-  ): Promise<Profile> {
+  ): Promise<ProfileDocument> {
     try {
       const updatedProfile = await this.profileModel
         .findOneAndUpdate({ userId }, updateProfileDto, {

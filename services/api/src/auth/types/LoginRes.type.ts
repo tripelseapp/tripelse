@@ -1,4 +1,4 @@
 export type TokensRes = {
-  access_token: string;
+  accessToken: string;
   refreshToken: string;
 };
