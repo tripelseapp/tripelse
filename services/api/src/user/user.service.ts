@@ -155,7 +155,7 @@ export class UserService {
           usersQuery.exec(),
           this.userModel.countDocuments().exec(),
         ]);
-
+      console.log(users);
       const formattedUsers: UserInListDto[] = users.map((user) => ({
         id: user._id.toString(),
         username: user.username,

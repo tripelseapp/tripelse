@@ -4,7 +4,7 @@ import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants/jwt.constants';
-import { GoogleStrategy } from './utils/googleStrategy.util';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { SessionSerializer } from './utils/serializer.util';
 import { LocalStrategy } from './strategies/local.strategy';

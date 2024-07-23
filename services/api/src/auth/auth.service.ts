@@ -7,7 +7,7 @@ import { comparePassword } from '../user/utils/password-utils';
 import { LoginDto } from './dto/login.dto';
 import { TokensRes } from './types/LoginRes.type';
 import { UserFromGoogle } from './types/User-from-google.type';
-import { TokenPayload } from './types/token-payload.type';
+import { ReqWithUser, TokenPayload } from './types/token-payload.type';
 import { jwtConstants } from './constants/jwt.constants';
 
 @Injectable()
@@ -124,5 +124,13 @@ export class AuthService {
     return {
       access_token: new_access_token,
     };
+  }
+  googleLogin(req: ReqWithUser) {
+    console.log('req.user', req.user);
+    if (!req.user) {
+      return 'No user from google';
+    }
+
+    return req.user;
   }
 }

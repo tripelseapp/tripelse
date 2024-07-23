@@ -4,7 +4,7 @@ import {
   Get,
   NotFoundException,
   Post,
-  Request,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -22,6 +22,7 @@ import { ReqWithUser } from './types/token-payload.type';
 import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from 'common/decorators/publicRoute.decorator';
+import { Request } from 'express';
 
 @ApiTags('Auth')
 @ApiCookieAuth('Access token')
@@ -47,7 +48,7 @@ export class AuthController {
     summary: 'Get user profile',
     description: 'Get the user profile for the currently authenticated user',
   })
-  async getProfile(@Request() req: ReqWithUser): Promise<UserDetails> {
+  async getProfile(@Req() req: ReqWithUser): Promise<UserDetails> {
     const user = req.user;
     if (!user) {
       throw new NotFoundException('User not found');
@@ -65,7 +66,7 @@ export class AuthController {
     summary: 'Get status',
     description: 'Get the status of the API',
   })
-  getStatus(@Request() request: ReqWithUser) {
+  getStatus(@Req() request: ReqWithUser) {
     if (request.user) {
       return { status: 'authorized', user: request.user };
     }
@@ -87,15 +88,15 @@ export class AuthController {
   @Get('login/social/google')
   @Public()
   @UseGuards(GoogleAuthGuard)
-  googleLogin() {
-    return { msg: 'google auth' };
-    // redirect to google, google auths, google sends back to /auth/login/social/google/callback
+  async googleAuth(@Req() req: Request) {
+    console.log('req', req);
   }
+
   @Get('login/social/google/redirect')
   @Public()
   @UseGuards(GoogleAuthGuard)
-  googleLoginCallback() {
-    return { msg: 'ok' };
+  googleAuthRedirect(@Req() req: ReqWithUser) {
+    return this.authService.googleLogin(req);
   }
 
   @Post('refresh')
@@ -104,10 +105,7 @@ export class AuthController {
     description: 'Refresh the JWT token',
   })
   @UseGuards(RefreshJwtAuthGuard)
-  async refreshToken(
-    @Body() body: RefreshTokenDto,
-    @Request() req: ReqWithUser,
-  ) {
+  async refreshToken(@Body() body: RefreshTokenDto, @Req() req: ReqWithUser) {
     const refresh = body.refreshToken;
     if (!refresh) {
       throw new NotFoundException('Refresh token not found');

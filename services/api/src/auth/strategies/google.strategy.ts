@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthService } from 'auth/auth.service';
-import { Profile, Strategy } from 'passport-google-oauth20';
+import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
 
 @Injectable()
-export class GoogleStrategy extends PassportStrategy(Strategy) {
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly authService: AuthService) {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
@@ -14,7 +14,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(_accesToken: string, _refreshToken: string, profile: Profile) {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: Profile,
+    done: VerifyCallback,
+  ): Promise<any> {
     if (!profile) {
       throw new Error('Google profile is required');
     }
@@ -31,6 +36,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       avatar: profile.photos?.[0].value ?? null,
     });
     console.log('userDetails', userDetails);
-    return userDetails || null;
+
+    done(null, userDetails);
   }
 }
