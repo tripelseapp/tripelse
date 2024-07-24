@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -24,7 +25,11 @@ import {
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
-import { UserDocument } from 'user/entities/user.entity';
+import { Types } from 'mongoose';
+import {
+  PopulatedUser,
+  PopulatedUserDocument,
+} from 'user/types/populated-user.type';
 import { getUserProfileDetails } from 'user/utils/get-users-profile-details';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -37,7 +42,7 @@ import {
 } from '../dto/user-details.dto';
 import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
-import { getUserDetails } from '../utils/get-users-details';
+import { ReqWithUser } from 'auth/types/token-payload.type';
 
 @Controller('user')
 @ApiCookieAuth()
@@ -76,7 +81,9 @@ export class UserController {
     summary: 'Get a complete user by id',
     description: 'Returns the complete user with a matching id.',
   })
-  async findOneRaw(@Param('id') id: string): Promise<UserDocument | null> {
+  async findOneRaw(
+    @Param('id') id: string,
+  ): Promise<PopulatedUserDocument | null> {
     return await this.userService.findUser({ id });
   }
   // - Get user by id
@@ -105,6 +112,41 @@ export class UserController {
   async findOne(@Param('id') id: string): Promise<UserDetails | null> {
     return await this.userService.findById(id);
   }
+
+  // - Get your profile by token
+  @Get('mine/profile')
+  @ApiOperation({
+    summary: 'Get logged-in user profile',
+    description: 'Returns the profile of the logged-in user.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User profile found',
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+  })
+  async findMineUserWithProfile(@Req() req: ReqWithUser) {
+    const id = req.user.id;
+    if (!id) {
+      throw new BadRequestException('You are not logged in correctly');
+    }
+
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const userAndProfileDocument = await this.userService.findOneWithProfile(
+      id,
+    );
+    const parsedData = getUserProfileDetails(userAndProfileDocument);
+
+    return parsedData;
+  }
+
   // - Create user
 
   @Post('')
@@ -133,9 +175,9 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async create(@Body() createUserDto: CreateUserDto): Promise<UserDetails> {
+  async create(@Body() createUserDto: CreateUserDto): Promise<PopulatedUser> {
     const newUser = await this.userService.create(createUserDto);
-    return getUserDetails(newUser);
+    return getUserProfileDetails(newUser);
   }
 
   @Post('multiple')
@@ -233,7 +275,7 @@ export class UserController {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    return getUserDetails(user);
+    return getUserProfileDetails(user);
   }
 
   //  - Update an user Password by id

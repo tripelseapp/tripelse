@@ -1,14 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PopulatedUserDocument } from 'user/types/populated-user.type';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { UserDocument } from '../user/entities/user.entity';
 import { UserService } from '../user/services/user.service';
 import { comparePassword } from '../user/utils/password-utils';
+import { jwtConstants } from './constants/jwt.constants';
 import { LoginDto } from './dto/login.dto';
 import { TokensRes } from './types/LoginRes.type';
 import { UserFromProvider } from './types/User-from-google.type';
 import { ReqWithUser, TokenPayload } from './types/token-payload.type';
-import { jwtConstants } from './constants/jwt.constants';
+import { UserDto } from 'user/dto/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,7 @@ export class AuthService {
     // check if the user has a password, if not then he might be a social login user
     if (!user.password) {
       throw new HttpException(
-        'User has no password, try logging in with google',
+        'User has no password, try logging in with providers as Google',
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
@@ -55,24 +56,33 @@ export class AuthService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    return await this.buildResponseWithToken(user);
+    return await this.buildResponseWithToken({
+      id: String(user._id),
+      username: user.username,
+      roles: user.roles,
+      avatar: user.profile.avatar,
+    });
   }
   public async register(createUserDto: CreateUserDto): Promise<TokensRes> {
     const savedUser = await this.userService.create(createUserDto);
-    return await this.buildResponseWithToken(savedUser);
+    return await this.buildResponseWithToken({
+      id: String(savedUser._id),
+      username: savedUser.username,
+      roles: savedUser.roles,
+      avatar: savedUser.profile.avatar,
+    });
   }
-  async buildResponseWithToken(user: UserDocument): Promise<TokensRes> {
+
+  async buildResponseWithToken(payload: TokenPayload): Promise<TokensRes> {
     try {
-      // Note: we choose a property name of sub to hold our userId value to be consistent with JWT standards.
-      const payload: TokenPayload = {
-        id: user._id.toString(),
-        username: user.username,
-        roles: user.roles,
-        avatar: user.avatar,
+      const payloadData: TokenPayload = {
+        id: payload.id,
+        username: payload.username,
+        roles: payload.roles,
+        avatar: payload.avatar,
       };
-      const accessToken = await this.jwtService.signAsync(payload);
-      const refreshToken = this.jwtService.sign(payload, {
-        // secret: jwtConstants.refreshSecret,
+      const accessToken = await this.jwtService.signAsync(payloadData);
+      const refreshToken = this.jwtService.sign(payloadData, {
         expiresIn: jwtConstants.refreshExpire,
       });
 
@@ -94,17 +104,24 @@ export class AuthService {
     });
 
     if (user) {
-      console.log('User found with google details', details);
-      return this.buildResponseWithToken(user);
+      return this.buildResponseWithToken({
+        id: String(user._id),
+        username: user.username,
+        roles: user.roles,
+        avatar: user.profile.avatar,
+      });
     }
 
     // first time user is logging in (and its a google user)
 
     try {
-      console.log('Creating new user with google details', details);
       const userCreated = await this.userService.createWithProvider(details);
-      console.log('User created with google details');
-      return this.buildResponseWithToken(userCreated);
+      return this.buildResponseWithToken({
+        id: String(userCreated._id),
+        username: userCreated.username,
+        roles: userCreated.roles,
+        avatar: userCreated.profile.avatar,
+      });
     } catch (error) {
       throw new HttpException(
         'Error creating user',
@@ -138,7 +155,6 @@ export class AuthService {
     };
   }
   public googleLogin(req: ReqWithUser) {
-    console.log('req.user', req.user);
     if (!req.user) {
       return 'No user from google';
     }

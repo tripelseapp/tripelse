@@ -10,7 +10,9 @@ import { PageMetaDto } from 'common/resources/pagination';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { FilterQuery, Model } from 'mongoose';
+import { ProfileDocument } from 'profile/entities/profile.entity';
 import { ProfileService } from 'profile/profile.service';
+import { PopulatedUserDocument } from 'user/types/populated-user.type';
 import { passwordStrongEnough } from 'utils/password-checker';
 import { buildQuery, buildSorting } from 'utils/query-utils';
 import { CreateProfileDto } from '../../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
@@ -23,9 +25,6 @@ import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
 import { comparePassword, hashPassword } from '../utils/password-utils';
-import { Types } from 'mongoose';
-import { PopulatedUserDocument } from 'user/types/populated-user.type';
-import { ProfileDocument } from 'profile/entities/profile.entity';
 
 interface findUserOptions {
   email?: string;
@@ -41,7 +40,9 @@ export class UserService {
     private profileService: ProfileService,
   ) {}
 
-  public async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+  public async create(
+    createUserDto: CreateUserDto,
+  ): Promise<PopulatedUserDocument> {
     const usernameExists = await this.findByUsernameOrEmail(
       createUserDto.username,
     );
@@ -91,9 +92,7 @@ export class UserService {
       // Save the user
       const savedUser = await newUserDocument.save();
 
-      // Create an empty profile associated with the new user
-
-      return savedUser;
+      return await this.findOneWithProfile(savedUser._id.toString());
     } catch (error) {
       console.error('Error saving user or profile:', error);
       throw new InternalServerErrorException(
@@ -101,7 +100,9 @@ export class UserService {
       );
     }
   }
-  async createWithProvider(data: UserFromProvider): Promise<UserDocument> {
+  async createWithProvider(
+    data: UserFromProvider,
+  ): Promise<PopulatedUserDocument> {
     const newProfile: CreateProfileDto = {
       givenName: data.givenName,
       familyName: data.familyName,
@@ -125,8 +126,8 @@ export class UserService {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-
-      return await newUser.save();
+      const savedUser = await newUser.save();
+      return await this.findOneWithProfile(savedUser._id.toString());
     } catch (error) {
       console.error('Error saving user:', error);
       throw new InternalServerErrorException('Could not save the user.');
@@ -234,7 +235,7 @@ export class UserService {
 
   public async findByUsernameOrEmail(
     usernameOrEmail: string,
-  ): Promise<UserDocument | null> {
+  ): Promise<PopulatedUserDocument | null> {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmail = emailRegex.test(usernameOrEmail);
 
@@ -249,7 +250,7 @@ export class UserService {
     email,
     username,
     id,
-  }: findUserOptions): Promise<UserDocument | null> {
+  }: findUserOptions): Promise<PopulatedUserDocument | null> {
     // Be case sensitive, compare the email and username in lowercase
     const user = await this.userModel
       .findOne({
@@ -262,7 +263,16 @@ export class UserService {
       .select('+password')
       .populate('profile')
       .exec();
-    return user;
+
+    if (!user) {
+      return null;
+    }
+
+    const userPopulated: PopulatedUserDocument = {
+      ...user.toObject(),
+      profile: user?.profile as unknown as ProfileDocument,
+    };
+    return userPopulated;
   }
 
   async findById(id: string): Promise<UserDetails> {
