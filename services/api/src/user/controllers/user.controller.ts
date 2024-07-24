@@ -346,4 +346,18 @@ export class UserController {
 
     return parsedData;
   }
+
+  @Get(':id/favorite-trips')
+  @ApiOperation({
+    summary: 'Get user favorite trips by id',
+    description:
+      'Returns a single user with favorite trips with a matching id.',
+  })
+  async findFavTrips(@Param('id') id: string) {
+    const userAndProfileDocument = await this.userService.getUserWithFavorites(
+      id,
+    );
+
+    return userAndProfileDocument;
+  }
 }

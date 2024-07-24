@@ -374,4 +374,13 @@ export class UserService {
       throw new InternalServerErrorException(err);
     }
   }
+
+  public async getUserWithFavorites(userId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
+  }
 }

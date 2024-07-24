@@ -22,7 +22,7 @@ import { TripDetailsDto } from './dto/trip/trip-details.dto';
 import { TripInListDto } from './dto/trip/trip-list.dto';
 import { TripDto } from './dto/trip/trip.dto';
 import { UpdateTripDto } from './dto/trip/update-trip.dto';
-import { Trip, TripDocument } from './entities/trip.entity';
+import { TripEntity, TripDocument } from './entities/trip.entity';
 import { ResponseTripOperation } from './types/response-trip-operation.type';
 import { getDays } from './utils/create-days';
 import { getTripDetails } from './utils/get-trip-details';
@@ -30,7 +30,8 @@ import { getTripDetails } from './utils/get-trip-details';
 @Injectable()
 export class TripService {
   constructor(
-    @InjectModel(Trip.name) private readonly tripModel: Model<TripDocument>,
+    @InjectModel(TripEntity.name)
+    private readonly tripModel: Model<TripDocument>,
   ) {}
 
   public async create(
@@ -39,7 +40,7 @@ export class TripService {
   ): Promise<ResponseTripOperation> {
     const days = getDays(createTripDto.startDate, createTripDto.endDate);
 
-    const completeTrip: Trip = {
+    const completeTrip: TripEntity = {
       ...createTripDto,
       days,
       thumbnail: '',
@@ -96,7 +97,7 @@ export class TripService {
       .sort(buildSorting(orderBy));
 
     try {
-      const [trips, itemCount]: [FilterQuery<Trip>[], number] =
+      const [trips, itemCount]: [FilterQuery<TripEntity>[], number] =
         await Promise.all([
           trpisQuery.exec(),
           this.tripModel.countDocuments().exec(),
@@ -250,7 +251,7 @@ export class TripService {
 
     return parsedExpense;
   }
-  public async findByUserId(userId: string): Promise<Trip[]> {
+  public async findByUserId(userId: string): Promise<TripEntity[]> {
     // search the trips that the user is a traveler
     const trips = await this.tripModel.find({ travelers: userId }).exec();
     if (!trips || trips.length === 0) {

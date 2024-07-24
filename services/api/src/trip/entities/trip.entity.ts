@@ -8,10 +8,9 @@ import {
   ExpenseSchema,
 } from 'common/resources/expenses/entities/expense.entity';
 import { Day, DaySchema } from './day.entity';
-import { UserEntity } from 'user/entities/user.entity';
 
 @Schema()
-export class Trip {
+export class TripEntity {
   @Prop({ required: true })
   name: string;
 
@@ -21,13 +20,16 @@ export class Trip {
   @Prop()
   thumbnail: string;
 
-  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: UserEntity.name })
+  @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'UserEntity' }],
+    default: [],
+  })
   travelers: string[];
 
-  @Prop({ required: true, default: now() })
+  @Prop({ required: true, default: Date.now })
   createdAt: Date;
 
-  @Prop({ required: true, default: now() })
+  @Prop({ required: true, default: Date.now })
   updatedAt: Date;
 
   @Prop({ type: [DaySchema], default: [] })
@@ -42,11 +44,11 @@ export class Trip {
   @Prop({ type: [Attachment], default: [] })
   attachments: Attachment[];
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: UserEntity.name })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'UserEntity' })
   createdBy: string;
 }
 
-export type TripDocument = HydratedDocument<Trip>;
+export type TripDocument = HydratedDocument<TripEntity>;
 
 // export type TripDocument = Trip & Document<Trip>;
-export const TripSchema = SchemaFactory.createForClass(Trip);
+export const TripSchema = SchemaFactory.createForClass(TripEntity);

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Trip, TripSchema } from './entities/trip.entity';
+import { TripEntity, TripSchema } from './entities/trip.entity';
 import { TripController } from './trip.controller';
 import { TripService } from './trip.service';
 import { UserModule } from 'user/user.module';
@@ -9,7 +9,7 @@ import { UserModule } from 'user/user.module';
   imports: [
     MongooseModule.forFeature([
       {
-        name: Trip.name,
+        name: TripEntity.name,
         schema: TripSchema,
       },
     ]),
