@@ -128,8 +128,37 @@ export class AuthController {
   @Get('login/social/google/redirect')
   @Public()
   @UseGuards(GoogleAuthGuard)
-  googleAuthRedirect(@Req() req: ReqWithUser) {
-    return this.authService.googleLogin(req);
+  googleAuthRedirect(@Req() req: ReqWithUser, @Res() res: Response) {
+    const loginTokens = this.authService.googleLogin(req);
+    const tokens = loginTokens as unknown as TokensRes;
+    const accessCookieName = constants.cookies.accessToken;
+    if (!accessCookieName) {
+      throw new NotFoundException(
+        'Access token cookie name not found in environment variables, contact the administrator',
+      );
+    }
+    const refreshCookieName = constants.cookies.refreshToken;
+    if (!refreshCookieName) {
+      throw new NotFoundException(
+        'Refresh token cookie name not found in environment variables, contact the administrator',
+      );
+    }
+    res.cookie(refreshCookieName, tokens.refreshToken, {
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 3600000), // e.g., 1 hour
+    });
+    res.cookie(accessCookieName, tokens.accessToken, {
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 2592000000), // e.g., 1 month
+    });
+
+    return res.status(HttpStatus.OK).send(tokens);
   }
 
   @Post('refresh')
@@ -147,7 +176,7 @@ export class AuthController {
     return this.authService.refreshToken(req.user);
   }
   @Post('logout')
-  async logout(@Req() req: Request, @Res() res: Response) {
+  async logout(@Res() res: Response) {
     const accessCookieName = constants.cookies.accessToken;
     const refreshCookieName = constants.cookies.refreshToken;
 

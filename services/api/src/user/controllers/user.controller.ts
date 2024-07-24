@@ -43,6 +43,7 @@ import {
 import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
 import { ReqWithUser } from 'auth/types/token-payload.type';
+import { getUserDetails } from 'user/utils/get-users-details';
 
 @Controller('user')
 @ApiCookieAuth()
