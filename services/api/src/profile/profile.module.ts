@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ProfileEntity, ProfileSchema } from './entities/profile.entity';
 import { ProfileController } from './profile.controller';
 import { ProfileService } from './profile.service';
-import { ProfileEntity, ProfileSchema } from './entities/profile.entity';
 
 @Module({
   imports: [

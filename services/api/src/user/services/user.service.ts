@@ -10,19 +10,21 @@ import { PageMetaDto } from 'common/resources/pagination';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { FilterQuery, Model } from 'mongoose';
+import { ProfileDocument } from 'profile/entities/profile.entity';
 import { ProfileService } from 'profile/profile.service';
+import { PopulatedUserDocument } from 'user/types/populated-user.type';
 import { passwordStrongEnough } from 'utils/password-checker';
 import { buildQuery, buildSorting } from 'utils/query-utils';
-import { CreateProfileDto } from '../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDetails, UserDetailsDto } from './dto/user-details.dto';
-import { UserInListDto } from './dto/user-list.dto';
-import { UserDocument, UserEntity } from './entities/user.entity';
-import { Role, RolesEnum } from './types/role.types';
-import { UserBeforeCreate } from './types/user-before-create.type';
-import { getUserDetails } from './utils/get-users-details';
-import { comparePassword, hashPassword } from './utils/password-utils';
+import { CreateProfileDto } from '../../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { UserDetails, UserDetailsDto } from '../dto/user-details.dto';
+import { UserInListDto } from '../dto/user-list.dto';
+import { UserDocument, UserEntity } from '../entities/user.entity';
+import { Role, RolesEnum } from '../types/role.types';
+import { UserBeforeCreate } from '../types/user-before-create.type';
+import { getUserDetails } from '../utils/get-users-details';
+import { comparePassword, hashPassword } from '../utils/password-utils';
 
 interface findUserOptions {
   email?: string;
@@ -38,7 +40,9 @@ export class UserService {
     private profileService: ProfileService,
   ) {}
 
-  public async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+  public async create(
+    createUserDto: CreateUserDto,
+  ): Promise<PopulatedUserDocument> {
     const usernameExists = await this.findByUsernameOrEmail(
       createUserDto.username,
     );
@@ -67,43 +71,42 @@ export class UserService {
     }
     const now = new Date();
 
-    const newUser: UserBeforeCreate = {
-      username: createUserDto.username,
-      email: createUserDto.email,
-      password: createUserDto.password,
-      createdAt: now,
-      updatedAt: now,
-      roles: [RolesEnum.USER],
-    };
-    // Create a new user instance
-    const newUserDocument = new this.userModel(newUser);
     try {
+      const newProfile = await this.profileService.create({});
+
+      if (!newProfile._id) {
+        throw new InternalServerErrorException('Could not save the profile');
+      }
+
+      const newUser: UserBeforeCreate = {
+        username: createUserDto.username,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        createdAt: now,
+        updatedAt: now,
+        profile: newProfile._id,
+        roles: [RolesEnum.USER],
+      };
+      // Create a new user instance
+      const newUserDocument = new this.userModel(newUser);
       // Save the user
       const savedUser = await newUserDocument.save();
 
-      // Create an empty profile associated with the new user
-      const createProfileDto: CreateProfileDto = {
-        bio: null,
-        givenName: null,
-        familyName: null,
-        avatar: createUserDto.avatar ?? null,
-      };
-      await this.profileService.create(createProfileDto);
-
-      return savedUser;
+      return await this.findOneWithProfile(savedUser._id.toString());
     } catch (error) {
       console.error('Error saving user or profile:', error);
       throw new InternalServerErrorException(
-        'Could not save the user or profile.',
+        'Could not save the user or profile: ' + error,
       );
     }
   }
-  async createWithProvider(data: UserFromProvider): Promise<UserDocument> {
+  async createWithProvider(
+    data: UserFromProvider,
+  ): Promise<PopulatedUserDocument> {
     const newProfile: CreateProfileDto = {
       givenName: data.givenName,
       familyName: data.familyName,
       avatar: data.avatar,
-      bio: null,
     };
     try {
       const savedProfile = await this.profileService.create(newProfile);
@@ -123,8 +126,8 @@ export class UserService {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-
-      return await newUser.save();
+      const savedUser = await newUser.save();
+      return await this.findOneWithProfile(savedUser._id.toString());
     } catch (error) {
       console.error('Error saving user:', error);
       throw new InternalServerErrorException('Could not save the user.');
@@ -178,7 +181,7 @@ export class UserService {
     const usersQuery = query
       .skip(skip)
       .limit(take)
-      .lean()
+      .populate('profile')
       .sort(buildSorting(orderBy));
 
     try {
@@ -190,6 +193,7 @@ export class UserService {
       const formattedUsers: UserInListDto[] = users.map((user) => ({
         id: user._id.toString(),
         username: user.username,
+        avatar: user.profile?.avatar,
       }));
 
       const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
@@ -231,7 +235,7 @@ export class UserService {
 
   public async findByUsernameOrEmail(
     usernameOrEmail: string,
-  ): Promise<UserDocument | null> {
+  ): Promise<PopulatedUserDocument | null> {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmail = emailRegex.test(usernameOrEmail);
 
@@ -246,7 +250,7 @@ export class UserService {
     email,
     username,
     id,
-  }: findUserOptions): Promise<UserDocument | null> {
+  }: findUserOptions): Promise<PopulatedUserDocument | null> {
     // Be case sensitive, compare the email and username in lowercase
     const user = await this.userModel
       .findOne({
@@ -257,9 +261,18 @@ export class UserService {
         ],
       })
       .select('+password')
-      .lean()
+      .populate('profile')
       .exec();
-    return user;
+
+    if (!user) {
+      return null;
+    }
+
+    const userPopulated: PopulatedUserDocument = {
+      ...user.toObject(),
+      profile: user?.profile as unknown as ProfileDocument,
+    };
+    return userPopulated;
   }
 
   async findById(id: string): Promise<UserDetails> {
@@ -326,5 +339,39 @@ export class UserService {
     const parsedUser = getUserDetails(updatedUser);
 
     return parsedUser;
+  }
+
+  public async deleteRole(
+    id: UserDocument['id'],
+    role: Role,
+  ): Promise<UserDetails> {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, { $pull: { roles: role } }, { new: true })
+      .lean()
+      .exec();
+    if (!user) {
+      throw new BadRequestException('Invalid ID');
+    }
+
+    const parsedUser = getUserDetails(user);
+
+    return parsedUser;
+  }
+
+  async findOneWithProfile(id: string): Promise<PopulatedUserDocument> {
+    try {
+      const user = await this.userModel.findById(id).populate('profile').exec();
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const profile = user.profile as unknown as ProfileDocument;
+      return {
+        ...user.toObject(),
+        profile,
+      };
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(err);
+    }
   }
 }

@@ -5,5 +5,6 @@ export const constants = {
   },
   cookies: {
     accessToken: process.env.ACCESS_TOKEN_COOKIE_NAME,
+    refreshToken: process.env.REFRESH_TOKEN_COOKIE_NAME,
   },
 };

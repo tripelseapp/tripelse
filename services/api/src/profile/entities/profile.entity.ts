@@ -1,15 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, now } from 'mongoose';
-import { UserDetails } from 'user/dto/user-details.dto';
 
 @Schema({
   timestamps: true,
 })
 export class ProfileEntity {
-  @Prop({ type: String })
+  @Prop({ required: false, default: null, type: String })
   bio: string | null;
 
-  @Prop({ required: true, default: null, type: String })
+  @Prop({ required: false, default: null, type: String })
   givenName: string | null;
 
   @Prop({ required: false, default: null, type: String })
@@ -17,6 +16,9 @@ export class ProfileEntity {
 
   @Prop({ type: String, default: null })
   avatar: string | null;
+
+  @Prop({ required: false, default: null, type: Date })
+  birthDate: Date | null;
 
   @Prop({ required: true, default: [] })
   followers: MongooseSchema.Types.ObjectId[];

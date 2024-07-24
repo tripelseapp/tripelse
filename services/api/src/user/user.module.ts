@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserEntity, UserSchema } from './entities/user.entity';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
+import { UserController } from './controllers/user.controller';
+import { UserService } from './services/user.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ProfileModule } from '../profile/profile.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from 'auth/guards/jwt.guard';
+import { RolesController } from './controllers/role.controller';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { JwtAuthGuard } from 'auth/guards/jwt.guard';
     }),
     ProfileModule,
   ],
-  controllers: [UserController],
+  controllers: [UserController, RolesController],
   providers: [
     UserService,
     {

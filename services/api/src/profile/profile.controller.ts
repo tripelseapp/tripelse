@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -22,46 +23,28 @@ import {
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileService } from './profile.service';
 import { getProfileDetails } from './utils/getProfileDetails.util';
+import { ReqWithUser } from 'auth/types/token-payload.type';
+import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 
 @Controller('profile')
 @ApiTags('Profiles')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @Get('only/:userId')
+  @Get('list')
   @ApiOperation({
-    summary: 'Get profile by user id',
-    description: 'Returns a profile associated with the user id.',
+    summary: 'List all profiles',
+    description: 'Returns an array of all profiles.',
   })
   @ApiOkResponse({
     status: HttpStatus.OK,
-    type: ProfileDetailsDto,
-    description: 'Profile found',
-    example: ExampleProfileDetailsDto,
+    type: [ProfileDetailsDto],
+    description: 'Profiles found',
+    example: [ExampleProfileDetailsDto],
   })
-  @ApiBadRequestResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Bad Request',
-    type: BadRequestException,
-  })
-  @ApiNotFoundResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Profile not found',
-    type: NotFoundException,
-  })
-  async findOneByUserId(
-    @Param('userId') userId: string,
-  ): Promise<ProfileDetailsDto> {
-    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
-      throw new BadRequestException('Invalid User ID');
-    }
-
-    const profile = await this.profileService.findByUserId(userId);
-    if (!profile) {
-      throw new NotFoundException('Profile not found for this user');
-    }
-
-    return getProfileDetails(profile);
+  async findAllProfiles(): Promise<ProfileDetailsDto[]> {
+    const profiles = await this.profileService.findAll();
+    return profiles.map(getProfileDetails);
   }
 
   @Patch('user/:userId')

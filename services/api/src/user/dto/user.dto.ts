@@ -10,7 +10,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Role, roles } from '../types/role.types';
+import { Role, RolesEnum, roles } from '../types/role.types';
 import { Transform } from 'class-transformer';
 
 export class UserDto {
@@ -64,13 +64,9 @@ export class UserDto {
   @IsArray()
   @IsIn(roles, { each: true })
   @ApiProperty({
-    description: 'The roles of a user.',
-    type: 'array',
-    items: {
-      type: 'string',
-      enum: roles,
-    },
-    default: ['user'],
+    example: RolesEnum.ADMIN,
+    enum: RolesEnum,
+    description: 'The role of the user',
   })
   readonly roles: Role[];
 

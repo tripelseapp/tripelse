@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../../auth/decorators/roles.decorator';
+import { TokenPayload } from 'auth/types/token-payload.type';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -17,30 +18,31 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
+    console.log('Requested Roles: ', roles);
     if (!roles) {
       return true;
     }
 
     const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const user: TokenPayload = request.user;
     const userRoles = user.roles;
     if (!userRoles) {
       throw new UnauthorizedException('User has no roles');
     }
+    console.log('USER ROLES ', userRoles);
 
     const hasAcces = this.matchRoles(roles, user.roles);
     if (!hasAcces) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        `User does not have the required roles (${roles} needed)`,
+      );
     }
     return hasAcces;
   }
 
   matchRoles(roles: string[], userRoles: string[]): boolean {
     // if admin, can always, if not, check if user has the role
-    if (userRoles?.includes('admin')) {
-      return true;
-    }
 
-    return userRoles.some((role) => roles.includes(role));
+    return roles.some((role) => userRoles.includes(role));
   }
 }

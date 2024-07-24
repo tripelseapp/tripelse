@@ -12,7 +12,6 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -23,29 +22,33 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from 'auth/decorators/roles.decorator';
-import { RolesGuard } from 'auth/guards/roles.guard';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { NewUserPasswordDto } from './dto/new-password-dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Types } from 'mongoose';
+import {
+  PopulatedUser,
+  PopulatedUserDocument,
+} from 'user/types/populated-user.type';
+import { getUserProfileDetails } from 'user/utils/get-users-profile-details';
+import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { NewUserPasswordDto } from '../dto/new-password-dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import {
   ExampleUserDetailsDto,
   UserDetails,
   UserDetailsDto,
-} from './dto/user-details.dto';
-import { UserInListDto } from './dto/user-list.dto';
-import { Role, RolesEnum } from './types/role.types';
-import { UserService } from './user.service';
-import { getUserDetails } from './utils/get-users-details';
-import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
+} from '../dto/user-details.dto';
+import { UserInListDto } from '../dto/user-list.dto';
+import { UserService } from '../services/user.service';
+import { ReqWithUser } from 'auth/types/token-payload.type';
+import { getUserDetails } from 'user/utils/get-users-details';
 
 @Controller('user')
 @ApiCookieAuth()
 @UseInterceptors(ClassSerializerInterceptor)
-@ApiTags('Users')
+@ApiTags('User Management / Users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -59,7 +62,6 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiPaginatedResponse(UserInListDto)
   async getUsers(
-    @Req() req: Request,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<UserInListDto>> {
     if (typeof pageOptionsDto.orderBy === 'string') {
@@ -73,6 +75,18 @@ export class UserController {
     return this.userService.findAll(pageOptionsDto);
   }
 
+  // - Get user by id
+
+  @Get(':id/raw')
+  @ApiOperation({
+    summary: 'Get a complete user by id',
+    description: 'Returns the complete user with a matching id.',
+  })
+  async findOneRaw(
+    @Param('id') id: string,
+  ): Promise<PopulatedUserDocument | null> {
+    return await this.userService.findUser({ id });
+  }
   // - Get user by id
 
   @Get(':id')
@@ -97,11 +111,41 @@ export class UserController {
     },
   })
   async findOne(@Param('id') id: string): Promise<UserDetails | null> {
-    // validate the id
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      throw new BadRequestException(['Invalid ID']);
-    }
     return await this.userService.findById(id);
+  }
+
+  // - Get your profile by token
+  @Get('mine/profile')
+  @ApiOperation({
+    summary: 'Get logged-in user profile',
+    description: 'Returns the profile of the logged-in user.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User profile found',
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+  })
+  async findMineUserWithProfile(@Req() req: ReqWithUser) {
+    const id = req.user.id;
+    if (!id) {
+      throw new BadRequestException('You are not logged in correctly');
+    }
+
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const userAndProfileDocument = await this.userService.findOneWithProfile(
+      id,
+    );
+    const parsedData = getUserProfileDetails(userAndProfileDocument);
+
+    return parsedData;
   }
 
   // - Create user
@@ -132,9 +176,9 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async create(@Body() createUserDto: CreateUserDto): Promise<UserDetails> {
+  async create(@Body() createUserDto: CreateUserDto): Promise<PopulatedUser> {
     const newUser = await this.userService.create(createUserDto);
-    return getUserDetails(newUser);
+    return getUserProfileDetails(newUser);
   }
 
   @Post('multiple')
@@ -215,7 +259,7 @@ export class UserController {
 
   //  - Get user by username or email
 
-  @Get('findByUsernameOrEmail/:userNameOrEmail')
+  @Get('byUsernameOrEmail/:userNameOrEmail')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -232,48 +276,7 @@ export class UserController {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    return getUserDetails(user);
-  }
-
-  //  - Update User Role by id
-  @Patch(':id/roles/add')
-  @ApiOperation({
-    summary: 'Add a role to user',
-    description: 'Adds a role to a single user with a matching id.',
-  })
-  @ApiOkResponse({
-    status: HttpStatus.OK,
-    type: UserDetailsDto,
-    description: 'User role updated',
-    example: ExampleUserDetailsDto,
-  })
-  @ApiBadRequestResponse({
-    status: HttpStatus.BAD_REQUEST,
-    type: BadRequestException,
-    description: 'Bad Request',
-    example: {
-      message: ['Invalid ID'],
-      error: 'Bad Request',
-      statusCode: 400,
-    },
-  })
-  @Roles(RolesEnum.USER)
-  @UseGuards(RolesGuard)
-  async addRole(
-    @Param('id', ParseObjectIdPipe) id: string,
-    @Param('role') role: Role,
-  ) {
-    if (!Object.values(RolesEnum).includes(role as RolesEnum)) {
-      throw new BadRequestException(
-        `Invalid role: ${role}, valid roles are: ${Object.values(RolesEnum)}`,
-      );
-    }
-
-    const updatedUser = await this.userService.addRole(id, role);
-    if (!updatedUser) {
-      throw new BadRequestException('This user ID did not exist');
-    }
-    return updatedUser;
+    return getUserProfileDetails(user);
   }
 
   //  - Update an user Password by id
@@ -311,5 +314,36 @@ export class UserController {
       throw new BadRequestException('This user ID did not exist');
     }
     return updatedUser;
+  }
+
+  @Get(':id/profile')
+  @ApiOperation({
+    summary: 'Get user profile by id',
+    description: 'Returns a single user with profile with a matching id.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDetailsDto,
+    description: 'User found',
+    example: ExampleUserDetailsDto,
+  })
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  async findOneWithProfile(@Param('id') id: string) {
+    const userAndProfileDocument = await this.userService.findOneWithProfile(
+      id,
+    );
+
+    const parsedData = getUserProfileDetails(userAndProfileDocument);
+
+    return parsedData;
   }
 }

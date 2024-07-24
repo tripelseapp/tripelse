@@ -22,7 +22,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     default:
       "I'm Albert and I love to travel around the world. I'm a software engineer and I love to code.",
   })
-  readonly bio: string | null;
+  readonly bio?: string | null;
 
   @IsString()
   @MaxLength(100)
@@ -30,7 +30,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     description: 'The first name of the profile',
     default: 'Albert',
   })
-  readonly givenName: string | null;
+  readonly givenName?: string | null;
 
   @IsString()
   @MaxLength(100)
@@ -38,7 +38,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     description: 'The family name of the profile',
     default: 'Einstein',
   })
-  readonly familyName: string | null;
+  readonly familyName?: string | null;
 
   //
   @MaxLength(250)
@@ -51,7 +51,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string',
     default: null,
   })
-  readonly avatar: string | null;
+  readonly avatar?: string | null;
 
   @IsArray()
   @ApiPropertyOptional({
@@ -59,7 +59,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string[]',
     default: ['Albert', 'John', 'Doe'],
   })
-  readonly followers: string[];
+  readonly followers?: string[];
 
   @IsArray()
   @ApiPropertyOptional({
@@ -67,7 +67,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string[]',
     default: ['Albert', 'John', 'Doe'],
   })
-  readonly following: string[];
+  readonly following?: string[];
 
   @IsDateString()
   @IsNotEmpty()
@@ -76,7 +76,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string',
     format: 'date-time',
   })
-  readonly createdAt: Date;
+  readonly createdAt?: Date;
 
   @IsDateString()
   @IsNotEmpty()
@@ -85,5 +85,5 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string',
     format: 'date-time',
   })
-  readonly updatedAt: Date;
+  readonly updatedAt?: Date;
 }
