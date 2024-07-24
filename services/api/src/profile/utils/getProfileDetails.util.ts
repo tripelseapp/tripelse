@@ -1,11 +1,14 @@
 import { ProfileDetails } from '../dto/profile-details.dto';
-import { ProfileEntity } from './../entities/profile.entity';
+import { ProfileDocument } from './../entities/profile.entity';
 
-export const getProfileDetails = (profile: ProfileEntity): ProfileDetails => {
+export const getProfileDetails = (profile: ProfileDocument): ProfileDetails => {
   return {
     bio: profile.bio,
     avatar: profile.avatar,
     followers: profile.followers.map((id) => id.toString()),
     following: profile.following.map((id) => id.toString()),
+    id: profile._id.toString(),
+    familyName: profile.familyName,
+    givenName: profile.givenName,
   };
 };

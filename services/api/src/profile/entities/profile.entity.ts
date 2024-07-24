@@ -17,6 +17,9 @@ export class ProfileEntity {
   @Prop({ type: String, default: null })
   avatar: string | null;
 
+  @Prop({ required: false, default: null, type: Date })
+  birthDate: Date | null;
+
   @Prop({ required: true, default: [] })
   followers: MongooseSchema.Types.ObjectId[];
 

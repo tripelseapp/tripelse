@@ -26,17 +26,6 @@ export class ProfileService {
     }
   }
 
-  async findByUserId(userId: string): Promise<ProfileDocument | null> {
-    try {
-      const profile = await this.profileModel.findOne({ userId }).exec();
-
-      return profile;
-    } catch (error) {
-      console.error('Error finding profile by userId:', error);
-      throw new InternalServerErrorException('Could not find the profile.');
-    }
-  }
-
   async update(
     userId: string,
     updateProfileDto: UpdateProfileDto,
@@ -55,6 +44,15 @@ export class ProfileService {
     } catch (error) {
       console.error('Error updating profile:', error);
       throw new InternalServerErrorException('Could not update the profile.');
+    }
+  }
+
+  async findAll(): Promise<ProfileDocument[]> {
+    try {
+      return await this.profileModel.find().exec();
+    } catch (error) {
+      console.error('Error finding all profiles:', error);
+      throw new InternalServerErrorException('Could not find profiles.');
     }
   }
 }

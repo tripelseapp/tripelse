@@ -68,6 +68,7 @@ export class AuthService {
         id: user._id.toString(),
         username: user.username,
         roles: user.roles,
+        avatar: user.avatar,
       };
       const accessToken = await this.jwtService.signAsync(payload);
       const refreshToken = this.jwtService.sign(payload, {
@@ -136,7 +137,7 @@ export class AuthService {
       access_token: new_access_token,
     };
   }
-  googleLogin(req: ReqWithUser) {
+  public googleLogin(req: ReqWithUser) {
     console.log('req.user', req.user);
     if (!req.user) {
       return 'No user from google';
@@ -145,7 +146,7 @@ export class AuthService {
     return req.user;
   }
 
-  async descerializeToken(token: string) {
+  descerializeToken(token: string): TokenPayload {
     try {
       const payload = this.jwtService.verify(token);
       return payload;

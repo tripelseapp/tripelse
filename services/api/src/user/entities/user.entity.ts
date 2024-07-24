@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
-import { ProfileEntity } from 'profile/entities/profile.entity';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { hashPassword } from 'user/utils/password-utils';
 import { Role, RolesEnum, roles } from '../types/role.types';
 
@@ -30,8 +29,8 @@ export class UserEntity {
   @Prop({ type: [{ provider: String, providerId: String }], default: [] })
   socialLogins: { provider: string; providerId: string }[];
 
-  @Prop({ type: Types.ObjectId, ref: ProfileEntity.name })
-  profile: Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ProfileEntity' })
+  profile: mongoose.Schema.Types.ObjectId;
 
   @Prop({ required: true })
   createdAt: Date;

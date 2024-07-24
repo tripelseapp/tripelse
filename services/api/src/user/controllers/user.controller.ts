@@ -11,8 +11,6 @@ import {
   Patch,
   Post,
   Query,
-  Req,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -26,6 +24,8 @@ import {
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
+import { UserDocument } from 'user/entities/user.entity';
+import { getUserProfileDetails } from 'user/utils/get-users-profile-details';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { NewUserPasswordDto } from '../dto/new-password-dto';
@@ -38,10 +38,6 @@ import {
 import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
 import { getUserDetails } from '../utils/get-users-details';
-import { ReqWithUser } from 'auth/types/token-payload.type';
-import { JwtAuthGuard } from 'auth/guards/jwt.guard';
-import { UserDocument } from 'user/entities/user.entity';
-import { Types } from 'mongoose';
 
 @Controller('user')
 @ApiCookieAuth()
@@ -60,7 +56,6 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiPaginatedResponse(UserInListDto)
   async getUsers(
-    @Req() req: Request,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<UserInListDto>> {
     if (typeof pageOptionsDto.orderBy === 'string') {
@@ -278,33 +273,34 @@ export class UserController {
     return updatedUser;
   }
 
-  @Get('profile')
+  @Get(':id/profile')
+  @ApiOperation({
+    summary: 'Get user profile by id',
+    description: 'Returns a single user with profile with a matching id.',
+  })
   @ApiOkResponse({
     status: HttpStatus.OK,
     type: UserDetailsDto,
+    description: 'User found',
+    example: ExampleUserDetailsDto,
   })
-  @ApiOperation({
-    summary: 'Get your user + profile',
-    description: 'Returns the user profile of the currently logged in user.',
+  @ApiBadRequestResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: BadRequestException,
+    description: 'Bad Request',
+    example: {
+      message: ['Invalid ID'],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
   })
-  async getMyUserAndProfile(
-    @Req() req: ReqWithUser,
-  ): Promise<UserDetails | null> {
-    console.log(req.user);
-    if (!req.user) {
-      throw new BadRequestException('User not found');
-    }
-    const yourId = req.user.id;
-    if (!yourId) {
-      throw new BadRequestException('User ID not found');
-    }
-    if (!Types.ObjectId.isValid(yourId)) {
-      throw new BadRequestException('Invalid ID format');
-    }
-    const user = await this.userService.findUserAndProfile(yourId);
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-    return getUserDetails(user);
+  async findOneWithProfile(@Param('id') id: string) {
+    const userAndProfileDocument = await this.userService.findOneWithProfile(
+      id,
+    );
+
+    const parsedData = getUserProfileDetails(userAndProfileDocument);
+
+    return parsedData;
   }
 }

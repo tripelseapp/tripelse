@@ -51,7 +51,7 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     type: 'string',
     default: null,
   })
-  readonly avatar: string | null;
+  readonly avatar?: string | null;
 
   @IsArray()
   @ApiPropertyOptional({

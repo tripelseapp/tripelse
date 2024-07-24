@@ -23,6 +23,9 @@ import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
 import { comparePassword, hashPassword } from '../utils/password-utils';
+import { Types } from 'mongoose';
+import { PopulatedUserDocument } from 'user/types/populated-user.type';
+import { ProfileDocument } from 'profile/entities/profile.entity';
 
 interface findUserOptions {
   email?: string;
@@ -68,10 +71,7 @@ export class UserService {
     const now = new Date();
 
     try {
-      const createProfileDto: CreateProfileDto = {
-        avatar: createUserDto.avatar ?? null,
-      };
-      const newProfile = await this.profileService.create(createProfileDto);
+      const newProfile = await this.profileService.create({});
 
       if (!newProfile._id) {
         throw new InternalServerErrorException('Could not save the profile');
@@ -180,7 +180,7 @@ export class UserService {
     const usersQuery = query
       .skip(skip)
       .limit(take)
-      .lean()
+      .populate('profile')
       .sort(buildSorting(orderBy));
 
     try {
@@ -192,6 +192,7 @@ export class UserService {
       const formattedUsers: UserInListDto[] = users.map((user) => ({
         id: user._id.toString(),
         username: user.username,
+        avatar: user.profile?.avatar,
       }));
 
       const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
@@ -259,7 +260,7 @@ export class UserService {
         ],
       })
       .select('+password')
-      .lean()
+      .populate('profile')
       .exec();
     return user;
   }
@@ -347,12 +348,20 @@ export class UserService {
     return parsedUser;
   }
 
-  public async findUserAndProfile(id: string): Promise<UserDocument | null> {
-    const user = await this.userModel
-      .findById(id)
-      .populate('profile')
-      .lean()
-      .exec();
-    return user;
+  async findOneWithProfile(id: string): Promise<PopulatedUserDocument> {
+    try {
+      const user = await this.userModel.findById(id).populate('profile').exec();
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const profile = user.profile as unknown as ProfileDocument;
+      return {
+        ...user.toObject(),
+        profile,
+      };
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(err);
+    }
   }
 }

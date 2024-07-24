@@ -14,7 +14,6 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { JwtAuthGuard } from './guards/jwt.guard';
 import { LocalAuthGuard } from './guards/local.guard';
 import { TokensRes } from './types/LoginRes.type';
 import { ReqWithUser } from './types/token-payload.type';
@@ -40,25 +39,6 @@ export class AuthController {
   })
   register(@Body() createUserDto: CreateUserDto): Promise<TokensRes> {
     return this.authService.register(createUserDto);
-  }
-
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({
-    summary: 'Get user profile',
-    description: 'Get the user profile for the currently authenticated user',
-  })
-  async getProfile(@Req() req: ReqWithUser): Promise<UserDetails> {
-    const user = req.user;
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    const { id } = user;
-    const userById = await this.userService.findUserAndProfile(id);
-    if (!userById) {
-      throw new NotFoundException('User not found');
-    }
-    return getUserDetails(userById);
   }
 
   @Get('status')
