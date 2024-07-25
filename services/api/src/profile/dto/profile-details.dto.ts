@@ -9,6 +9,7 @@ export class ProfileDetailsDto extends PickType(ProfileDto, [
   'id',
   'givenName',
   'familyName',
+  // 'favoriteTrips',
 ] as const) {}
 export type ProfileDetails = ProfileDetailsDto;
 
@@ -20,4 +21,5 @@ export const ExampleProfileDetailsDto: ProfileDetailsDto = {
   following: ['user5', 'user4'],
   givenName: 'Albert',
   familyName: 'Einstein',
+  // favoriteTrips: ['trip1', 'trip2', 'trip3'],
 };

@@ -33,12 +33,12 @@ export class ProfileEntity {
   @Prop({ required: true, default: Date.now })
   updatedAt: Date;
 
-  @Prop({
-    required: true,
-    default: [],
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'TripEntity' }],
-  })
-  favoriteTrips: MongooseSchema.Types.ObjectId[];
+  // @Prop({
+  //   required: true,
+  //   default: [],
+  //   type: [{ type: MongooseSchema.Types.ObjectId, ref: 'TripEntity' }],
+  // })
+  // favoriteTrips: MongooseSchema.Types.ObjectId[];
 }
 
 export type ProfileDocument = HydratedDocument<ProfileEntity>;

@@ -10,5 +10,6 @@ export const getProfileDetails = (profile: ProfileDocument): ProfileDetails => {
     id: profile._id.toString(),
     familyName: profile.familyName,
     givenName: profile.givenName,
+    // favoriteTrips: profile.favoriteTrips.map((id) => id.toString()),
   };
 };

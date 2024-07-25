@@ -10,7 +10,6 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -21,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { ReqWithUser, TokenPayload } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
+import { Public } from 'common/decorators/publicRoute.decorator';
 import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
 import {
@@ -30,19 +30,17 @@ import {
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
-import { CreateTripDto, CreateTripExample } from './dto/trip/create-trip.dto';
+import { CreateTripDto, CreateTripExample } from '../dto/trip/create-trip.dto';
 import {
   TripDetailsDto,
   tripDetailsExample,
-} from './dto/trip/trip-details.dto';
-import { TripInListDto } from './dto/trip/trip-list.dto';
-import { UpdateTripDto } from './dto/trip/update-trip.dto';
-import { TripService } from './trip.service';
-import { ResponseTripOperation } from './types/response-trip-operation.type';
-import { JwtAuthGuard } from 'auth/guards/jwt.guard';
-import { Public } from 'common/decorators/publicRoute.decorator';
+} from '../dto/trip/trip-details.dto';
+import { TripInListDto } from '../dto/trip/trip-list.dto';
+import { UpdateTripDto } from '../dto/trip/update-trip.dto';
+import { TripService } from '../services/trip.service';
+import { ResponseTripOperation } from '../types/response-trip-operation.type';
 
-@Controller('trip')
+@Controller('Trip')
 @ApiCookieAuth()
 @ApiTags('Trip')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -50,7 +48,6 @@ export class TripController {
   constructor(private readonly tripService: TripService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Create a new trip',
     description: 'Creates a new trip with the provided data',
@@ -163,53 +160,40 @@ export class TripController {
 
   // Expenses maangement
 
-  @Get(':id/expense')
-  @ApiOperation({
-    summary: 'Get all expenses of a trip',
-    description: 'Returns all expenses of a trip with the provided ID',
-  })
-  @ApiOkResponse({
-    example: tripDetailsExample,
-    status: 200,
-    description: 'The expenses have been successfully found.',
-    type: TripDetailsDto,
-  })
-  async getExpenses(
-    @Param('id', ParseObjectIdPipe) id: string,
-  ): Promise<ExpenseDto[]> {
-    return this.tripService.getExpenses(id);
-  }
+  // @Get(':id/expense')
+  // @ApiOperation({
+  //   summary: 'Get all expenses of a trip',
+  //   description: 'Returns all expenses of a trip with the provided ID',
+  // })
+  // @ApiOkResponse({
+  //   example: tripDetailsExample,
+  //   status: 200,
+  //   description: 'The expenses have been successfully found.',
+  //   type: TripDetailsDto,
+  // })
+  // async getExpenses(
+  //   @Param('id', ParseObjectIdPipe) id: string,
+  // ): Promise<ExpenseDto[]> {
+  //   return this.tripService.getExpenses(id);
+  // }
 
-  // createExpense for a trip
-  @Post(':id/expense')
-  @ApiOperation({
-    summary: 'Create an expense for a trip',
-    description: 'Creates an expense for a trip with the provided ID',
-  })
-  @ApiOkResponse({
-    example: expenseExample,
-    status: 201,
-    description: 'The expense has been successfully created.',
-    type: Expense,
-  })
-  async createExpense(
-    @Param('id', ParseObjectIdPipe) id: string,
-    @Body() createExpenseDto: CreateExpenseDto,
-    @Req() req: ReqWithUser,
-  ): Promise<ExpenseDto> {
-    return this.tripService.createExpense(id, createExpenseDto, req.user.id);
-  }
-
-  @Get('user/:userId')
-  async getTripsByUserId(@Param('userId', ParseObjectIdPipe) userId: string) {
-    const trips = await this.tripService.findByUserId(userId);
-    return trips;
-  }
-  @Get('mine')
-  async getMyTrips(@Req() req: ReqWithUser) {
-    console.log(req);
-    // const trips = await this.tripService.findByUserId(req.user.id);
-    return 'trips';
-    // return trips;
-  }
+  // // createExpense for a trip
+  // @Post(':id/expense')
+  // @ApiOperation({
+  //   summary: 'Create an expense for a trip',
+  //   description: 'Creates an expense for a trip with the provided ID',
+  // })
+  // @ApiOkResponse({
+  //   example: expenseExample,
+  //   status: 201,
+  //   description: 'The expense has been successfully created.',
+  //   type: Expense,
+  // })
+  // async createExpense(
+  //   @Param('id', ParseObjectIdPipe) id: string,
+  //   @Body() createExpenseDto: CreateExpenseDto,
+  //   @Req() req: ReqWithUser,
+  // ): Promise<ExpenseDto> {
+  //   return this.tripService.createExpense(id, createExpenseDto, req.user.id);
+  // }
 }

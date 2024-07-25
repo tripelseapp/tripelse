@@ -1,7 +1,6 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
-import { plainToInstance } from 'class-transformer';
 import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
 import {
@@ -17,15 +16,15 @@ import {
 import { FilterQuery, Model } from 'mongoose';
 import { UserDto } from 'user/dto/user.dto';
 import { buildQuery, buildSorting } from 'utils/query-utils';
-import { CreateTripDto } from './dto/trip/create-trip.dto';
-import { TripDetailsDto } from './dto/trip/trip-details.dto';
-import { TripInListDto } from './dto/trip/trip-list.dto';
-import { TripDto } from './dto/trip/trip.dto';
-import { UpdateTripDto } from './dto/trip/update-trip.dto';
-import { TripEntity, TripDocument } from './entities/trip.entity';
-import { ResponseTripOperation } from './types/response-trip-operation.type';
-import { getDays } from './utils/create-days';
-import { getTripDetails } from './utils/get-trip-details';
+import { CreateTripDto } from '../dto/trip/create-trip.dto';
+import { TripDetailsDto } from '../dto/trip/trip-details.dto';
+import { TripInListDto } from '../dto/trip/trip-list.dto';
+import { TripDto } from '../dto/trip/trip.dto';
+import { UpdateTripDto } from '../dto/trip/update-trip.dto';
+import { TripEntity, TripDocument } from '../entities/trip.entity';
+import { ResponseTripOperation } from '../types/response-trip-operation.type';
+import { getDays } from '../utils/create-days';
+import { getTripDetails } from '../utils/get-trip-details';
 
 @Injectable()
 export class TripService {
@@ -210,7 +209,7 @@ export class TripService {
 
     const parseExpense = (expense: ExpenseDocument) => {
       return {
-        ...plainToInstance(ExpenseDto, expense),
+        ...expense.toObject(),
         id: expense._id.toString(),
         _id: undefined,
       };
@@ -223,36 +222,8 @@ export class TripService {
     return parseExpensesToDto;
   }
 
-  public async createExpense(
-    tripId: string,
-    createExpenseDto: CreateExpenseDto,
-    creatorId: string,
-  ): Promise<ExpenseDto> {
-    // update the trip with the new expense
-
-    const trip = await this.tripModel.findById(tripId).exec();
-
-    if (!trip) {
-      throw new NotFoundException('Trip not found');
-    }
-
-    const expense = createExpenseFromDto(createExpenseDto);
-
-    trip.expenses.push(expense);
-    const newTrip = await this.update(
-      tripId,
-      trip.toObject() as Partial<UpdateTripDto>,
-      creatorId,
-    );
-
-    const newExpense = newTrip.expenses[newTrip.expenses.length - 1];
-
-    const parsedExpense = plainToInstance(ExpenseDto, newExpense);
-
-    return parsedExpense;
-  }
   public async findByUserId(userId: string): Promise<TripEntity[]> {
-    // search the trips that the user is a traveler
+    // search the trips that the user is a traveler from the travelers array
     const trips = await this.tripModel.find({ travelers: userId }).exec();
     if (!trips || trips.length === 0) {
       throw new NotFoundException(`No trips found for user with ID ${userId}`);

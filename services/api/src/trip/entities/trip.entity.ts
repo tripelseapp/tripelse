@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, now, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
 import { CategoriesEnum } from 'common/enums/category.enum';
 import { Attachment } from 'common/resources/attachments/entity/attachment.entity';

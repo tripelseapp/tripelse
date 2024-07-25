@@ -2,7 +2,6 @@ import {
   PopulatedUser,
   PopulatedUserDocument,
 } from 'user/types/populated-user.type';
-import { UserDetails } from '../dto/user-details.dto';
 import { getProfileDetails } from 'profile/utils/getProfileDetails.util';
 
 export const getUserProfileDetails = (
