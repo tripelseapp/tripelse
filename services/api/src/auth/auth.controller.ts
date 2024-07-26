@@ -188,7 +188,6 @@ export class AuthController {
     }
 
     const isValid = await this.authService.validateRefreshToken(refreshToken);
-    console.log('Resfresh cookie is valid:', isValid);
     if (!isValid) {
       throw new NotFoundException('Invalid refresh token, login again');
     }
