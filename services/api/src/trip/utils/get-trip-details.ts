@@ -34,7 +34,11 @@ export const getTripDetails = (
       events: day.events,
     })),
 
-    categories: trip.categories,
+    moods: trip.moods,
+    purposes: trip.purposes,
+    budgets: trip.budgets,
+    durations: trip.durations,
+    logistics: trip.logistics,
     expenses: trip.expenses.map((expense: any) => ({
       id: String(expense._id),
       currency: expense.currency,

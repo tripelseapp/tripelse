@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  IsIn,
   IsNotEmpty,
   IsString,
   MaxLength,
@@ -12,13 +13,17 @@ import {
 import { CommonDto } from 'common/common.dto';
 import { Types } from 'mongoose';
 import { Day } from 'trip/entities/day.entity';
+import { BudgetsEnum } from 'trip/enums/budget.enum';
+import { DurationsEnum } from 'trip/enums/duration.enum';
+import { LogisticsEnum } from 'trip/enums/logistics.enum';
+import { MoodsEnum } from 'trip/enums/mood.enum';
+import { PurposesEnum } from 'trip/enums/purpose.enum';
 import { UserInList } from 'user/dto/user-list.dto';
 
 export class TripDto extends PickType(CommonDto, [
   'id',
   'attachments',
   'expenses',
-  'categories',
 ] as const) {
   @IsString()
   @IsNotEmpty()
@@ -122,4 +127,60 @@ export class TripDto extends PickType(CommonDto, [
     default: false,
   })
   readonly areYouMember: boolean;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(Object.values(MoodsEnum), { each: true })
+  @ApiPropertyOptional({
+    description: 'Type of mood, experience user is looking for with the trip.',
+    type: 'string',
+    isArray: true,
+    default: [MoodsEnum.ADVENTURE],
+  })
+  readonly moods: MoodsEnum[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(Object.values(PurposesEnum), { each: true })
+  @ApiPropertyOptional({
+    description: 'Purpose of the trip.',
+    type: 'string',
+    isArray: true,
+    default: [PurposesEnum.ROMANTIC],
+  })
+  readonly purposes: PurposesEnum[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(Object.values(BudgetsEnum), { each: true })
+  @ApiPropertyOptional({
+    description: 'Total price (per day per person) of the trip.',
+    type: 'string',
+    isArray: true,
+    default: [BudgetsEnum.AFFORDABLE],
+  })
+  readonly budgets: BudgetsEnum[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(Object.values(DurationsEnum), { each: true })
+  @ApiPropertyOptional({
+    description: 'Duration of the trip in days.',
+    type: 'string',
+    isArray: true,
+    default: [DurationsEnum.SHORT],
+  })
+  readonly durations: DurationsEnum[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(Object.values(LogisticsEnum), { each: true })
+  @ApiPropertyOptional({
+    description:
+      'The logistics of the trip, encompassing the mode of transport and types of accommodation.',
+    type: 'string',
+    isArray: true,
+    default: [LogisticsEnum.CAMPER],
+  })
+  readonly logistics: LogisticsEnum[];
 }

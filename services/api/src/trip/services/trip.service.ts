@@ -47,6 +47,12 @@ export class TripService {
       attachments: [],
       createdAt: new Date(),
       updatedAt: new Date(),
+      budgets: [],
+      durations: [],
+      expenses: [],
+      logistics: [],
+      moods: [],
+      purposes: [],
     };
 
     const newTrip = new this.tripModel(completeTrip);
