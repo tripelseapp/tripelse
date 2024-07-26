@@ -85,7 +85,10 @@ export class AuthController {
     summary: 'Login user',
     description: 'Get a JWT token for a user by username or email and password',
   })
-  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res() res: Response,
+  ): Promise<Response<LoginDto, any>> {
     const loginRes = await this.authService.login(loginDto);
 
     const accessCookieName = constants.cookies.accessToken;
@@ -162,19 +165,62 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Public()
   @ApiOperation({
     summary: 'Refresh JWT token',
     description: 'Refresh the JWT token',
   })
   @UseGuards(RefreshJwtAuthGuard)
-  async refreshToken(@Body() body: RefreshTokenDto, @Req() req: ReqWithUser) {
-    const refresh = body.refreshToken;
-    if (!refresh) {
+  async refreshToken(
+    @Req() req: ReqWithUser,
+    @Res() res: Response,
+  ): Promise<Response<RefreshTokenDto, any>> {
+    // get the refresh cookie and check if it exists
+    const refreshCookieName = constants.cookies.refreshToken;
+    if (!refreshCookieName) {
+      throw new NotFoundException(
+        'Refresh token cookie name not found in environment variables, contact the administrator',
+      );
+    }
+    const refreshToken = req.cookies[refreshCookieName];
+    if (!refreshToken) {
       throw new NotFoundException('Refresh token not found');
     }
 
-    return this.authService.refreshToken(req.user);
+    const isValid = await this.authService.validateRefreshToken(refreshToken);
+    console.log('Resfresh cookie is valid:', isValid);
+    if (!isValid) {
+      throw new NotFoundException('Invalid refresh token, login again');
+    }
+
+    const newToken = await this.authService.refreshToken(req.user);
+
+    // delete the old access token and set the new one
+    const accessCookieName = constants.cookies.accessToken;
+    if (!accessCookieName) {
+      throw new NotFoundException(
+        'Access token cookie name not found in environment variables, contact the administrator',
+      );
+    }
+
+    res.clearCookie(accessCookieName, {
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    res.cookie(accessCookieName, newToken, {
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 3600000), // 1 hour
+    });
+
+    return res.status(HttpStatus.OK).send({ accessToken: newToken });
   }
+
+  @Public()
   @Post('logout')
   async logout(@Res() res: Response) {
     const accessCookieName = constants.cookies.accessToken;
@@ -185,8 +231,6 @@ export class AuthController {
         'Cookie names not found in environment variables, contact the administrator',
       );
     }
-
-    console.log('Clearing cookies:', accessCookieName, refreshCookieName);
 
     // Clear cookies
     res.clearCookie(accessCookieName, {
@@ -204,6 +248,6 @@ export class AuthController {
     });
 
     // Respond to the client
-    res.status(HttpStatus.OK).send('Logged out successfully.');
+    res.status(HttpStatus.OK).send({ message: 'Logged out successfully.' });
   }
 }

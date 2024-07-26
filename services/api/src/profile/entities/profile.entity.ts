@@ -6,7 +6,7 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
   timestamps: true,
 })
 export class ProfileEntity {
-  @Prop({ required: false, default: null, type: String })
+  @Prop({ default: null, type: String })
   bio: string | null;
 
   @Prop({ required: false, default: null, type: String })
