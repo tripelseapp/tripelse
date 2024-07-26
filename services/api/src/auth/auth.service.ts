@@ -148,11 +148,15 @@ export class AuthService {
     return null;
   }
 
-  async refreshToken(tokenPayload: TokenPayload) {
-    const new_access_token = await this.jwtService.signAsync(tokenPayload);
-    return {
-      access_token: new_access_token,
-    };
+  async validateRefreshToken(token: string) {
+    try {
+      return this.jwtService.verify(token);
+    } catch (error) {
+      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+    }
+  }
+  async refreshToken(tokenPayload: TokenPayload): Promise<string> {
+    return await this.jwtService.signAsync(tokenPayload);
   }
   public googleLogin(req: ReqWithUser) {
     if (!req.user) {

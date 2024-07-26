@@ -3,6 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { jwtConstants } from '../constants/jwt.constants';
 import { TokenPayload } from '../types/token-payload.type';
+import { UnauthorizedException } from '@nestjs/common';
+import { constants } from 'constants/constants';
 
 export class RefreshJwtStrategy extends PassportStrategy(
   Strategy,
@@ -10,8 +12,15 @@ export class RefreshJwtStrategy extends PassportStrategy(
 ) {
   constructor() {
     super({
-      // I have my jwt in cookies
-      jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request) => {
+          const cookieName = constants.cookies.refreshToken;
+          if (!cookieName) {
+            throw new UnauthorizedException('Refresh Token cookie not found');
+          }
+          return request.cookies[cookieName];
+        },
+      ]),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
     });
@@ -22,6 +31,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
       id: payload.id,
       username: payload.username,
       roles: payload.roles,
+      avatar: payload.avatar,
     };
   }
 }

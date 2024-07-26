@@ -18,7 +18,13 @@ export class ProfileService {
 
   async create(createProfileDto: CreateProfileDto): Promise<ProfileDocument> {
     try {
-      const newProfile = new this.profileModel(createProfileDto);
+      const newProfileData = {
+        ...createProfileDto,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        favoriteTrips: [],
+      };
+      const newProfile = new this.profileModel(newProfileData);
       return await newProfile.save();
     } catch (error) {
       console.error('Error creating profile:', error);

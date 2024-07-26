@@ -8,7 +8,6 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     super({
-      // I have my jwt in cookies
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
           const cookieName = constants.cookies.accessToken;

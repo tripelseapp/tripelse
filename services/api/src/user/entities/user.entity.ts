@@ -32,10 +32,10 @@ export class UserEntity {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ProfileEntity' })
   profile: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: Date.now })
   createdAt: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: Date.now })
   updatedAt: Date;
 }
 

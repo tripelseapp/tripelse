@@ -54,6 +54,14 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
   readonly avatar?: string | null;
 
   @IsArray()
+  @ApiProperty({
+    description: 'Array of id from users that follows you',
+    type: 'string[]',
+    default: [],
+  })
+  readonly favoriteTrips: string[];
+
+  @IsArray()
   @ApiPropertyOptional({
     description: 'Array of id from users that follows you',
     type: 'string[]',

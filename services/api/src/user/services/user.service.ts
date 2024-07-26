@@ -360,6 +360,7 @@ export class UserService {
 
   async findOneWithProfile(id: string): Promise<PopulatedUserDocument> {
     try {
+      // populate profile and inside of profile populate favoriteTrips
       const user = await this.userModel.findById(id).populate('profile').exec();
       if (!user) {
         throw new NotFoundException('User not found');
