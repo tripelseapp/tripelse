@@ -2,6 +2,11 @@ import { PickType } from '@nestjs/swagger';
 import { TripDto } from './trip.dto';
 import { CategoriesEnum } from 'common/enums/category.enum';
 import { DayExample1, DayExample2 } from '../day/day.dto';
+import { MoodsEnum } from 'trip/enums/mood.enum';
+import { PurposesEnum } from 'trip/enums/purpose.enum';
+import { BudgetsEnum } from 'trip/enums/budget.enum';
+import { DurationsEnum } from 'trip/enums/duration.enum';
+import { LogisticsEnum } from 'trip/enums/logistics.enum';
 
 export class TripDetailsDto extends PickType(TripDto, [
   'name',
@@ -12,7 +17,11 @@ export class TripDetailsDto extends PickType(TripDto, [
   'updatedAt',
   'expenses',
   'days',
-  'categories',
+  'moods',
+  'purposes',
+  'budgets',
+  'durations',
+  'logistics',
   'travelers',
   'createdBy',
   'areYouMember',
@@ -33,7 +42,11 @@ export const tripDetailsExample: TripDetailsDto = {
     username: 'John Doe',
   },
   days: [DayExample1, DayExample2],
-  categories: [CategoriesEnum.ENTERTAINMENT],
+  moods: [MoodsEnum.ADVENTURE],
+  purposes: [PurposesEnum.ROMANTIC],
+  budgets: [BudgetsEnum.AFFORDABLE],
+  durations: [DurationsEnum.SHORT],
+  logistics: [LogisticsEnum.CAMPER],
   travelers: [],
   areYouMember: true,
   public: true,

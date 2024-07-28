@@ -47,6 +47,15 @@ export class TripService {
       attachments: [],
       createdAt: new Date(),
       updatedAt: new Date(),
+
+      //creo que aqui esta el problema, no se si deberia ser un array de strings o de enums, de hecho menos budget i duration deberian salir del ...create dto, que no los he puesto pq eso no lo haces al crear el viaje. Peero si no los pongo me peta el COMPLETE TRIP.
+
+      budgets: [],
+      durations: [],
+      expenses: [],
+      logistics: [],
+      moods: [],
+      purposes: [],
     };
 
     const newTrip = new this.tripModel(completeTrip);
