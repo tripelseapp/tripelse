@@ -1,19 +1,18 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
 import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
 import {
   Expense,
   ExpenseDocument,
 } from 'common/resources/expenses/entities/expense.entity';
-import { createExpenseFromDto } from 'common/resources/expenses/utils/createExpenseFromDto.util';
 import {
   PageDto,
   PageMetaDto,
   PageOptionsDto,
 } from 'common/resources/pagination';
 import { FilterQuery, Model } from 'mongoose';
+import { getTripsInList } from 'trip/utils/get-trip-list';
 import { UserDto } from 'user/dto/user.dto';
 import { buildQuery, buildSorting } from 'utils/query-utils';
 import { CreateTripDto } from '../dto/trip/create-trip.dto';
@@ -21,7 +20,7 @@ import { TripDetailsDto } from '../dto/trip/trip-details.dto';
 import { TripInListDto } from '../dto/trip/trip-list.dto';
 import { TripDto } from '../dto/trip/trip.dto';
 import { UpdateTripDto } from '../dto/trip/update-trip.dto';
-import { TripEntity, TripDocument } from '../entities/trip.entity';
+import { TripDocument, TripEntity } from '../entities/trip.entity';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
 import { getDays } from '../utils/create-days';
 import { getTripDetails } from '../utils/get-trip-details';
@@ -98,7 +97,7 @@ export class TripService {
       fields: ['name', 'description', 'thumbnail'],
     });
 
-    const trpisQuery = query
+    const tripsQuery = query
       .skip(skip)
       .limit(take)
       .lean()
@@ -107,16 +106,13 @@ export class TripService {
     try {
       const [trips, itemCount]: [FilterQuery<TripEntity>[], number] =
         await Promise.all([
-          trpisQuery.exec(),
+          tripsQuery.exec(),
           this.tripModel.countDocuments().exec(),
         ]);
 
-      const formattedTrips: TripInListDto[] = trips.map((trip) => ({
-        id: trip._id.toString(),
-        name: trip.name,
-        description: trip.description,
-        thumbnail: trip.thumbnail,
-      }));
+      const formattedTrips: TripInListDto[] = getTripsInList(
+        trips as unknown as TripDocument[],
+      );
 
       const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
       return new PageDto(formattedTrips, pageMetaDto);
@@ -132,7 +128,23 @@ export class TripService {
   public async findOne(id: string, userId: string): Promise<TripDetailsDto> {
     const trip = await this.tripModel
       .findById(id)
-      .populate('createdBy')
+      // get the user from the createdBy id and then get the profile from the user
+      .populate({
+        path: 'createdBy',
+        select: 'username profile',
+        populate: {
+          path: 'profile',
+          select: 'avatar',
+        },
+      })
+      .populate({
+        path: 'travelers',
+        select: 'username profile',
+        populate: {
+          path: 'profile',
+          select: 'avatar',
+        },
+      })
       .lean()
       .exec();
     if (!trip) {
@@ -231,9 +243,21 @@ export class TripService {
     return parseExpensesToDto;
   }
 
-  public async findByUserId(userId: string): Promise<TripEntity[]> {
+  public async findByUserId(userId: string): Promise<TripDocument[]> {
     // search the trips that the user is a traveler from the travelers array
-    const trips = await this.tripModel.find({ travelers: userId }).exec();
+    const trips = await this.tripModel
+      .find({ travelers: userId })
+      .populate({
+        path: 'travelers',
+        select: 'username profile',
+        populate: {
+          path: 'profile',
+          select: 'avatar',
+        },
+      })
+
+      .lean()
+      .exec();
     if (!trips || trips.length === 0) {
       throw new NotFoundException(`No trips found for user with ID ${userId}`);
     }

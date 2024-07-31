@@ -10,7 +10,7 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { ReqWithUser } from 'auth/types/token-payload.type';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { TripService } from '../services/trip.service';
-import { getTripsInList } from 'trip/utils/get-trip-lint';
+import { getTripsInList } from 'trip/utils/get-trip-list';
 
 @Controller('trip-user')
 @ApiCookieAuth()
