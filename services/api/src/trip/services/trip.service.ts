@@ -14,7 +14,11 @@ import {
 import { FilterQuery, Model } from 'mongoose';
 import { getTripsInList } from 'trip/utils/get-trip-list';
 import { UserDto } from 'user/dto/user.dto';
-import { buildQuery, buildSorting } from 'utils/query-utils';
+import {
+  buildQuery,
+  buildQueryWithCount,
+  buildSorting,
+} from 'utils/query-utils';
 import { CreateTripDto } from '../dto/trip/create-trip.dto';
 import { TripDetailsDto } from '../dto/trip/trip-details.dto';
 import { TripInListDto } from '../dto/trip/trip-list.dto';
@@ -90,16 +94,24 @@ export class TripService {
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
-    const query = buildQuery<TripDocument>({
+    const { query, countQuery } = buildQueryWithCount<TripDocument>({
       model: this.tripModel,
       filters: { search, startDate, endDate },
       searchIn: ['name', 'description'],
-      fields: ['name', 'description', 'thumbnail'],
+      fields: ['name', 'description', 'thumbnail', 'travelers'],
     });
 
     const tripsQuery = query
       .skip(skip)
       .limit(take)
+      .populate({
+        path: 'travelers',
+        select: 'username profile',
+        populate: {
+          path: 'profile',
+          select: 'avatar',
+        },
+      })
       .lean()
       .sort(buildSorting(orderBy));
 
@@ -107,7 +119,7 @@ export class TripService {
       const [trips, itemCount]: [FilterQuery<TripEntity>[], number] =
         await Promise.all([
           tripsQuery.exec(),
-          this.tripModel.countDocuments().exec(),
+          countQuery.countDocuments().exec(),
         ]);
 
       const formattedTrips: TripInListDto[] = getTripsInList(

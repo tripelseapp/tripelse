@@ -96,12 +96,10 @@ export class TripController {
   async getUsers(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<TripInListDto>> {
-    if (typeof pageOptionsDto.orderBy === 'string') {
-      pageOptionsDto.orderBy = [pageOptionsDto.orderBy];
-    } else if (
-      pageOptionsDto.orderBy &&
-      !Array.isArray(pageOptionsDto.orderBy)
-    ) {
+    const order = pageOptionsDto.orderBy;
+    if (typeof order === 'string') {
+      pageOptionsDto.orderBy = [order];
+    } else if (order && !Array.isArray(order)) {
       throw new BadRequestException('orderBy must be a string or an array');
     }
     return this.tripService.findAll(pageOptionsDto);

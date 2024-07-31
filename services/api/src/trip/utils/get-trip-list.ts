@@ -1,6 +1,7 @@
 import { TripInListDto } from 'trip/dto/trip/trip-list.dto';
 import { TripDocument } from 'trip/entities/trip.entity';
-import { getUserInList } from 'user/utils/get-users-list';
+import { UserDocument } from 'user/entities/user.entity';
+import { getUsersInList } from 'user/utils/get-users-list';
 export interface TripDetailMetadata {
   active: boolean;
   areYouMember: boolean;
@@ -11,7 +12,7 @@ export const getTripInList = (trip: TripDocument): TripInListDto => {
     name: trip.name,
     description: trip.description,
     thumbnail: trip.thumbnail,
-    travelers: trip.travelers.map((traveler: any) => getUserInList(traveler)),
+    travelers: getUsersInList(trip.travelers as unknown as UserDocument[]),
   };
 };
 
