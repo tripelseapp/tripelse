@@ -22,6 +22,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { ReqWithUser } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
@@ -42,8 +43,6 @@ import {
 } from '../dto/user-details.dto';
 import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
-import { ReqWithUser } from 'auth/types/token-payload.type';
-import { getUserDetails } from 'user/utils/get-users-details';
 
 @Controller('user')
 @ApiCookieAuth()

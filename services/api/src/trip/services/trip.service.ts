@@ -11,14 +11,10 @@ import {
   PageMetaDto,
   PageOptionsDto,
 } from 'common/resources/pagination';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { getTripsInList } from 'trip/utils/get-trip-list';
 import { UserDto } from 'user/dto/user.dto';
-import {
-  buildQuery,
-  buildQueryWithCount,
-  buildSorting,
-} from 'utils/query-utils';
+import { buildQueryWithCount, buildSorting } from 'utils/query-utils';
 import { CreateTripDto } from '../dto/trip/create-trip.dto';
 import { TripDetailsDto } from '../dto/trip/trip-details.dto';
 import { TripInListDto } from '../dto/trip/trip-list.dto';
@@ -255,10 +251,38 @@ export class TripService {
     return parseExpensesToDto;
   }
 
-  public async findByUserId(userId: string): Promise<TripDocument[]> {
-    // search the trips that the user is a traveler from the travelers array
-    const trips = await this.tripModel
-      .find({ travelers: userId })
+  public async findByUserId(
+    userId: string,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<TripInListDto>> {
+    const {
+      page = 1,
+      take = 10,
+      orderBy = ['createdAt:DESC'],
+      search,
+      startDate,
+      endDate,
+    } = pageOptionsDto;
+
+    const skip = (page - 1) * take;
+    const userIdObjectId = new Types.ObjectId(userId); // Correct instantiation
+
+    const filters = {
+      search,
+      startDate,
+      endDate,
+      travelers: [userIdObjectId], // Ensure this is an array for $in
+    };
+
+    const { query, countQuery } = buildQueryWithCount<TripDocument>({
+      model: this.tripModel,
+      filters,
+      searchIn: ['name', 'description'],
+      fields: ['name', 'description', 'thumbnail', 'travelers'],
+    });
+    const tripsQuery = query
+      .skip(skip)
+      .limit(take)
       .populate({
         path: 'travelers',
         select: 'username profile',
@@ -267,13 +291,26 @@ export class TripService {
           select: 'avatar',
         },
       })
-
       .lean()
-      .exec();
-    if (!trips || trips.length === 0) {
-      throw new NotFoundException(`No trips found for user with ID ${userId}`);
+      .sort(buildSorting(orderBy));
+
+    try {
+      const [trips, itemCount]: [TripDocument[], number] = await Promise.all([
+        tripsQuery.exec(),
+        countQuery.countDocuments().exec(),
+      ]);
+
+      const formattedTrips: TripInListDto[] = getTripsInList(trips);
+
+      const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+      return new PageDto(formattedTrips, pageMetaDto);
+    } catch (error) {
+      if (error instanceof Error) {
+        const message = `Error while fetching users. Error: ${error.message}`;
+        throw new Error(message);
+      }
+      throw new Error('Error while fetching users.');
     }
-    return trips;
   }
 
   public buildTripDetails(

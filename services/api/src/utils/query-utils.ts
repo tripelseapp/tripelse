@@ -2,58 +2,64 @@
 import { Model, Document, SortOrder, FilterQuery } from 'mongoose';
 import { Orders, PossibleOrders } from 'interfaces/pagination.interface';
 
-interface FiltersOptions {
-  search?: string;
-  startDate?: Date;
-  endDate?: Date;
-  [key: string]: any;
-}
-type ExtendedFilterQuery<T> = FilterQuery<T> & {
-  createdAt?: { $gte?: Date; $lte?: Date };
-};
 export interface BuildQueryOptions<T> {
   model: Model<T>;
-  filters: FiltersOptions;
+  filters: Record<string, any>; // Use Record<string, any> for dynamic filters
   searchIn: (keyof T)[];
   fields?: (keyof T)[];
 }
 
+//
+
+function buildFilterConditions<T extends Document>(
+  filters: Record<string, any>,
+  searchIn: (keyof T)[],
+): Record<string, any> {
+  const conditions: Record<string, any> = {};
+
+  if (filters.search) {
+    const searchFields = searchIn || [];
+    const searchString = String(filters.search);
+    conditions.$or = searchFields.map((field) => ({
+      [field]: { $regex: new RegExp(searchString, 'i') },
+    }));
+  }
+
+  if (filters.startDate || filters.endDate) {
+    conditions.createdAt = {};
+    if (filters.startDate) {
+      conditions.createdAt.$gte = new Date(filters.startDate);
+    }
+    if (filters.endDate) {
+      conditions.createdAt.$lte = new Date(filters.endDate);
+    }
+  }
+
+  Object.keys(filters).forEach((key) => {
+    if (!['search', 'startDate', 'endDate'].includes(key)) {
+      if (Array.isArray(filters[key])) {
+        conditions[key] = { $in: filters[key] };
+      } else {
+        conditions[key] = filters[key];
+      }
+    }
+  });
+
+  return conditions;
+}
 export function buildQuery<T extends Document>({
   model,
   filters,
   searchIn,
   fields = [],
-}: BuildQueryOptions<T>): ExtendedFilterQuery<T> {
-  let query: ExtendedFilterQuery<T> = model.find();
+}: BuildQueryOptions<T>): FilterQuery<T> {
+  const conditions = buildFilterConditions(filters, searchIn);
 
-  if (Boolean(filters.search)) {
-    const searchFields = searchIn || [];
-    const searchString = String(filters.search ?? '');
-    query = query.or(
-      searchFields.map((field) => ({
-        [field]: { $regex: new RegExp(searchString, 'i') },
-      })),
-    );
+  let query = model.find(conditions);
+
+  if (fields.length > 0) {
+    query = query.select(fields.join(' '));
   }
-
-  if (filters.startDate || filters.endDate) {
-    query.createdAt = {};
-    if (filters.startDate) {
-      query.createdAt.$gte = new Date(filters.startDate);
-    }
-    if (filters.endDate) {
-      query.createdAt.$lte = new Date(filters.endDate);
-    }
-  }
-
-  // Add other dynamic filters based on filters
-  Object.keys(filters).forEach((key) => {
-    if (!['search', 'startDate', 'endDate'].includes(key)) {
-      query[key as keyof T] = filters[key];
-    }
-  });
-
-  query = query.select(fields.join(' '));
 
   return query;
 }

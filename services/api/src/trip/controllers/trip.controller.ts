@@ -21,12 +21,6 @@ import {
 import { ReqWithUser, TokenPayload } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { Public } from 'common/decorators/publicRoute.decorator';
-import { CreateExpenseDto } from 'common/resources/expenses/dto/create-expense.dto';
-import { ExpenseDto } from 'common/resources/expenses/dto/expense.dto';
-import {
-  Expense,
-  expenseExample,
-} from 'common/resources/expenses/entities/expense.entity';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';

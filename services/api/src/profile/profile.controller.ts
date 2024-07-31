@@ -7,7 +7,6 @@ import {
   NotFoundException,
   Param,
   Patch,
-  Req,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -23,8 +22,6 @@ import {
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileService } from './profile.service';
 import { getProfileDetails } from './utils/getProfileDetails.util';
-import { ReqWithUser } from 'auth/types/token-payload.type';
-import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 
 @Controller('profile')
 @ApiTags('Profiles')
