@@ -171,11 +171,21 @@ export class UserService {
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
+    // Build the query with the necessary filters and search conditions
+
     const query = buildQuery<UserDocument>({
       model: this.userModel,
       filters: { search, startDate, endDate },
       searchIn: ['username', 'email'],
       fields: ['username'],
+    });
+
+    // Apply the same filters to the count query
+    const countQuery = buildQuery<UserDocument>({
+      model: this.userModel,
+      filters: { search, startDate, endDate },
+      searchIn: ['username', 'email'],
+      fields: [],
     });
 
     const usersQuery = query
@@ -188,7 +198,7 @@ export class UserService {
       const [users, itemCount]: [FilterQuery<UserEntity>[], number] =
         await Promise.all([
           usersQuery.exec(),
-          this.userModel.countDocuments().exec(),
+          countQuery.countDocuments().exec(),
         ]);
       const formattedUsers: UserInListDto[] = users.map((user) => ({
         id: user._id.toString(),
