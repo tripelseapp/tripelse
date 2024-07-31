@@ -10,6 +10,7 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { ReqWithUser } from 'auth/types/token-payload.type';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { TripService } from '../services/trip.service';
+import { getTripsInList } from 'trip/utils/get-trip-lint';
 
 @Controller('trip-user')
 @ApiCookieAuth()
@@ -21,7 +22,8 @@ export class TripUserController {
   @Get(':userId')
   async getTripsByUserId(@Param('userId', ParseObjectIdPipe) userId: string) {
     const trips = await this.tripService.findByUserId(userId);
-    return trips;
+    const parsedTrips = getTripsInList(trips);
+    return parsedTrips;
   }
   @Get('mine')
   async getMyTrips(@Req() req: ReqWithUser) {

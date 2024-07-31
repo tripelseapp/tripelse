@@ -1,7 +1,7 @@
 import { TripDetailsDto } from 'trip/dto/trip/trip-details.dto';
 import { TripDocument } from 'trip/entities/trip.entity';
 import { UserDocument } from 'user/entities/user.entity';
-import { getUserInList } from 'user/utils/get-users-list';
+import { getUserInList, getUsersInList } from 'user/utils/get-users-list';
 export interface TripDetailMetadata {
   active: boolean;
   areYouMember: boolean;
@@ -23,7 +23,8 @@ export const getTripDetails = (
     description: trip.description,
     thumbnail: trip.thumbnail,
     createdBy: getUserInList(createdBy),
-    travelers: trip.travelers,
+    travelers: getUsersInList(trip.travelers as unknown as UserDocument[]),
+
     days: trip.days.map((day: any) => ({
       id: String(day._id),
       name: day.name,

@@ -11,7 +11,7 @@ interface FiltersOptions {
 type ExtendedFilterQuery<T> = FilterQuery<T> & {
   createdAt?: { $gte?: Date; $lte?: Date };
 };
-interface BuildQueryOptions<T> {
+export interface BuildQueryOptions<T> {
   model: Model<T>;
   filters: FiltersOptions;
   searchIn: (keyof T)[];
@@ -75,3 +75,15 @@ export function buildSortOptions(orderBy: PossibleOrders[]): {
 
   return sortOptions;
 }
+export const buildQueryWithCount = <T extends Document>({
+  model,
+  filters,
+  searchIn,
+  fields = [],
+}: BuildQueryOptions<T>) => {
+  const query = buildQuery({ model, filters, searchIn, fields });
+  // Apply the same filters to the count query
+  const countQuery = buildQuery({ model, filters, searchIn, fields });
+
+  return { query, countQuery };
+};

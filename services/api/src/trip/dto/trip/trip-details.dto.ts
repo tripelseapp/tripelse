@@ -40,6 +40,7 @@ export const tripDetailsExample: TripDetailsDto = {
   createdBy: {
     id: '6695aebd76dcb559c2f56d17',
     username: 'John Doe',
+    avatar: 'https://example.com/avatar.jpg',
   },
   days: [DayExample1, DayExample2],
   moods: [MoodsEnum.ADVENTURE],

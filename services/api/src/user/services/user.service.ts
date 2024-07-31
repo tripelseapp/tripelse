@@ -14,7 +14,12 @@ import { ProfileDocument } from 'profile/entities/profile.entity';
 import { ProfileService } from 'profile/profile.service';
 import { PopulatedUserDocument } from 'user/types/populated-user.type';
 import { passwordStrongEnough } from 'utils/password-checker';
-import { buildQuery, buildSorting } from 'utils/query-utils';
+import {
+  BuildQueryOptions,
+  buildQuery,
+  buildQueryWithCount,
+  buildSorting,
+} from 'utils/query-utils';
 import { CreateProfileDto } from '../../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -25,6 +30,7 @@ import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
 import { comparePassword, hashPassword } from '../utils/password-utils';
+import { getUserInList, getUsersInList } from 'user/utils/get-users-list';
 
 interface findUserOptions {
   email?: string;
@@ -171,17 +177,15 @@ export class UserService {
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
-    // Build the query with the necessary filters and search conditions
 
-    const query = buildQuery<UserDocument>({
+    const filterData: BuildQueryOptions<UserDocument> = {
       model: this.userModel,
       filters: { search, startDate, endDate },
       searchIn: ['username', 'email'],
       fields: ['username'],
-    });
+    };
+    const { query, countQuery } = buildQueryWithCount(filterData);
 
-    // Apply the same filters to the count query
-    const countQuery = query;
     const usersQuery = query
       .skip(skip)
       .limit(take)
@@ -194,11 +198,9 @@ export class UserService {
           usersQuery.exec(),
           countQuery.countDocuments().exec(),
         ]);
-      const formattedUsers: UserInListDto[] = users.map((user) => ({
-        id: user._id.toString(),
-        username: user.username,
-        avatar: user.profile?.avatar,
-      }));
+      const formattedUsers: UserInListDto[] = getUsersInList(
+        users as unknown as UserDocument[],
+      );
 
       const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
       return new PageDto(formattedUsers, pageMetaDto);

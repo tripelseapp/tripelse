@@ -93,7 +93,7 @@ export class TripDto extends PickType(CommonDto, [
     type: [Types.ObjectId],
     default: [],
   })
-  readonly travelers: string[];
+  readonly travelers: UserInList[];
 
   @IsString()
   @IsNotEmpty()
