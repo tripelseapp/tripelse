@@ -181,13 +181,7 @@ export class UserService {
     });
 
     // Apply the same filters to the count query
-    const countQuery = buildQuery<UserDocument>({
-      model: this.userModel,
-      filters: { search, startDate, endDate },
-      searchIn: ['username', 'email'],
-      fields: [],
-    });
-
+    const countQuery = query;
     const usersQuery = query
       .skip(skip)
       .limit(take)
