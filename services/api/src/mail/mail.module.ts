@@ -11,7 +11,7 @@ import { constants } from 'constants/constants';
     MailerModule.forRoot({
       transport: {
         host: constants.mail.host,
-        port: Number(465),
+        port: Number(constants.mail.port),
         secure: true,
         auth: {
           user: constants.mail.user,
