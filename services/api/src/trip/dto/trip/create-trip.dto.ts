@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
-import { IsArray, IsDateString, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 import { TripDto } from './trip.dto';
 import { MoodsEnum } from 'trip/enums/mood.enum';
 import { PurposesEnum } from 'trip/enums/purpose.enum';
@@ -31,13 +37,14 @@ export class CreateTripDto extends PickType(TripDto, [
 
   @IsArray()
   @IsNotEmpty()
+  @IsEmail({}, { each: true })
   @ApiProperty({
-    description: 'List of users that will participate in the trip.',
+    description: 'List of user emails that will participate in the trip.',
     type: 'array',
     default: [],
     items: {
       type: 'string',
-      example: '6695aebd76dcb559c2f56d17',
+      example: 'tripelseapp@gmail.com',
     },
   })
   readonly travelers: string[];

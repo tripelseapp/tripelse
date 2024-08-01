@@ -24,16 +24,16 @@ import { TripDocument, TripEntity } from '../entities/trip.entity';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
 import { getDays } from '../utils/create-days';
 import { getTripDetails } from '../utils/get-trip-details';
-import { InvitationService } from 'invitation/invitation.service';
 import { UserService } from 'user/services/user.service';
+import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
 
 @Injectable()
 export class TripService {
   constructor(
     @InjectModel(TripEntity.name)
     private readonly tripModel: Model<TripDocument>,
-    private readonly invitationService: InvitationService,
     private readonly userService: UserService,
+    private readonly eventEmitter: TypedEventEmitter,
   ) {}
   /**
    * Creates a new trip.
@@ -332,5 +332,18 @@ export class TripService {
     };
 
     return getTripDetails(trip, metadata);
+  }
+  public async sendTripInvitation(
+    email: string,
+    trip: CreateTripDto,
+    currentUserId: string,
+  ) {
+    const user = await this.userService.findUser({ email });
+
+    if (!user) {
+      this.eventEmitter.emit('trip.invitation', { email, trip, currentUserId });
+    } else {
+      this.eventEmitter.emit('trip.invitation', { email, trip, currentUserId });
+    }
   }
 }
