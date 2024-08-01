@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PopulatedUserDocument } from 'user/types/populated-user.type';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UserService } from '../user/services/user.service';
 import { comparePassword } from '../user/utils/password-utils';
@@ -9,13 +8,14 @@ import { LoginDto } from './dto/login.dto';
 import { TokensRes } from './types/LoginRes.type';
 import { UserFromProvider } from './types/User-from-google.type';
 import { ReqWithUser, TokenPayload } from './types/token-payload.type';
-import { UserDto } from 'user/dto/user.dto';
+import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly eventEmitter: TypedEventEmitter,
   ) {}
   async login(loginDto: LoginDto): Promise<TokensRes> {
     // validate that we have the needed data
@@ -65,6 +65,15 @@ export class AuthService {
   }
   public async register(createUserDto: CreateUserDto): Promise<TokensRes> {
     const savedUser = await this.userService.create(createUserDto);
+
+    try {
+      this.eventEmitter.emit('user.welcome', {
+        name: 'tripelse',
+        email: createUserDto.email,
+      });
+    } catch (error) {
+      console.log('Error sending email', error);
+    }
     return await this.buildResponseWithToken({
       id: String(savedUser._id),
       username: savedUser.username,

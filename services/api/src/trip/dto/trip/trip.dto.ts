@@ -159,7 +159,7 @@ export class TripDto extends PickType(CommonDto, [
     isArray: true,
     default: [BudgetsEnum.AFFORDABLE],
   })
-  readonly budgets: BudgetsEnum[];
+  readonly budget: BudgetsEnum;
 
   @IsArray()
   @IsString({ each: true })
@@ -170,7 +170,7 @@ export class TripDto extends PickType(CommonDto, [
     isArray: true,
     default: [DurationsEnum.SHORT],
   })
-  readonly durations: DurationsEnum[];
+  readonly duration: DurationsEnum;
 
   @IsArray()
   @IsString({ each: true })
