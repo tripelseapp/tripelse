@@ -70,7 +70,7 @@ export class TripController {
       travelers.push(currentUserId);
     }
 
-    const newTrip = {
+    const newTrip: CreateTripDto = {
       ...createTripDto,
       travelers: travelers,
     };

@@ -24,14 +24,22 @@ import { TripDocument, TripEntity } from '../entities/trip.entity';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
 import { getDays } from '../utils/create-days';
 import { getTripDetails } from '../utils/get-trip-details';
+import { InvitationService } from 'invitation/invitation.service';
+import { UserService } from 'user/services/user.service';
 
 @Injectable()
 export class TripService {
   constructor(
     @InjectModel(TripEntity.name)
     private readonly tripModel: Model<TripDocument>,
+    private readonly invitationService: InvitationService,
+    private readonly userService: UserService,
   ) {}
-
+  /**
+   * Creates a new trip.
+   * @param createTripDto DTO containing trip details.
+   * @returns ResponseTripOperation object.
+   */
   public async create(
     createTripDto: CreateTripDto,
     createdById: string,
@@ -43,18 +51,13 @@ export class TripService {
       days,
       thumbnail: '',
       createdBy: createdById,
+      moods: createTripDto.moods || [],
+      purposes: createTripDto.purposes || [],
+      logistics: createTripDto.logistics || [],
+      travelers: [createdById],
       attachments: [],
       createdAt: new Date(),
       updatedAt: new Date(),
-
-      //creo que aqui esta el problema, no se si deberia ser un array de strings o de enums, de hecho menos budget i duration deberian salir del ...create dto, que no los he puesto pq eso no lo haces al crear el viaje. Peero si no los pongo me peta el COMPLETE TRIP.
-
-      budgets: [],
-      durations: [],
-      expenses: [],
-      logistics: [],
-      moods: [],
-      purposes: [],
     };
 
     const newTrip = new this.tripModel(completeTrip);

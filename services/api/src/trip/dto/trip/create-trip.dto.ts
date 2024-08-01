@@ -54,7 +54,7 @@ export class CreateTripDto extends PickType(TripDto, [
       example: MoodsEnum.RELAX,
     },
   })
-  readonly moods?: MoodsEnum[];
+  readonly moods: MoodsEnum[];
 
   @IsArray()
   @IsOptional()
@@ -68,7 +68,7 @@ export class CreateTripDto extends PickType(TripDto, [
       example: PurposesEnum.ROMANTIC,
     },
   })
-  readonly purposes?: PurposesEnum[];
+  readonly purposes: PurposesEnum[];
 
   @IsArray()
   @IsOptional()
@@ -83,7 +83,7 @@ export class CreateTripDto extends PickType(TripDto, [
       example: LogisticsEnum.CAMPER,
     },
   })
-  readonly logistics?: LogisticsEnum[];
+  readonly logistics: LogisticsEnum[];
 }
 
 export const CreateTripExample: CreateTripDto = {

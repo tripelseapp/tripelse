@@ -2,6 +2,9 @@ import { TripDetailsDto } from 'trip/dto/trip/trip-details.dto';
 import { TripDocument } from 'trip/entities/trip.entity';
 import { UserDocument } from 'user/entities/user.entity';
 import { getUserInList, getUsersInList } from 'user/utils/get-users-list';
+import { getTripDuration } from './get-trip-duration.utils';
+import { sumAllExpenses } from './expenses.utils';
+import { getTripBudget } from './get-trip-budget.util';
 export interface TripDetailMetadata {
   active: boolean;
   areYouMember: boolean;
@@ -37,8 +40,8 @@ export const getTripDetails = (
 
     moods: trip.moods,
     purposes: trip.purposes,
-    budgets: trip.budgets,
-    durations: trip.durations,
+    duration: getTripDuration(trip.days.length),
+    budget: getTripBudget(trip),
     logistics: trip.logistics,
     expenses: trip.expenses.map((expense: any) => ({
       id: String(expense._id),

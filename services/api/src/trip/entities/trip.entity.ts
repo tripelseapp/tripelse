@@ -6,12 +6,10 @@ import {
   Expense,
   ExpenseSchema,
 } from 'common/resources/expenses/entities/expense.entity';
-import { Day, DaySchema } from './day.entity';
+import { LogisticsEnum } from 'trip/enums/logistics.enum';
 import { MoodsEnum } from 'trip/enums/mood.enum';
 import { PurposesEnum } from 'trip/enums/purpose.enum';
-import { BudgetsEnum } from 'trip/enums/budget.enum';
-import { DurationsEnum } from 'trip/enums/duration.enum';
-import { LogisticsEnum } from 'trip/enums/logistics.enum';
+import { Day, DaySchema } from './day.entity';
 
 @Schema()
 export class TripEntity {
@@ -53,12 +51,6 @@ export class TripEntity {
 
   @Prop({ type: [String], default: [] })
   purposes: PurposesEnum[];
-
-  @Prop({ type: [String], default: [] })
-  budgets: BudgetsEnum[];
-
-  @Prop({ type: [String], default: [] })
-  durations: DurationsEnum[];
 
   @Prop({ type: [String], default: [] })
   logistics: LogisticsEnum[];
