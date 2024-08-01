@@ -22,6 +22,24 @@ export class MailService {
       },
     });
   }
+  @OnEvent('trip.invitation')
+  async tripInvitation(data: EventPayloads['trip.invitation']) {
+    const { email, trip, currentUserId } = data;
+    const name = 'Tripelse';
+    const subject = `Your new trip "${trip.name}" !`;
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject,
+      template: './welcome',
+
+      context: {
+        name,
+        trip,
+        currentUserId,
+      },
+    });
+  }
 
   @OnEvent('user.reset-password')
   async forgotPasswordEmail(data: EventPayloads['user.reset-password']) {
