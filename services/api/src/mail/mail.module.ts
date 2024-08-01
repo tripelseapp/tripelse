@@ -4,21 +4,22 @@ import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { join } from 'path';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
+import { constants } from 'constants/constants';
 
 @Module({
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: 'smtp.gmail.com',
+        host: constants.mail.host,
         port: Number(465),
         secure: true,
         auth: {
-          user: 'tripelseapp@gmail.com',
-          pass: 'ttiq zpvu blot jnbv',
+          user: constants.mail.user,
+          pass: constants.mail.pass,
         },
       },
       defaults: {
-        from: '"Tripelse (No Reply)" <tripelseapp@gmail.com>',
+        from: `"Tripelse" <${constants.mail.user}>`,
       },
       template: {
         dir: join(__dirname, 'templates'),
