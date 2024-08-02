@@ -346,4 +346,54 @@ export class TripService {
       this.eventEmitter.emit('trip.invitation', { email, trip, currentUserId });
     }
   }
+
+  public async addParticipant(tripId: string, userId: string) {
+    const trip = await this.tripModel.findById(tripId).exec();
+    if (!trip) {
+      throw new NotFoundException('Trip not found');
+    }
+
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if the user is already a participant
+    if (trip.travelers.includes(user.id)) {
+      return {
+        ok: true,
+        message: 'User is already a participant',
+      };
+    }
+
+    trip.travelers.push(user.id);
+    await trip.save();
+
+    return {
+      ok: true,
+      message: 'User added successfully',
+    };
+  }
+
+  public async removeParticipant(tripId: string, userId: string) {
+    const trip = await this.tripModel.findById(tripId).exec();
+    if (!trip) {
+      throw new NotFoundException('Trip not found');
+    }
+
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    trip.travelers = trip.travelers.filter(
+      (traveler) => traveler.toString() !== user.id.toString(),
+    );
+    await trip.save();
+
+    return {
+      ok: true,
+      message: 'User removed successfully',
+    };
+  }
 }

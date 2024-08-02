@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Query,
   Req,
   UseInterceptors,
@@ -39,10 +40,6 @@ export class TripUserController {
       throw new BadRequestException('orderBy must be a string or an array');
     }
 
-    // const trips = await this.tripService.findByUserId(userId);
-    // const parsedTrips = getTripsInList(trips);
-    // return parsedTrips;
-
     return this.tripService.findByUserId(userId, pageOptionsDto);
   }
   @Get('my-trips')
@@ -69,10 +66,43 @@ export class TripUserController {
       throw new BadRequestException('orderBy must be a string or an array');
     }
 
-    // const trips = await this.tripService.findByUserId(userId);
-    // const parsedTrips = getTripsInList(trips);
-    // return parsedTrips;
-
     return this.tripService.findByUserId(String(userId), pageOptionsDto);
+  }
+
+  @Patch(':tripId/add/:userId')
+  @ApiOperation({
+    summary: 'Add a user to a trip',
+    description: 'Add a user to a trip',
+  })
+  async addParticipant(
+    @Param('tripId', ParseObjectIdPipe) tripId: string,
+    @Param('userId', ParseObjectIdPipe) userId: string,
+  ) {
+    return this.tripService.addParticipant(tripId, userId);
+  }
+  @Patch(':tripId/remove/:userId')
+  @ApiOperation({
+    summary: 'Remove a user from a trip',
+    description: 'Remove a user from a trip',
+  })
+  async removeParticipant(
+    @Param('tripId', ParseObjectIdPipe) tripId: string,
+    @Param('userId', ParseObjectIdPipe) userId: string,
+  ) {
+    return this.tripService.removeParticipant(tripId, userId);
+  }
+
+  @Patch(':tripId/add/me')
+  @ApiOperation({
+    summary: 'Add the current logged in user to a trip',
+    description: 'Add the current logged in user to a trip',
+  })
+  async addMeToTrip(
+    @Req() req: ReqWithUser,
+    @Param('tripId', ParseObjectIdPipe) tripId: string,
+  ) {
+    console.log('req.user.id', req.user.id);
+
+    return this.tripService.addParticipant(tripId, req.user.id);
   }
 }
