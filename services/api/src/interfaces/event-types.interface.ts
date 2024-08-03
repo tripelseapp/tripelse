@@ -9,4 +9,5 @@ export interface EventPayloads {
     trip: CreateTripDto;
     currentUserId: string;
   };
+  'user.password.reset': { email: string; resetUrl: string; username: string };
 }

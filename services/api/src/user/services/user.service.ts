@@ -12,11 +12,12 @@ import { PageDto } from 'common/resources/pagination/page.dto';
 import { FilterQuery, Model } from 'mongoose';
 import { ProfileDocument } from 'profile/entities/profile.entity';
 import { ProfileService } from 'profile/profile.service';
+import { TemporalTokenService } from 'temporal-token/services/temporal-token.service';
 import { PopulatedUserDocument } from 'user/types/populated-user.type';
+import { getUsersInList } from 'user/utils/get-users-list';
 import { passwordStrongEnough } from 'utils/password-checker';
 import {
   BuildQueryOptions,
-  buildQuery,
   buildQueryWithCount,
   buildSorting,
 } from 'utils/query-utils';
@@ -29,8 +30,8 @@ import { UserDocument, UserEntity } from '../entities/user.entity';
 import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
-import { comparePassword, hashPassword } from '../utils/password-utils';
-import { getUserInList, getUsersInList } from 'user/utils/get-users-list';
+import { hashPassword } from '../utils/password-utils';
+import { NewUserPasswordDto } from 'user/dto/new-password-dto';
 
 interface findUserOptions {
   email?: string;
@@ -44,6 +45,7 @@ export class UserService {
     @InjectModel(UserEntity.name)
     private userModel: Model<UserDocument>,
     private profileService: ProfileService,
+    private readonly tokenService: TemporalTokenService,
   ) {}
 
   public async create(
@@ -313,38 +315,46 @@ export class UserService {
   }
 
   public async updatePassword(
-    id: string,
-    password: string,
-  ): Promise<UserDetails> {
-    // check if the user already had the same password
-    const oldUser = await this.userModel.findById(id, { password: 1 }).lean();
-    if (!oldUser) {
-      throw new BadRequestException('Invalid ID');
-    }
-    if (!oldUser.password) {
-      throw new BadRequestException('User does not have a password');
-    }
-    const isSamePassword = await comparePassword(password, oldUser.password);
-    if (isSamePassword) {
-      throw new BadRequestException(
-        'New password must be different from the old password',
-      );
+    token: string,
+    newPassword: string,
+  ): Promise<void> {
+    // Validate token
+    const userId = await this.tokenService.validateToken(
+      token,
+      'password_reset',
+    );
+    if (!userId) {
+      throw new BadRequestException('Invalid or expired token');
     }
 
-    const hashedPassword = await hashPassword(password);
+    // Validate new password
+    const { strongEnough, reason } = passwordStrongEnough(newPassword);
 
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, { password: hashedPassword }, { new: true })
-      .lean()
-      .exec();
-
-    if (!updatedUser) {
-      throw new BadRequestException('Invalid ID');
+    if (!strongEnough && reason?.length) {
+      throw new BadRequestException(reason);
     }
 
-    const parsedUser = getUserDetails(updatedUser);
+    // Update user password
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    return parsedUser;
+    user.password = await hashPassword(newPassword);
+    try {
+      await user.save();
+    } catch (error) {
+      console.error('Error saving user:', error);
+      throw new InternalServerErrorException('Could not save the user.');
+    }
+
+    // Optionally, delete the token after successful password reset
+    try {
+      await this.tokenService.delete(token);
+    } catch (error) {
+      console.error('Error deleting token:', error);
+      throw new InternalServerErrorException('Could not delete the token.');
+    }
   }
 
   public async deleteRole(

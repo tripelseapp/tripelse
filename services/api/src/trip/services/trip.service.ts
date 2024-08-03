@@ -68,7 +68,6 @@ export class TripService {
       if (!savedTrip._id) {
         throw new HttpException('Error creating trip', 500);
       }
-
       return {
         ok: true,
         message: 'Trip created successfully',
@@ -333,6 +332,7 @@ export class TripService {
 
     return getTripDetails(trip, metadata);
   }
+
   public async sendTripInvitation(
     email: string,
     trip: CreateTripDto,

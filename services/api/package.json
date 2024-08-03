@@ -21,7 +21,8 @@
     "docker:dev": "docker-compose up",
     "docker:build": "docker-compose build",
     "docker:run": "docker-compose up --watch",
-    "docker:reset": "pnpm run docker:down && pnpm run docker:build && pnpm run docker:dev"
+    "docker:reset": "pnpm run docker:down && pnpm run docker:build && pnpm run docker:dev",
+    "docs:generate": "npx @compodoc/compodoc -p tsconfig.json -s"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",

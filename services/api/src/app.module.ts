@@ -6,10 +6,10 @@ import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { TripModule } from './trip/trip.module';
 import { UserModule } from './user/user.module';
-import { InvitationModule } from './invitation/invitation.module';
 import { MailModule } from 'mail/mail.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypedEventEmitterModule } from 'event-emitter/event-emitter.module';
+import { TemporalTokenModule } from './temporal-token/temporal-token.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
@@ -20,10 +20,10 @@ import { TypedEventEmitterModule } from 'event-emitter/event-emitter.module';
     UserModule,
     TripModule,
     AuthModule,
-    InvitationModule,
     MailModule,
     EventEmitterModule.forRoot(),
     TypedEventEmitterModule,
+    TemporalTokenModule,
   ],
   controllers: [],
   providers: [],

@@ -41,9 +41,9 @@ export class MailService {
     });
   }
 
-  @OnEvent('user.reset-password')
-  async forgotPasswordEmail(data: EventPayloads['user.reset-password']) {
-    const { name, email, link } = data;
+  @OnEvent('user.password.reset')
+  async forgotPasswordEmail(data: EventPayloads['user.password.reset']) {
+    const { email, resetUrl, username } = data;
 
     const subject = `Company: Reset Password`;
 
@@ -52,8 +52,9 @@ export class MailService {
       subject,
       template: './forgot-password',
       context: {
-        link,
-        name,
+        resetUrl,
+        username,
+        email,
       },
     });
   }

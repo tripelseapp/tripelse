@@ -7,6 +7,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   Param,
   Patch,
   Post,
@@ -26,7 +27,11 @@ import { ReqWithUser } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
-import { Types } from 'mongoose';
+import configuration from 'config/configuration';
+import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
+import mongoose, { Types } from 'mongoose';
+import { TemporalTokenService } from 'temporal-token/services/temporal-token.service';
+import { TemporalTokenEnum } from 'temporal-token/types/temporal-token.types';
 import {
   PopulatedUser,
   PopulatedUserDocument,
@@ -34,7 +39,6 @@ import {
 import { getUserProfileDetails } from 'user/utils/get-users-profile-details';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { NewUserPasswordDto } from '../dto/new-password-dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import {
   ExampleUserDetailsDto,
@@ -49,7 +53,11 @@ import { UserService } from '../services/user.service';
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('User Management / Users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly eventEmitter: TypedEventEmitter,
+    private readonly tokenService: TemporalTokenService,
+  ) {}
 
   // - Get all users
 
@@ -278,8 +286,8 @@ export class UserController {
     return getUserProfileDetails(user);
   }
 
-  //  - Update an user Password by id
-  @Patch(':id/password')
+  //  - request a user Password email by email
+  @Patch(':id/request-new-password')
   @ApiOperation({
     summary: 'Update user password by id',
     description: 'Updates a single user password with a matching id.',
@@ -300,19 +308,63 @@ export class UserController {
       statusCode: 400,
     },
   })
+  async requestPasswordReset(email: string): Promise<void> {
+    const user = await this.userService.findUser({ email });
+    if (!user) throw new Error('User not found');
+
+    const userId = user._id.toString();
+    const duration = 3600000; // 1 hour
+    const tokenType = TemporalTokenEnum.password_reset;
+
+    const tokenGenerated = new mongoose.Types.ObjectId().toHexString();
+
+    const token = await this.tokenService.create({
+      type: tokenType,
+      token: tokenGenerated,
+      userId,
+      expiresAt: new Date(Date.now() + duration),
+    });
+
+    if (!token) throw new InternalServerErrorException('Token not created');
+
+    const resetUrl = `${
+      configuration().domain
+    }/auth/reset-password?token=${tokenGenerated}`;
+
+    // Emit an event to send an email
+    this.eventEmitter.emit('user.password.reset', {
+      email,
+      resetUrl,
+      username: user.username,
+    });
+  }
+
   async updatePassword(
-    @Param('id', ParseObjectIdPipe) id: string,
-    @Body() body: NewUserPasswordDto,
-  ) {
-    const newPassword = body.password;
+    @Body()
+    body: {
+      newPassword: string;
+      token: string;
+    },
+    @Req() req: ReqWithUser,
+  ): Promise<{
+    message: string;
+  }> {
+    const userId = req.user.id;
+    if (!userId) {
+      throw new BadRequestException('You are not logged in correctly');
+    }
+    const newPassword = body.newPassword;
     if (!newPassword) {
       throw new BadRequestException('Password cannot be empty');
     }
-    const updatedUser = await this.userService.updatePassword(id, newPassword);
-    if (!updatedUser) {
-      throw new BadRequestException('This user ID did not exist');
+    try {
+      await this.userService.updatePassword(userId, newPassword);
+      return {
+        message: 'Password updated successfully',
+      };
+    } catch (error) {
+      throw new BadRequestException('Password could not be updated');
     }
-    return updatedUser;
   }
 
   @Get(':id/profile')
