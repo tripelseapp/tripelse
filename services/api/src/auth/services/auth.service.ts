@@ -1,14 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { UserService } from '../user/services/user.service';
-import { comparePassword } from '../user/utils/password-utils';
-import { jwtConstants } from './constants/jwt.constants';
-import { LoginDto } from './dto/login.dto';
-import { TokensRes } from './types/LoginRes.type';
-import { UserFromProvider } from './types/User-from-google.type';
-import { ReqWithUser, TokenPayload } from './types/token-payload.type';
+import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { UserService } from '../../user/services/user.service';
+import { comparePassword } from '../../user/utils/password-utils';
+import { LoginDto } from './../dto/login.dto';
+import { TokensRes } from './../types/LoginRes.type';
+import { UserFromProvider } from '../types/User-from-google.type';
+import { ReqWithUser, TokenPayload } from '../types/token-payload.type';
 import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
+import config from 'config/config';
 
 @Injectable()
 export class AuthService {
@@ -58,6 +58,7 @@ export class AuthService {
     }
     return await this.buildResponseWithToken({
       id: String(user._id),
+      email: user.email,
       username: user.username,
       roles: user.roles,
       avatar: user.profile.avatar,
@@ -77,6 +78,7 @@ export class AuthService {
     return await this.buildResponseWithToken({
       id: String(savedUser._id),
       username: savedUser.username,
+      email: savedUser.email,
       roles: savedUser.roles,
       avatar: savedUser.profile.avatar,
     });
@@ -87,12 +89,13 @@ export class AuthService {
       const payloadData: TokenPayload = {
         id: payload.id,
         username: payload.username,
+        email: payload.email,
         roles: payload.roles,
         avatar: payload.avatar,
       };
       const accessToken = await this.jwtService.signAsync(payloadData);
       const refreshToken = this.jwtService.sign(payloadData, {
-        expiresIn: jwtConstants.refreshExpire,
+        expiresIn: config().jwt.expiration,
       });
 
       return {
@@ -117,6 +120,7 @@ export class AuthService {
         id: String(user._id),
         username: user.username,
         roles: user.roles,
+        email: user.email,
         avatar: user.profile.avatar,
       });
     }
@@ -128,6 +132,7 @@ export class AuthService {
       return this.buildResponseWithToken({
         id: String(userCreated._id),
         username: userCreated.username,
+        email: userCreated.email,
         roles: userCreated.roles,
         avatar: userCreated.profile.avatar,
       });

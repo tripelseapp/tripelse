@@ -5,6 +5,7 @@ import { Role } from 'user/types/role.types';
 export type TokenPayload = {
   id: string;
   username: string;
+  email: string;
   roles: Role[];
   avatar: ProfileEntity['avatar'];
 };

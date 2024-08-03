@@ -12,6 +12,7 @@ export const getUserDetails = (user: UserDocument): UserDetails => {
     username: user.username,
     email: user.email,
     roles: user.roles ?? [],
+    emailVerified: user.emailVerified?.toISOString() ?? null,
     createdAt: user.createdAt.toISOString(),
     updatedAt: updatedDate,
   };

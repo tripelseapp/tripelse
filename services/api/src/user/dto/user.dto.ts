@@ -7,6 +7,7 @@ import {
   IsIn,
   IsNotEmpty,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -51,8 +52,12 @@ export class UserDto {
   @Transform(({ value }) => value.trim()) // transform is allways the first validation
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
-  @MaxLength(200)
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @MaxLength(50, { message: 'Password must be no longer than 50 characters' })
+  @Matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/, {
+    message:
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+  })
   @ApiProperty({
     description: 'The password of a user.',
     minimum: 8,
@@ -69,6 +74,15 @@ export class UserDto {
     description: 'The role of the user',
   })
   readonly roles: Role[];
+
+  @IsDateString()
+  @ApiProperty({
+    description: 'The date and time the user email was verified.',
+    type: 'string',
+    format: 'date-time',
+  })
+  @IsNotEmpty()
+  readonly emailVerified: string | null;
 
   @IsDateString()
   @ApiProperty({

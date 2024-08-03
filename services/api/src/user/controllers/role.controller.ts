@@ -23,7 +23,6 @@ import { UserService } from '../services/user.service';
 import { Role, RolesEnum } from '../types/role.types';
 
 @Controller('role')
-@ApiCookieAuth()
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('User Management / Roles')
 export class RolesController {

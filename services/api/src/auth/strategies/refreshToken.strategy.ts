@@ -1,10 +1,9 @@
 import { PassportStrategy } from '@nestjs/passport';
 
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { jwtConstants } from '../constants/jwt.constants';
 import { TokenPayload } from '../types/token-payload.type';
 import { UnauthorizedException } from '@nestjs/common';
-import { constants } from 'constants/constants';
+import config from 'config/config';
 
 export class RefreshJwtStrategy extends PassportStrategy(
   Strategy,
@@ -14,7 +13,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
-          const cookieName = constants.cookies.refreshToken;
+          const cookieName = config().jwt.refreshTokenCookie;
           if (!cookieName) {
             throw new UnauthorizedException('Refresh Token cookie not found');
           }
@@ -22,7 +21,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: jwtConstants.secret,
+      secretOrKey: config().jwt.refreshSecret,
     });
   }
 

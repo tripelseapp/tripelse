@@ -41,36 +41,35 @@ export class MailService {
     });
   }
 
-  @OnEvent('user.reset-password')
-  async forgotPasswordEmail(data: EventPayloads['user.reset-password']) {
-    const { name, email, link } = data;
+  @OnEvent('user.password.reset')
+  async forgotPasswordEmail(data: EventPayloads['user.password.reset']) {
+    const { email, resetUrl, username } = data;
 
-    const subject = `Company: Reset Password`;
-
+    const subject = `Tripelse: Reset Password`;
     await this.mailerService.sendMail({
       to: email,
       subject,
       template: './forgot-password',
       context: {
-        link,
-        name,
+        resetUrl,
+        username,
       },
     });
   }
 
-  @OnEvent('user.verify-email')
-  async verifyEmail(data: EventPayloads['user.verify-email']) {
-    const { name, email, otp } = data;
+  @OnEvent('user.email.validate')
+  async verifyEmail(data: EventPayloads['user.email.validate']) {
+    const { username, email, url } = data;
 
-    const subject = `Company: OTP To Verify Email`;
+    const subject = `Tripelse: Verify Email`;
 
     await this.mailerService.sendMail({
       to: email,
       subject,
-      template: './verify-email',
+      template: './email-verification',
       context: {
-        otp,
-        name,
+        url,
+        username,
       },
     });
   }

@@ -8,6 +8,7 @@ export class UserDetailsDto extends PickType(UserDto, [
   'roles',
   'createdAt',
   'updatedAt',
+  'emailVerified',
 ] as const) {}
 export type UserDetails = UserDetailsDto;
 
@@ -16,6 +17,7 @@ export const ExampleUserDetailsDto: UserDetailsDto = {
   username: 'testuser',
   email: 'testuser@email.com',
   roles: ['user'],
+  emailVerified: null,
   createdAt: '2021-07-19T15:33:07.000Z',
   updatedAt: '2021-07-19T15:33:07.000Z',
 };

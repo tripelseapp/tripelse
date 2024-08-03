@@ -1,15 +1,14 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { constants } from 'constants/constants';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import helmet from 'helmet';
 import passport from 'passport';
 import { AppModule } from './app.module';
-import configuration from './config/configuration';
+import configuration from './config/config';
 import { setupSwagger } from './utils/setupSwagger';
+import { ConfigService } from '@nestjs/config';
+import config from './config/config';
 
-const PORT = configuration().port;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({ origin: '*' });
@@ -20,13 +19,12 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  app.setGlobalPrefix(`${constants.api.prefix}/${constants.api.version}`);
-  app.use(helmet());
+  app.setGlobalPrefix(`${config().api.prefix}/${config().api.version}`);
 
   app.use(cookieParser());
   app.use(
     session({
-      secret: 'randomString',
+      secret: configuration().jwt.secret,
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: 60000 },
@@ -37,10 +35,16 @@ async function bootstrap() {
   app.use(passport.session());
   setupSwagger(app);
 
-  await app.listen(PORT, () => {
-    console.log(`🚀 Application running at port ${PORT}`);
+  const configService = app.get(ConfigService);
+
+  const port = configService.get('PORT');
+
+  await app.listen(port, () => {
+    console.log(`🚀 Application running at port ${port}`);
     console.log(
-      `🟢 Swagger opened in http://localhost:${PORT}/${constants.api.prefix}`,
+      `🟢 Swagger opened in http://localhost:${port}/${config().api.prefix}/${
+        config().api.version
+      }`,
     );
   });
 }

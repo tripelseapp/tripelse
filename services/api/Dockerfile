@@ -12,7 +12,7 @@ RUN npm install
 
 COPY . .
 
-COPY .env .env.development ./
+COPY .env ./
 
 
 # Build the NestJS application
@@ -38,7 +38,7 @@ RUN npm install --only=production
 
 COPY . .
 
-COPY .env .env.production ./
+COPY .env ./
 
 
 # Copy build artifacts from development stage
