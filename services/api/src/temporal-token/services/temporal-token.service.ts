@@ -6,7 +6,10 @@ import { CreateTemporalTokenDto } from 'temporal-token/dto/create-temporal-token
 import { TemporalTokenDto } from 'temporal-token/dto/temporal-token.dto';
 import { UpdateTemporalTokenDto } from 'temporal-token/dto/update-temporal-token.dto';
 import { TemporalTokenEntity } from 'temporal-token/entities/temporal-token.entity';
-import { TemporalTokenType } from 'temporal-token/types/temporal-token.types';
+import {
+  TemporalTokenEnum,
+  TemporalTokenType,
+} from 'temporal-token/types/temporal-token.types';
 import { UserDto } from 'user/dto/user.dto';
 
 @Injectable()
@@ -24,12 +27,16 @@ export class TemporalTokenService {
     // Optionally, check if a token already exists for this user and type
     await this.tokenModel.deleteMany({ userId, type });
 
-    const newToken = new this.tokenModel({
-      type,
+    const newTokenData: TemporalTokenEntity = {
+      type: type as TemporalTokenEnum,
       token,
       userId,
       expiresAt,
-    });
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const newToken = new this.tokenModel(newTokenData);
 
     const savedToken = await newToken.save();
     return this.mapToResponseDto(savedToken);
@@ -63,6 +70,12 @@ export class TemporalTokenService {
       throw new NotFoundException(`Token with ID ${id} not found`);
     }
   }
+  async deleteByToken(token: string): Promise<void> {
+    const result = await this.tokenModel.deleteOne({ token });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(`Token with token ${token} not found`);
+    }
+  }
 
   private mapToResponseDto(token: TemporalTokenEntity): TemporalTokenDto {
     return {
@@ -75,6 +88,12 @@ export class TemporalTokenService {
     };
   }
 
+  /**
+   * Validate a token and return the user ID
+   * @param token The string token to validate
+   * @param type The type of token to validate
+   * @returns The user ID associated with the token
+   */
   async validateToken(
     token: string,
     type: TemporalTokenType,

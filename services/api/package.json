@@ -64,7 +64,6 @@
   },
   "devDependencies": {
     "@nestjs/cli": "10.4.1",
-    "@nestjs/devtools-integration": "^0.1.6",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/schematics": "10.1.2",

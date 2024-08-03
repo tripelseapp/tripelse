@@ -24,7 +24,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(
     session({
-      secret: 'randomString',
+      secret: configuration().jwtSecret,
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: 60000 },

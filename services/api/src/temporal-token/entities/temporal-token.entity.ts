@@ -9,7 +9,7 @@ export class TemporalTokenEntity {
   @Prop({
     type: String,
     required: true,
-    enum: Object.values(TemporalTokenEnum),
+    enum: Object.keys(TemporalTokenEnum),
   })
   type: TemporalTokenEnum;
 

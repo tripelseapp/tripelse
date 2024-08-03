@@ -45,8 +45,7 @@ export class MailService {
   async forgotPasswordEmail(data: EventPayloads['user.password.reset']) {
     const { email, resetUrl, username } = data;
 
-    const subject = `Company: Reset Password`;
-
+    const subject = `Tripelse: Reset Password`;
     await this.mailerService.sendMail({
       to: email,
       subject,
@@ -54,7 +53,6 @@ export class MailService {
       context: {
         resetUrl,
         username,
-        email,
       },
     });
   }

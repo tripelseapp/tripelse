@@ -9,22 +9,21 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from 'common/decorators/publicRoute.decorator';
-import { Request, Response } from 'express';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { LocalAuthGuard } from './guards/local.guard';
-import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
-import { TokensRes } from './types/LoginRes.type';
-import { ReqWithUser } from './types/token-payload.type';
 import { constants } from 'constants/constants';
+import { Request, Response } from 'express';
+import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { LoginDto } from '../dto/login.dto';
+import { RefreshTokenDto } from '../dto/refresh-token.dto';
+import { GoogleAuthGuard } from '../guards/google-auth.guard';
+import { LocalAuthGuard } from '../guards/local.guard';
+import { RefreshJwtAuthGuard } from '../guards/refresh-jwt-auth.guard';
+import { AuthService } from '../services/auth.service';
+import { TokensRes } from '../types/LoginRes.type';
+import { ReqWithUser } from '../types/token-payload.type';
 
 @ApiTags('Auth')
-@ApiCookieAuth('Access token')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

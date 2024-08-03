@@ -7,6 +7,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserFromProvider } from 'auth/types/User-from-google.type';
+import {
+  PageDto,
+  PageMetaDto,
+  PageOptionsDto,
+} from 'common/resources/pagination';
 import { FilterQuery, Model } from 'mongoose';
 import { ProfileDocument } from 'profile/entities/profile.entity';
 import { ProfileService } from 'profile/profile.service';
@@ -28,12 +33,7 @@ import { UserDocument, UserEntity } from '../entities/user.entity';
 import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
-import { hashPassword } from '../utils/password-utils';
-import {
-  PageDto,
-  PageMetaDto,
-  PageOptionsDto,
-} from 'common/resources/pagination';
+import { UserDto } from 'user/dto/user.dto';
 
 interface findUserOptions {
   email?: string;
@@ -217,7 +217,10 @@ export class UserService {
     }
   }
 
-  public async update(id: string, data: UpdateUserDto): Promise<UserDetails> {
+  public async update(
+    id: string,
+    data: Partial<UserDto>,
+  ): Promise<UserDetails> {
     try {
       const newUser = { ...data, updatedAt: new Date() };
       const savedUser = (await this.userModel
@@ -314,49 +317,6 @@ export class UserService {
     const parsedUser = getUserDetails(user as UserDocument);
 
     return parsedUser;
-  }
-
-  public async updatePassword(
-    token: string,
-    newPassword: string,
-  ): Promise<void> {
-    // Validate token
-    const userId = await this.tokenService.validateToken(
-      token,
-      'password_reset',
-    );
-    if (!userId) {
-      throw new BadRequestException('Invalid or expired token');
-    }
-
-    // Validate new password
-    const { strongEnough, reason } = passwordStrongEnough(newPassword);
-
-    if (!strongEnough && reason?.length) {
-      throw new BadRequestException(reason);
-    }
-
-    // Update user password
-    const user = await this.userModel.findById(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    user.password = await hashPassword(newPassword);
-    try {
-      await user.save();
-    } catch (error) {
-      console.error('Error saving user:', error);
-      throw new InternalServerErrorException('Could not save the user.');
-    }
-
-    // Optionally, delete the token after successful password reset
-    try {
-      await this.tokenService.delete(token);
-    } catch (error) {
-      console.error('Error deleting token:', error);
-      throw new InternalServerErrorException('Could not delete the token.');
-    }
   }
 
   public async deleteRole(
