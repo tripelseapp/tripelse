@@ -77,6 +77,15 @@ export class UserDto {
 
   @IsDateString()
   @ApiProperty({
+    description: 'The date and time the user email was verified.',
+    type: 'string',
+    format: 'date-time',
+  })
+  @IsNotEmpty()
+  readonly emailVerified: string | null;
+
+  @IsDateString()
+  @ApiProperty({
     description: 'The date and time the user was created.',
     type: 'string',
     format: 'date-time',

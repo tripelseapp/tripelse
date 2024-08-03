@@ -7,6 +7,7 @@ import { Role, RolesEnum, roles } from '../types/role.types';
 Entity (User): Represents your MongoDB schema and is directly tied to your database structure. It includes all fields defined in your schema, such as username, email, password, role, createdAt, and potentially other fields.
 */
 // User is all related with the pure user, like role or login fields, the profile is in another entity where we can store more information about the user.
+
 @Schema({
   timestamps: true,
 })
