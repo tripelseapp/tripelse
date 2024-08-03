@@ -1,24 +1,19 @@
 import {
   BadRequestException,
-  Body,
   ClassSerializerInterceptor,
   Controller,
-  HttpStatus,
   InternalServerErrorException,
   NotFoundException,
   Param,
   Patch,
   Post,
+  Req,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  ResetPasswordDto,
-  ResetPasswordResponseDto,
-  resetPasswordResponseExample,
-} from 'auth/dto/new-password.dto';
-import { ResetPasswordService } from 'auth/services/reset-password.service';
-import { Public } from 'common/decorators/publicRoute.decorator';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ResetPasswordResponseDto } from 'auth/dto/new-password.dto';
+import { ValidateUserService } from 'auth/services/validate-user.service';
+import { ReqWithUser } from 'auth/types/token-payload.type';
 import config from 'config/config';
 import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
 import mongoose from 'mongoose';
@@ -27,34 +22,39 @@ import { TemporalTokenEnum } from 'temporal-token/types/temporal-token.types';
 import { UserService } from 'user/services/user.service';
 import { getUserProfileDetails } from 'user/utils/get-users-profile-details';
 
-@Controller('password-reset')
+@Controller('validate-email')
 @UseInterceptors(ClassSerializerInterceptor)
-@ApiTags('Auth / Reset Password')
-export class ResetPasswordController {
+@ApiTags('Auth / Validate email')
+export class ValidateEmailController {
   constructor(
-    private readonly resetPasswordService: ResetPasswordService,
+    private readonly validateUserService: ValidateUserService,
     private readonly userService: UserService,
     private readonly tokenService: TemporalTokenService,
     private readonly eventEmitter: TypedEventEmitter,
   ) {}
 
   //  - request a user Password email by email
-  @Public()
-  @Post(':email/request')
+  @Post('request')
   @ApiOperation({
     summary: 'Sends a password reset email',
     description:
       'Sends a password reset email to the user with the provided email',
   })
-  async request(@Param('email') email: string): Promise<{
+  async request(@Req() request: ReqWithUser): Promise<{
     message: string;
   }> {
+    const email: string = request.user.email;
+    if (!email) {
+      throw new BadRequestException(
+        'Your are not logged in correctly, logout and login again',
+      );
+    }
     const user = await this.userService.findUser({ email });
     if (!user) throw new NotFoundException('User not found');
     const parsedUser = getUserProfileDetails(user);
     const userId = parsedUser.id.toString();
     const duration = 3600000; // 1 hour
-    const tokenType = TemporalTokenEnum.password_reset;
+    const tokenType = TemporalTokenEnum.email_verification;
 
     const tokenGenerated = new mongoose.Types.ObjectId().toHexString();
 
@@ -67,14 +67,14 @@ export class ResetPasswordController {
 
     if (!token) throw new InternalServerErrorException('Token not created');
 
-    const resetUrl = `${
-      config().domain
-    }/auth/reset-password?token=${tokenGenerated}`;
+    const url = `${
+      config().client.domain
+    }/auth/validate-email/${tokenGenerated}`;
 
     // Emit an event to send an email
-    this.eventEmitter.emit('user.password.reset', {
+    this.eventEmitter.emit('user.email.validate', {
       email,
-      resetUrl,
+      url,
       username: user.username,
     });
     return {
@@ -82,24 +82,15 @@ export class ResetPasswordController {
     };
   }
 
-  @Public()
-  @Patch('update-password')
+  @Patch(':token')
   @ApiOperation({
-    summary: 'Update password',
+    summary: 'Updates the verification date of the email',
     description:
-      'Update the password of the user with the provided token and new password',
+      'Updates the verification date of the email to the current date',
   })
-  @ApiOkResponse({
-    status: HttpStatus.OK,
-    type: ResetPasswordResponseDto,
-    description: 'Password updated successfully',
-    example: resetPasswordResponseExample,
-  })
-  async updatePassword(
-    @Body() resetPasswordDto: ResetPasswordDto,
+  async updateVerifyEmail(
+    @Param('token') token: string,
   ): Promise<ResetPasswordResponseDto> {
-    const newPassword = resetPasswordDto.newPassword;
-    const token = resetPasswordDto.token;
     if (!token) {
       throw new BadRequestException('Token cannot be empty');
     }
@@ -108,12 +99,9 @@ export class ResetPasswordController {
       throw new BadRequestException('Invalid token');
     }
 
-    if (!newPassword) {
-      throw new BadRequestException('Password cannot be empty');
-    }
-    await this.resetPasswordService.updatePassword(token, newPassword);
+    await this.validateUserService.validateEmail(token);
     return {
-      message: 'Password updated successfully',
+      message: 'Email verified successfully',
     };
   }
 }

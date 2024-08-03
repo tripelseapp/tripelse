@@ -4,46 +4,39 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { TemporalTokenService } from 'temporal-token/services/temporal-token.service';
+import { TemporalTokenEnum } from 'temporal-token/types/temporal-token.types';
 import { UserService } from 'user/services/user.service';
-import { hashPassword } from 'user/utils/password-utils';
-import { passwordStrongEnough } from 'utils/password-checker';
 
 @Injectable()
-export class ResetPasswordService {
+export class ValidateUserService {
   constructor(
     private readonly userService: UserService,
     private readonly tokenService: TemporalTokenService,
   ) {}
 
-  public async updatePassword(
-    token: string,
-    newPassword: string,
-  ): Promise<void> {
+  public async validateEmail(token: string): Promise<void> {
     // Validate token
     const userId = await this.tokenService.validateToken(
       token,
-      'password_reset',
+      TemporalTokenEnum.email_verification,
     );
     if (!userId) {
       throw new BadRequestException('Invalid or expired token');
     }
+    const emailVerified = new Date().toISOString();
+    const partialUser = { emailVerified };
 
-    // Validate new password
-    const { strongEnough, reason } = passwordStrongEnough(newPassword);
-
-    if (!strongEnough && reason?.length) {
-      throw new BadRequestException(reason);
-    }
-
-    const password = await hashPassword(newPassword);
     try {
-      await this.userService.update(userId, { password });
+      const newUser = await this.userService.update(userId, partialUser);
+      if (!newUser) {
+        throw new InternalServerErrorException('Could not save the user.');
+      }
     } catch (error) {
       console.error('Error saving user:', error);
-      throw new InternalServerErrorException('Could not save the user.');
+      throw new InternalServerErrorException('Something went wrong.');
     }
 
-    // Delete the token after successful password reset
+    // Delete the token after successful email verification
     try {
       await this.tokenService.deleteByToken(token);
     } catch (error) {

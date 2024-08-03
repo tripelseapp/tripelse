@@ -223,6 +223,7 @@ export class UserService {
   ): Promise<UserDetails> {
     try {
       const newUser = { ...data, updatedAt: new Date() };
+
       const savedUser = (await this.userModel
         .findByIdAndUpdate(id, newUser, { new: true })
         .lean()

@@ -31,11 +31,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "docker:dev": "docker-compose up",
-    "docker:build": "docker-compose build",
-    "docker:run": "docker-compose up --watch",
-    "docker:reset": "pnpm run docker:down && pnpm run docker:build && pnpm run docker:dev",
-    "docs:generate": "npx @compodoc/compodoc -p tsconfig.json -s"
+    "docs:generate": "npx @compodoc/compodoc -p tsconfig.json -s",
+    "run:dev": "docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build",
+    "run:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",

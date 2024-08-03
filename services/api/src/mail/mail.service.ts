@@ -57,19 +57,19 @@ export class MailService {
     });
   }
 
-  @OnEvent('user.verify-email')
-  async verifyEmail(data: EventPayloads['user.verify-email']) {
-    const { name, email, otp } = data;
+  @OnEvent('user.email.validate')
+  async verifyEmail(data: EventPayloads['user.email.validate']) {
+    const { username, email, url } = data;
 
-    const subject = `Company: OTP To Verify Email`;
+    const subject = `Tripelse: Verify Email`;
 
     await this.mailerService.sendMail({
       to: email,
       subject,
-      template: './verify-email',
+      template: './email-verification',
       context: {
-        otp,
-        name,
+        url,
+        username,
       },
     });
   }

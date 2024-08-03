@@ -106,6 +106,8 @@ export class TemporalTokenService {
 
     // check if the token has expired
     if (tokenEntity.expiresAt < new Date()) {
+      // delete the token
+      await this.delete(tokenEntity.id);
       throw new NotFoundException('Token has expired');
     }
 
