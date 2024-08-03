@@ -161,7 +161,7 @@ export class TripService {
       throw new NotFoundException('Trip not found');
     }
 
-    const tripDetails = this.buildTripDetails(trip, userId);
+    const tripDetails = this.buildTripDetails(trip as TripDocument, userId);
 
     return tripDetails;
   }
@@ -179,7 +179,10 @@ export class TripService {
       throw new NotFoundException('Trip not found');
     }
     // the return value of findByIdAndUpdate is the document before the update
-    const tripDetails = this.buildTripDetails(trip, currentUserId);
+    const tripDetails = this.buildTripDetails(
+      trip as TripDocument,
+      currentUserId,
+    );
     return tripDetails;
   }
 

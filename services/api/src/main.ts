@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { constants } from 'constants/constants';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import helmet from 'helmet';
 import passport from 'passport';
 import { AppModule } from './app.module';
 import configuration from './config/configuration';
@@ -21,7 +20,6 @@ async function bootstrap() {
     }),
   );
   app.setGlobalPrefix(`${constants.api.prefix}/${constants.api.version}`);
-  app.use(helmet());
 
   app.use(cookieParser());
   app.use(

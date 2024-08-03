@@ -1,10 +1,23 @@
 {
-  "name": "nestjs-mongo-docker",
-  "version": "0.1.0",
-  "description": "Nest.js + Mongo + Docker Starter",
-  "author": "Pol Gubau Amores <gubaupol@gmail.com>",
+  "name": "tripelse",
+  "description": "Tripelse nest API server",
+  "version": "0.0.1",
+  "author": {
+    "name": "Tripelse",
+    "email": "tripelseapp@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Pol Gubau Amores",
+      "email": "gubaupol@gmail.com"
+    },
+    {
+      "name": "Albert Arrebola",
+      "email": "albertarrebola8@gmail.com"
+    }
+  ],
+  "license": "ISC",
   "private": true,
-  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

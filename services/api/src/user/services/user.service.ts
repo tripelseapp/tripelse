@@ -1,14 +1,12 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserFromProvider } from 'auth/types/User-from-google.type';
-import { PageMetaDto } from 'common/resources/pagination';
-import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
-import { PageDto } from 'common/resources/pagination/page.dto';
 import { FilterQuery, Model } from 'mongoose';
 import { ProfileDocument } from 'profile/entities/profile.entity';
 import { ProfileService } from 'profile/profile.service';
@@ -31,7 +29,11 @@ import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
 import { hashPassword } from '../utils/password-utils';
-import { NewUserPasswordDto } from 'user/dto/new-password-dto';
+import {
+  PageDto,
+  PageMetaDto,
+  PageOptionsDto,
+} from 'common/resources/pagination';
 
 interface findUserOptions {
   email?: string;
@@ -55,14 +57,14 @@ export class UserService {
       createUserDto.username,
     );
     if (usernameExists) {
-      throw new BadRequestException('Username already exists');
+      throw new ConflictException('Username already exists');
     }
 
     const emailExists = await this.findUser({
       email: createUserDto.email,
     });
     if (emailExists) {
-      throw new BadRequestException('Email already exists');
+      throw new ConflictException('Email already exists');
     }
 
     if (!createUserDto.password) {
@@ -237,7 +239,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const parsedUser = getUserDetails(user);
+    const parsedUser = getUserDetails(user as UserDocument);
     return parsedUser;
   }
 
@@ -289,7 +291,7 @@ export class UserService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      return getUserDetails(user);
+      return getUserDetails(user as UserDocument);
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(err);
@@ -309,7 +311,7 @@ export class UserService {
       throw new BadRequestException('Invalid ID');
     }
 
-    const parsedUser = getUserDetails(user);
+    const parsedUser = getUserDetails(user as UserDocument);
 
     return parsedUser;
   }
@@ -369,7 +371,7 @@ export class UserService {
       throw new BadRequestException('Invalid ID');
     }
 
-    const parsedUser = getUserDetails(user);
+    const parsedUser = getUserDetails(user as UserDocument);
 
     return parsedUser;
   }
