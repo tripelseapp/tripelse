@@ -26,7 +26,7 @@ export function setupSwagger(app: INestApplication): void {
       operationsSorter: 'alpha', // Sort operations within each tag alphabetically
       docExpansion: 'none',
       deepLinking: true,
-      displayOperationId: true,
+      displayOperationId: false,
       defaultModelsExpandDepth: 2,
       defaultModelExpandDepth: 2,
       tryItOutEnabled: true, // Enable the "Try it out" feature by default

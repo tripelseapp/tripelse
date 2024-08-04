@@ -283,13 +283,13 @@ export class TripService {
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
-    const userIdObjectId = new Types.ObjectId(userId); // Correct instantiation
+    const userIdObjectId = new Types.ObjectId(userId);
 
     const filters = {
       search,
       startDate,
       endDate,
-      travelers: [userIdObjectId], // Ensure this is an array for $in
+      travelers: [userIdObjectId],
     };
 
     const { query, countQuery } = buildQueryWithCount<TripDocument>({

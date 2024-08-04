@@ -19,7 +19,7 @@ import { TripService } from '../services/trip.service';
 
 @Controller('trip-user')
 @ApiCookieAuth()
-@ApiTags('Trip-User')
+@ApiTags('Trip / User Relationship')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TripUserController {
   constructor(private readonly tripService: TripService) {}
@@ -42,18 +42,18 @@ export class TripUserController {
 
     return this.tripService.findByUserId(userId, pageOptionsDto);
   }
-  @Get('my-trips')
+  @Get('mine')
   @ApiOperation({
-    summary: 'List all trips',
-    description: 'Returns an array of all trips. Supports pagination',
+    summary: 'List all trips for the current user',
+    description:
+      'Returns an array of all trips where the current user is a traveler',
   })
   @ApiPaginatedResponse(TripInListDto)
   async getMyTrips(
-    @Req() req: ReqWithUser,
     @Query() pageOptionsDto: PageOptionsDto,
+    @Req() req: ReqWithUser,
   ): Promise<PageDto<TripInListDto>> {
     const userId = req.user.id;
-    console.log('userId', userId);
 
     if (!userId) {
       throw new BadRequestException('User not found');
@@ -66,7 +66,7 @@ export class TripUserController {
       throw new BadRequestException('orderBy must be a string or an array');
     }
 
-    return this.tripService.findByUserId(String(userId), pageOptionsDto);
+    return this.tripService.findByUserId(userId, pageOptionsDto);
   }
 
   @Patch(':tripId/add/:userId')
