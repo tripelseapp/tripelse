@@ -15,8 +15,3 @@ export class RefreshTokenDto {
   })
   readonly refreshToken: string;
 }
-
-// Example usage of the DTO
-export const ExampleRefreshTokenDto: RefreshTokenDto = {
-  refreshToken: '$2b$10$E6iZH4hKXhBR1FjBoZBOseKu5ey.BVlSxR.lBGsosHXPqZpJ/dwZK',
-};

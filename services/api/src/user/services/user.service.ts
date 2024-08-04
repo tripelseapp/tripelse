@@ -1,22 +1,26 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserFromProvider } from 'auth/types/User-from-google.type';
-import { PageMetaDto } from 'common/resources/pagination';
-import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
-import { PageDto } from 'common/resources/pagination/page.dto';
+import {
+  PageDto,
+  PageMetaDto,
+  PageOptionsDto,
+} from 'common/resources/pagination';
 import { FilterQuery, Model } from 'mongoose';
 import { ProfileDocument } from 'profile/entities/profile.entity';
 import { ProfileService } from 'profile/profile.service';
+import { TemporalTokenService } from 'temporal-token/services/temporal-token.service';
 import { PopulatedUserDocument } from 'user/types/populated-user.type';
+import { getUsersInList } from 'user/utils/get-users-list';
 import { passwordStrongEnough } from 'utils/password-checker';
 import {
   BuildQueryOptions,
-  buildQuery,
   buildQueryWithCount,
   buildSorting,
 } from 'utils/query-utils';
@@ -29,8 +33,7 @@ import { UserDocument, UserEntity } from '../entities/user.entity';
 import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
-import { comparePassword, hashPassword } from '../utils/password-utils';
-import { getUserInList, getUsersInList } from 'user/utils/get-users-list';
+import { UserDto } from 'user/dto/user.dto';
 
 interface findUserOptions {
   email?: string;
@@ -44,6 +47,7 @@ export class UserService {
     @InjectModel(UserEntity.name)
     private userModel: Model<UserDocument>,
     private profileService: ProfileService,
+    private readonly tokenService: TemporalTokenService,
   ) {}
 
   public async create(
@@ -53,14 +57,14 @@ export class UserService {
       createUserDto.username,
     );
     if (usernameExists) {
-      throw new BadRequestException('Username already exists');
+      throw new ConflictException('Username already exists');
     }
 
     const emailExists = await this.findUser({
       email: createUserDto.email,
     });
     if (emailExists) {
-      throw new BadRequestException('Email already exists');
+      throw new ConflictException('Email already exists');
     }
 
     if (!createUserDto.password) {
@@ -213,9 +217,13 @@ export class UserService {
     }
   }
 
-  public async update(id: string, data: UpdateUserDto): Promise<UserDetails> {
+  public async update(
+    id: string,
+    data: Partial<UserDto>,
+  ): Promise<UserDetails> {
     try {
       const newUser = { ...data, updatedAt: new Date() };
+
       const savedUser = (await this.userModel
         .findByIdAndUpdate(id, newUser, { new: true })
         .lean()
@@ -235,7 +243,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const parsedUser = getUserDetails(user);
+    const parsedUser = getUserDetails(user as UserDocument);
     return parsedUser;
   }
 
@@ -287,7 +295,7 @@ export class UserService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      return getUserDetails(user);
+      return getUserDetails(user as UserDocument);
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(err);
@@ -307,42 +315,7 @@ export class UserService {
       throw new BadRequestException('Invalid ID');
     }
 
-    const parsedUser = getUserDetails(user);
-
-    return parsedUser;
-  }
-
-  public async updatePassword(
-    id: string,
-    password: string,
-  ): Promise<UserDetails> {
-    // check if the user already had the same password
-    const oldUser = await this.userModel.findById(id, { password: 1 }).lean();
-    if (!oldUser) {
-      throw new BadRequestException('Invalid ID');
-    }
-    if (!oldUser.password) {
-      throw new BadRequestException('User does not have a password');
-    }
-    const isSamePassword = await comparePassword(password, oldUser.password);
-    if (isSamePassword) {
-      throw new BadRequestException(
-        'New password must be different from the old password',
-      );
-    }
-
-    const hashedPassword = await hashPassword(password);
-
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, { password: hashedPassword }, { new: true })
-      .lean()
-      .exec();
-
-    if (!updatedUser) {
-      throw new BadRequestException('Invalid ID');
-    }
-
-    const parsedUser = getUserDetails(updatedUser);
+    const parsedUser = getUserDetails(user as UserDocument);
 
     return parsedUser;
   }
@@ -359,7 +332,7 @@ export class UserService {
       throw new BadRequestException('Invalid ID');
     }
 
-    const parsedUser = getUserDetails(user);
+    const parsedUser = getUserDetails(user as UserDocument);
 
     return parsedUser;
   }

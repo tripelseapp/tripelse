@@ -5,7 +5,6 @@ import { TripController } from './controllers/trip.controller';
 import { TripService } from './services/trip.service';
 import { UserModule } from 'user/user.module';
 import { TripUserController } from './controllers/trip-user.controller';
-import { InvitationModule } from 'invitation/invitation.module';
 
 @Module({
   imports: [
@@ -16,7 +15,6 @@ import { InvitationModule } from 'invitation/invitation.module';
       },
     ]),
     UserModule,
-    InvitationModule,
   ],
   controllers: [TripController, TripUserController],
   providers: [TripService],

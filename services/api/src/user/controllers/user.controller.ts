@@ -34,7 +34,6 @@ import {
 import { getUserProfileDetails } from 'user/utils/get-users-profile-details';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { NewUserPasswordDto } from '../dto/new-password-dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import {
   ExampleUserDetailsDto,
@@ -45,7 +44,6 @@ import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
 
 @Controller('user')
-@ApiCookieAuth()
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('User Management / Users')
 export class UserController {
@@ -276,43 +274,6 @@ export class UserController {
       throw new BadRequestException('User not found');
     }
     return getUserProfileDetails(user);
-  }
-
-  //  - Update an user Password by id
-  @Patch(':id/password')
-  @ApiOperation({
-    summary: 'Update user password by id',
-    description: 'Updates a single user password with a matching id.',
-  })
-  @ApiOkResponse({
-    status: HttpStatus.OK,
-    type: UserDetailsDto,
-    description: 'User password updated',
-    example: ExampleUserDetailsDto,
-  })
-  @ApiBadRequestResponse({
-    status: HttpStatus.BAD_REQUEST,
-    type: BadRequestException,
-    description: 'Bad Request',
-    example: {
-      message: ['Invalid ID'],
-      error: 'Bad Request',
-      statusCode: 400,
-    },
-  })
-  async updatePassword(
-    @Param('id', ParseObjectIdPipe) id: string,
-    @Body() body: NewUserPasswordDto,
-  ) {
-    const newPassword = body.password;
-    if (!newPassword) {
-      throw new BadRequestException('Password cannot be empty');
-    }
-    const updatedUser = await this.userService.updatePassword(id, newPassword);
-    if (!updatedUser) {
-      throw new BadRequestException('This user ID did not exist');
-    }
-    return updatedUser;
   }
 
   @Get(':id/profile')

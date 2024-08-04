@@ -4,22 +4,22 @@ import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { join } from 'path';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
-import { constants } from 'constants/constants';
+import config from 'config/config';
 
 @Module({
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: constants.mail.host,
-        port: Number(constants.mail.port),
+        host: config().email.host,
+        port: Number(config().email.port),
         secure: true,
         auth: {
-          user: constants.mail.user,
-          pass: constants.mail.pass,
+          user: config().email.user,
+          pass: config().email.password,
         },
       },
       defaults: {
-        from: `"Tripelse" <${constants.mail.user}>`,
+        from: `"Tripelse" <${config().email.user}>`,
       },
       template: {
         dir: join(__dirname, 'templates'),

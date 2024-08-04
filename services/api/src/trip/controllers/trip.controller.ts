@@ -33,6 +33,7 @@ import { TripInListDto } from '../dto/trip/trip-list.dto';
 import { UpdateTripDto } from '../dto/trip/update-trip.dto';
 import { TripService } from '../services/trip.service';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
+import { UserInList } from 'user/dto/user-list.dto';
 
 @Controller('Trip')
 @ApiCookieAuth()
@@ -63,19 +64,37 @@ export class TripController {
     }
     const currentUserId = currentUser.id;
 
+    const emailsToInvite = createTripDto.travelers;
+
     // add your Id to the travelers array
-    const travelers = createTripDto.travelers || [];
-    // check if the user is already in the travelers array
-    if (!travelers.includes(currentUserId)) {
-      travelers.push(currentUserId);
-    }
+    const travelers = [currentUserId];
+
+    // travelers will be your ID, the rest of people will be added when they accept the invitation sent by email
 
     const newTrip: CreateTripDto = {
       ...createTripDto,
       travelers: travelers,
     };
 
-    return this.tripService.create(newTrip, currentUser.id);
+    // send the invitation to the rest of the travelers
+
+    const tripCreated = this.tripService.create(newTrip, currentUser.id);
+
+    if (!tripCreated) {
+      throw new BadRequestException('Trip not created');
+    }
+
+    const creator: UserInList = {
+      id: currentUserId,
+      username: currentUser.username,
+      avatar: currentUser.avatar,
+    };
+
+    emailsToInvite.forEach((email) => {
+      this.tripService.sendTripInvitation(email, newTrip, creator);
+    });
+
+    return tripCreated;
   }
 
   // Find all paginated trips

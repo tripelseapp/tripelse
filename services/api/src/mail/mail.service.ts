@@ -10,9 +10,7 @@ export class MailService {
   @OnEvent('user.welcome')
   async welcomeEmail(data: EventPayloads['user.welcome']) {
     const { email, name } = data;
-
     const subject = `Welcome to ${name}`;
-
     await this.mailerService.sendMail({
       to: email,
       subject,
@@ -23,36 +21,54 @@ export class MailService {
     });
   }
 
-  @OnEvent('user.reset-password')
-  async forgotPasswordEmail(data: EventPayloads['user.reset-password']) {
-    const { name, email, link } = data;
+  @OnEvent('trip.invitation.known')
+  async tripInvitation(data: EventPayloads['trip.invitation.known']) {
+    const { email, trip, receptor, creator } = data;
+    const name = 'Tripelse';
+    const subject = `Your new trip "${trip.name}" !`;
 
-    const subject = `Company: Reset Password`;
+    await this.mailerService.sendMail({
+      to: email,
+      subject,
+      template: './welcome',
+      context: {
+        name,
+        trip,
+        receptor,
+        creator,
+      },
+    });
+  }
 
+  @OnEvent('user.password.reset')
+  async forgotPasswordEmail(data: EventPayloads['user.password.reset']) {
+    const { email, resetUrl, username } = data;
+
+    const subject = `Tripelse: Reset Password`;
     await this.mailerService.sendMail({
       to: email,
       subject,
       template: './forgot-password',
       context: {
-        link,
-        name,
+        resetUrl,
+        username,
       },
     });
   }
 
-  @OnEvent('user.verify-email')
-  async verifyEmail(data: EventPayloads['user.verify-email']) {
-    const { name, email, otp } = data;
+  @OnEvent('user.email.validate')
+  async verifyEmail(data: EventPayloads['user.email.validate']) {
+    const { username, email, url } = data;
 
-    const subject = `Company: OTP To Verify Email`;
+    const subject = `Tripelse: Verify Email`;
 
     await this.mailerService.sendMail({
       to: email,
       subject,
-      template: './verify-email',
+      template: './email-verification',
       context: {
-        otp,
-        name,
+        url,
+        username,
       },
     });
   }

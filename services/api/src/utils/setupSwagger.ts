@@ -1,6 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { constants } from '../constants/constants';
+import configuration from 'config/config';
 
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
@@ -8,7 +8,7 @@ export function setupSwagger(app: INestApplication): void {
     .setDescription('Visible endpoints for Tripelse API')
     .setVersion('1.0')
     .addCookieAuth(
-      constants.cookies.accessToken,
+      configuration().jwt.accessTokenCookie,
       {
         type: 'http',
         in: 'Header',

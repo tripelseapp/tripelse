@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { PassportSerializer } from '@nestjs/passport';
-import { AuthService } from 'auth/auth.service';
+import { AuthService } from '../services/auth.service';
 import { UserEntity } from '../../user/entities/user.entity';
 import { TokensRes } from 'auth/types/LoginRes.type';
 

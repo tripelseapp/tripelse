@@ -1,5 +1,3 @@
-import { UserEntity } from 'user/entities/user.entity';
-
 const isXCharsLong = (password: string, x: number): boolean => {
   return password.length >= x;
 };

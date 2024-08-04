@@ -1,8 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { jwtConstants } from 'auth/constants/jwt.constants';
 import { TokenPayload } from 'auth/types/token-payload.type';
-import { constants } from 'constants/constants';
+import config from 'config/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -10,7 +9,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
-          const cookieName = constants.cookies.accessToken;
+          const cookieName = config().jwt.accessTokenCookie;
           if (!cookieName) {
             throw new UnauthorizedException('Cookie not found');
           }
@@ -18,16 +17,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: jwtConstants.secret,
+      secretOrKey: config().jwt.secret,
     });
   }
 
   async validate(payload: TokenPayload) {
-    return {
-      id: payload.id,
-      username: payload.username,
-      roles: payload.roles,
-      avatar: payload.avatar,
-    };
+    const token: TokenPayload = payload;
+    return token;
   }
 }

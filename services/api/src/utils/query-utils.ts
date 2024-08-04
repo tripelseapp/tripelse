@@ -55,10 +55,13 @@ export function buildQuery<T extends Document>({
 }: BuildQueryOptions<T>): FilterQuery<T> {
   const conditions = buildFilterConditions(filters, searchIn);
 
-  let query = model.find(conditions);
+  let query = model.find(conditions as FilterQuery<T>) as ReturnType<
+    typeof model.find
+  >;
 
   if (fields.length > 0) {
-    query = query.select(fields.join(' '));
+    const allFields = fields.join(' ');
+    query = query.select(allFields) as ReturnType<typeof model.find>;
   }
 
   return query;

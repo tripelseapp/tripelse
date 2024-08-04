@@ -9,22 +9,21 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from 'common/decorators/publicRoute.decorator';
 import { Request, Response } from 'express';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { LocalAuthGuard } from './guards/local.guard';
-import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
-import { TokensRes } from './types/LoginRes.type';
-import { ReqWithUser } from './types/token-payload.type';
-import { constants } from 'constants/constants';
+import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { LoginDto } from '../dto/login.dto';
+import { RefreshTokenDto } from '../dto/refresh-token.dto';
+import { GoogleAuthGuard } from '../guards/google-auth.guard';
+import { LocalAuthGuard } from '../guards/local.guard';
+import { RefreshJwtAuthGuard } from '../guards/refresh-jwt-auth.guard';
+import { AuthService } from '../services/auth.service';
+import { TokensRes } from '../types/LoginRes.type';
+import { ReqWithUser } from '../types/token-payload.type';
+import config from 'config/config';
 
 @ApiTags('Auth')
-@ApiCookieAuth('Access token')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -36,13 +35,13 @@ export class AuthController {
   })
   async register(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     const registerRes = await this.authService.register(createUserDto);
-    const accessCookieName = constants.cookies.accessToken;
+    const accessCookieName = config().jwt.accessTokenCookie;
     if (!accessCookieName) {
       throw new NotFoundException(
         'Access token cookie name not found in environment variables, contact the administrator',
       );
     }
-    const refreshCookieName = constants.cookies.refreshToken;
+    const refreshCookieName = config().jwt.refreshTokenCookie;
     if (!refreshCookieName) {
       throw new NotFoundException(
         'Refresh token cookie name not found in environment variables, contact the administrator',
@@ -91,13 +90,13 @@ export class AuthController {
   ): Promise<Response<LoginDto, any>> {
     const loginRes = await this.authService.login(loginDto);
 
-    const accessCookieName = constants.cookies.accessToken;
+    const accessCookieName = config().jwt.accessTokenCookie;
     if (!accessCookieName) {
       throw new NotFoundException(
         'Access token cookie name not found in environment variables, contact the administrator',
       );
     }
-    const refreshCookieName = constants.cookies.refreshToken;
+    const refreshCookieName = config().jwt.refreshTokenCookie;
     if (!refreshCookieName) {
       throw new NotFoundException(
         'Refresh token cookie name not found in environment variables, contact the administrator',
@@ -134,13 +133,13 @@ export class AuthController {
   googleAuthRedirect(@Req() req: ReqWithUser, @Res() res: Response) {
     const loginTokens = this.authService.googleLogin(req);
     const tokens = loginTokens as unknown as TokensRes;
-    const accessCookieName = constants.cookies.accessToken;
+    const accessCookieName = config().jwt.accessTokenCookie;
     if (!accessCookieName) {
       throw new NotFoundException(
         'Access token cookie name not found in environment variables, contact the administrator',
       );
     }
-    const refreshCookieName = constants.cookies.refreshToken;
+    const refreshCookieName = config().jwt.refreshTokenCookie;
     if (!refreshCookieName) {
       throw new NotFoundException(
         'Refresh token cookie name not found in environment variables, contact the administrator',
@@ -176,7 +175,7 @@ export class AuthController {
     @Res() res: Response,
   ): Promise<Response<RefreshTokenDto, any>> {
     // get the refresh cookie and check if it exists
-    const refreshCookieName = constants.cookies.refreshToken;
+    const refreshCookieName = config().jwt.refreshTokenCookie;
     if (!refreshCookieName) {
       throw new NotFoundException(
         'Refresh token cookie name not found in environment variables, contact the administrator',
@@ -195,7 +194,7 @@ export class AuthController {
     const newToken = await this.authService.refreshToken(req.user);
 
     // delete the old access token and set the new one
-    const accessCookieName = constants.cookies.accessToken;
+    const accessCookieName = config().jwt.accessTokenCookie;
     if (!accessCookieName) {
       throw new NotFoundException(
         'Access token cookie name not found in environment variables, contact the administrator',
@@ -222,8 +221,8 @@ export class AuthController {
   @Public()
   @Post('logout')
   async logout(@Res() res: Response) {
-    const accessCookieName = constants.cookies.accessToken;
-    const refreshCookieName = constants.cookies.refreshToken;
+    const accessCookieName = config().jwt.accessTokenCookie;
+    const refreshCookieName = config().jwt.refreshTokenCookie;
 
     if (!accessCookieName || !refreshCookieName) {
       throw new NotFoundException(

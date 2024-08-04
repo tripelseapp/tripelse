@@ -10,6 +10,7 @@ import { ProfileModule } from '../profile/profile.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from 'auth/guards/jwt.guard';
 import { RolesController } from './controllers/role.controller';
+import { TemporalTokenModule } from 'temporal-token/temporal-token.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RolesController } from './controllers/role.controller';
       },
     }),
     ProfileModule,
+    TemporalTokenModule,
   ],
   controllers: [UserController, RolesController],
   providers: [
