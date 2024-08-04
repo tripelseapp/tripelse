@@ -20,9 +20,23 @@ export function setupSwagger(app: INestApplication): void {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
+      filter: true, // Allows filtering the endpoints
+      showRequestDuration: true,
       tagsSorter: 'alpha', // Sort tags alphabetically for better organization
       operationsSorter: 'alpha', // Sort operations within each tag alphabetically
       docExpansion: 'none',
+      deepLinking: true,
+      displayOperationId: true,
+      defaultModelsExpandDepth: 2,
+      defaultModelExpandDepth: 2,
+      tryItOutEnabled: true, // Enable the "Try it out" feature by default
+      syntaxHighlight: {
+        activate: true,
+        theme: 'agate', // Options: 'agate', 'arta', 'monokai', etc.
+      },
+      showCommonExtensions: true,
+      customSiteTitle: 'Tripelse API',
+
       requestInterceptor: (req: any) => {
         req.credentials = 'include';
         return req;

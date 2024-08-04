@@ -16,6 +16,9 @@ export class CreateTripDto extends PickType(TripDto, [
   'description',
   'expenses',
   'thumbnail',
+  'moods',
+  'purposes',
+  'logistics',
 ] as const) {
   @IsDateString()
   @IsNotEmpty()
@@ -48,49 +51,6 @@ export class CreateTripDto extends PickType(TripDto, [
     },
   })
   readonly travelers: string[];
-
-  @IsArray()
-  @IsOptional()
-  @ApiPropertyOptional({
-    description: 'The moods associated with the trip.',
-    type: 'array',
-    enum: MoodsEnum,
-    default: [],
-    items: {
-      type: 'string',
-      example: MoodsEnum.RELAX,
-    },
-  })
-  readonly moods: MoodsEnum[];
-
-  @IsArray()
-  @IsOptional()
-  @ApiPropertyOptional({
-    description: 'The purposes of the trip.',
-    type: 'array',
-    enum: PurposesEnum,
-    default: [],
-    items: {
-      type: 'string',
-      example: PurposesEnum.ROMANTIC,
-    },
-  })
-  readonly purposes: PurposesEnum[];
-
-  @IsArray()
-  @IsOptional()
-  @ApiPropertyOptional({
-    description:
-      'The logistics of the trip, encompassing the mode of transport and types of accommodation.',
-    type: 'array',
-    enum: LogisticsEnum,
-    default: [],
-    items: {
-      type: 'string',
-      example: LogisticsEnum.CAMPER,
-    },
-  })
-  readonly logistics: LogisticsEnum[];
 }
 
 export const CreateTripExample: CreateTripDto = {

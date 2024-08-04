@@ -29,6 +29,7 @@ import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
 import { UserInList } from 'user/dto/user-list.dto';
 import { getUserInList } from 'user/utils/get-users-list';
 import { UserDocument } from 'user/entities/user.entity';
+import { GetAllTripsDto } from 'trip/dto/trip/get-all-trips.dto';
 
 @Injectable()
 export class TripService {
@@ -83,7 +84,7 @@ export class TripService {
   }
 
   public async findAll(
-    pageOptionsDto: PageOptionsDto,
+    pageOptionsDto: GetAllTripsDto,
   ): Promise<PageDto<TripInListDto>> {
     const {
       page = 1,
@@ -92,14 +93,23 @@ export class TripService {
       search,
       startDate,
       endDate,
+      moods,
+      durations,
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
     const { query, countQuery } = buildQueryWithCount<TripDocument>({
       model: this.tripModel,
-      filters: { search, startDate, endDate },
+      filters: { search, startDate, endDate, moods, durations },
       searchIn: ['name', 'description'],
-      fields: ['name', 'description', 'thumbnail', 'travelers'],
+      fields: [
+        'name',
+        'description',
+        'thumbnail',
+        'travelers',
+        'moods',
+        'days',
+      ],
     });
 
     const tripsQuery = query

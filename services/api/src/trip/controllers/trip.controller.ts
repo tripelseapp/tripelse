@@ -34,6 +34,7 @@ import { UpdateTripDto } from '../dto/trip/update-trip.dto';
 import { TripService } from '../services/trip.service';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
 import { UserInList } from 'user/dto/user-list.dto';
+import { GetAllTripsDto } from 'trip/dto/trip/get-all-trips.dto';
 
 @Controller('Trip')
 @ApiCookieAuth()
@@ -107,7 +108,7 @@ export class TripController {
   })
   @ApiPaginatedResponse(TripInListDto)
   async getUsers(
-    @Query() pageOptionsDto: PageOptionsDto,
+    @Query() pageOptionsDto: GetAllTripsDto,
   ): Promise<PageDto<TripInListDto>> {
     const order = pageOptionsDto.orderBy;
     if (typeof order === 'string') {
