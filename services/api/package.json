@@ -1,10 +1,23 @@
 {
-  "name": "nestjs-mongo-docker",
-  "version": "0.1.0",
-  "description": "Nest.js + Mongo + Docker Starter",
-  "author": "Pol Gubau Amores <gubaupol@gmail.com>",
+  "name": "tripelse",
+  "description": "Tripelse nest API server",
+  "version": "0.0.1",
+  "author": {
+    "name": "Tripelse",
+    "email": "tripelseapp@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Pol Gubau Amores",
+      "email": "gubaupol@gmail.com"
+    },
+    {
+      "name": "Albert Arrebola",
+      "email": "albertarrebola8@gmail.com"
+    }
+  ],
+  "license": "ISC",
   "private": true,
-  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -18,10 +31,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "docker:dev": "docker-compose up",
-    "docker:build": "docker-compose build",
-    "docker:run": "docker-compose up --watch",
-    "docker:reset": "pnpm run docker:down && pnpm run docker:build && pnpm run docker:dev"
+    "docs:generate": "npx @compodoc/compodoc -p tsconfig.json -s",
+    "run:dev": "docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build",
+    "run:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
@@ -50,7 +62,6 @@
   },
   "devDependencies": {
     "@nestjs/cli": "10.4.1",
-    "@nestjs/devtools-integration": "^0.1.6",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/schematics": "10.1.2",

@@ -3,6 +3,23 @@
     "@nestjs/mapped-types": "*"
   },
   "name": "tripelse",
+  "description": "Tripelse Monorepo",
+  "version": "0.0.1",
+  "author": {
+    "name": "Tripelse",
+    "email": "tripelseapp@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Pol Gubau Amores",
+      "email": "gubaupol@gmail.com"
+    },
+    {
+      "name": "Albert Arrebola",
+      "email": "albertarrebola8@gmail.com"
+    }
+  ],
+  "license": "ISC",
   "private": true,
   "scripts": {
     "build": "turbo build",
