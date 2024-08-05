@@ -62,6 +62,7 @@ export class AuthService {
       username: user.username,
       roles: user.roles,
       avatar: user.profile.avatar,
+      profileId: String(user.profile._id),
     });
   }
   public async register(createUserDto: CreateUserDto): Promise<TokensRes> {
@@ -81,20 +82,14 @@ export class AuthService {
       email: savedUser.email,
       roles: savedUser.roles,
       avatar: savedUser.profile.avatar,
+      profileId: String(savedUser.profile._id),
     });
   }
 
   async buildResponseWithToken(payload: TokenPayload): Promise<TokensRes> {
     try {
-      const payloadData: TokenPayload = {
-        id: payload.id,
-        username: payload.username,
-        email: payload.email,
-        roles: payload.roles,
-        avatar: payload.avatar,
-      };
-      const accessToken = await this.jwtService.signAsync(payloadData);
-      const refreshToken = this.jwtService.sign(payloadData, {
+      const accessToken = await this.jwtService.signAsync(payload);
+      const refreshToken = this.jwtService.sign(payload, {
         expiresIn: config().jwt.expiration,
       });
 
@@ -122,6 +117,7 @@ export class AuthService {
         roles: user.roles,
         email: user.email,
         avatar: user.profile.avatar,
+        profileId: String(user.profile._id),
       });
     }
 
@@ -135,6 +131,7 @@ export class AuthService {
         email: userCreated.email,
         roles: userCreated.roles,
         avatar: userCreated.profile.avatar,
+        profileId: String(userCreated.profile._id),
       });
     } catch (error) {
       throw new HttpException(
@@ -156,6 +153,7 @@ export class AuthService {
     }
 
     if (user && (await comparePassword(pass, user.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are removing the password from the user object
       const { password, ...result } = user;
       return result;
     }

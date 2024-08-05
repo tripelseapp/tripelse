@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { SavedTripsDocument } from './saved-trips.entity';
 
-// TO AVOID CIRCULAR DEPENDENCIES, NEVER REFERENCE USERENTITY DIRECTLY
 @Schema({
   timestamps: true,
 })
@@ -33,12 +33,11 @@ export class ProfileEntity {
   @Prop({ required: true, default: Date.now })
   updatedAt: Date;
 
-  // @Prop({
-  //   required: true,
-  //   default: [],
-  //   type: [{ type: MongooseSchema.Types.ObjectId, ref: 'TripEntity' }],
-  // })
-  // favoriteTrips: MongooseSchema.Types.ObjectId[];
+  @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'SavedTripsEntity' }],
+    default: [],
+  })
+  savedTrips: SavedTripsDocument[];
 }
 
 export type ProfileDocument = HydratedDocument<ProfileEntity>;

@@ -8,6 +8,7 @@ export type TokenPayload = {
   email: string;
   roles: Role[];
   avatar: ProfileEntity['avatar'];
+  profileId: string;
 };
 
 export type ReqWithUser = Request & {

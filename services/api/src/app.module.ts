@@ -10,6 +10,7 @@ import { TemporalTokenModule } from './temporal-token/temporal-token.module';
 import { TripModule } from './trip/trip.module';
 import { UserModule } from './user/user.module';
 import { validate } from './env.validation';
+import { ProfileModule } from 'profile/profile.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { validate } from './env.validation';
     }),
     MongooseModule.forRoot(configuration().db.uri, {}),
     UserModule,
+    ProfileModule,
     TripModule,
     AuthModule,
     MailModule,

@@ -29,7 +29,6 @@ export class RolesGuard implements CanActivate {
     if (!userRoles) {
       throw new UnauthorizedException('User has no roles');
     }
-    console.log('USER ROLES ', userRoles);
 
     const hasAcces = this.matchRoles(roles, user.roles);
     if (!hasAcces) {

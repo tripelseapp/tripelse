@@ -22,7 +22,7 @@ export class MailService {
   }
 
   @OnEvent('trip.invitation.known')
-  async tripInvitation(data: EventPayloads['trip.invitation.known']) {
+  async tripInvitationKnown(data: EventPayloads['trip.invitation.known']) {
     const { email, trip, receptor, creator } = data;
     const name = 'Tripelse';
     const subject = `Your new trip "${trip.name}" !`;
