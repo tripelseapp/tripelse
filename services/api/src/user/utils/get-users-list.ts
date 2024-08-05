@@ -8,6 +8,7 @@ export const getUserInList = (user: UserDocument): UserInListDto => {
     id: String(user._id),
     username: user.username,
     avatar: populatedUser.profile?.avatar ?? null,
+    profileId: populatedUser.profile._id.toString(),
   };
 };
 

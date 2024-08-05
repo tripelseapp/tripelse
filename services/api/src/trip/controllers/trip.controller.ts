@@ -88,6 +88,7 @@ export class TripController {
     const creator: UserInList = {
       id: currentUserId,
       username: currentUser.username,
+      profileId: currentUser.profileId,
       avatar: currentUser.avatar,
     };
 

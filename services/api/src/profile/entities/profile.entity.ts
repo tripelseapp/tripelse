@@ -21,11 +21,18 @@ export class ProfileEntity {
   @Prop({ required: false, default: null, type: Date })
   birthDate: Date | null;
 
-  @Prop({ required: true, default: [] })
-  followers: MongooseSchema.Types.ObjectId[];
-
-  @Prop({ required: true, default: [] })
-  following: MongooseSchema.Types.ObjectId[];
+  @Prop({
+    required: true,
+    default: [],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'UserEntity' }],
+  })
+  followers: string[];
+  @Prop({
+    required: true,
+    default: [],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'UserEntity' }],
+  })
+  following: string[];
 
   @Prop({ required: true, default: Date.now })
   createdAt: Date;
@@ -43,6 +50,9 @@ export class ProfileEntity {
 export type ProfileDocument = HydratedDocument<ProfileEntity>;
 
 export const ProfileSchema = SchemaFactory.createForClass(ProfileEntity);
+ProfileSchema.index({ followers: 1 });
+ProfileSchema.index({ following: 1 });
+
 ProfileSchema.pre<ProfileEntity>('save', async function (next) {
   const now = new Date();
   this.updatedAt = now;

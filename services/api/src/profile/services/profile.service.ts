@@ -9,7 +9,6 @@ import {
   SavedTripsDocument,
   SavedTripsEntity,
 } from 'profile/entities/saved-trips.entity';
-import { TripService } from 'trip/services/trip.service';
 import { CreateProfileDto } from '../dto/create-profile.dto';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
 import { ProfileDocument, ProfileEntity } from '../entities/profile.entity';
@@ -153,28 +152,6 @@ export class ProfileService {
     return deletedFolder;
   }
 
-  async addSavedTripToProfile(
-    profileId: string,
-    savedTripId: string,
-  ): Promise<ProfileDocument> {
-    if (!isObjectIdOrHexString(profileId)) {
-      throw new NotFoundException('Invalid profile ID');
-    }
-
-    const newProfile = await this.profileModel
-      .findByIdAndUpdate(
-        profileId,
-        { $push: { savedTrips: savedTripId } },
-        { new: true },
-      )
-      .populate('savedTrips');
-
-    if (!newProfile) {
-      throw new NotFoundException('Profile not found');
-    }
-    return newProfile;
-  }
-
   async listMySavedTrips(profileId: string): Promise<ProfileDocument> {
     if (!isObjectIdOrHexString(profileId)) {
       throw new NotFoundException('Invalid profile ID');
@@ -252,5 +229,122 @@ export class ProfileService {
     }
 
     return updatedFolder;
+  }
+
+  // FOLLOW
+
+  async followUser(
+    profileId: string,
+    followeeProfileId: string,
+  ): Promise<ProfileDocument> {
+    if (
+      !isObjectIdOrHexString(profileId) ||
+      !isObjectIdOrHexString(followeeProfileId)
+    ) {
+      throw new NotFoundException('Invalid profile ID');
+    }
+
+    const profile = await this.profileModel.findById(profileId).exec();
+    const followeeProfile = await this.profileModel
+      .findById(followeeProfileId)
+      .exec();
+
+    if (!profile || !followeeProfile) {
+      throw new NotFoundException('Profile or followee not found');
+    }
+
+    // Check if the user is already following
+    if (profile.following.includes(followeeProfileId)) {
+      throw new InternalServerErrorException('Already following this user');
+    }
+
+    // Add followeeProfileId to following list
+    profile.following.push(followeeProfileId);
+    await profile.save();
+
+    // Add profileId to followers list of followee
+    followeeProfile.followers.push(profileId);
+    await followeeProfile.save();
+
+    return profile;
+  }
+  /**
+   *  Removing a Follower - This method will allow a profile to unfollow another profile:
+   * @returns  ProfileDocument
+   */
+  async unfollowUser(
+    profileId: string,
+    followeeProfileId: string,
+  ): Promise<ProfileDocument> {
+    if (
+      !isObjectIdOrHexString(profileId) ||
+      !isObjectIdOrHexString(followeeProfileId)
+    ) {
+      throw new NotFoundException('Invalid profile ID');
+    }
+
+    const profile = await this.profileModel.findById(profileId).exec();
+    const followeeProfile = await this.profileModel
+      .findById(followeeProfileId)
+      .exec();
+
+    if (!profile || !followeeProfile) {
+      throw new NotFoundException('Profile or followee not found');
+    }
+
+    // Check if the user is already not following
+    if (!profile.following.includes(followeeProfileId)) {
+      throw new InternalServerErrorException('Not following this user');
+    }
+
+    // Remove followeeProfileId from following list
+    profile.following = profile.following.filter(
+      (id) => id.toString() !== followeeProfileId,
+    );
+    await profile.save();
+
+    // Remove profileId from followers list of followee
+    followeeProfile.followers = followeeProfile.followers.filter(
+      (id) => id.toString() !== profileId,
+    );
+    await followeeProfile.save();
+
+    return profile;
+  }
+  /**
+   * Fetching Followers and Following Lists - This method will allow fetching the followers and following lists of a profile
+   */
+  async getFollowers(profileId: string): Promise<ProfileDocument> {
+    if (!isObjectIdOrHexString(profileId)) {
+      throw new NotFoundException('Invalid profile ID');
+    }
+
+    const profile = await this.profileModel
+      .findById(profileId)
+      .populate('followers')
+      .exec();
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return profile;
+  }
+
+  async getFollowing(profileId: string): Promise<ProfileDocument> {
+    if (!isObjectIdOrHexString(profileId)) {
+      throw new NotFoundException('Invalid profile ID');
+    }
+
+    const profile = await this.profileModel
+      .findById(profileId)
+      .populate('following')
+      .exec();
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return profile;
   }
 }

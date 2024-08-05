@@ -8,7 +8,7 @@ import { TemporalTokenService } from 'temporal-token/services/temporal-token.ser
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 
 @Controller('temporal-tokens')
-@ApiTags('temporal-tokens')
+@ApiTags('Temporal Tokens')
 export class TemporalTokenController {
   constructor(private readonly temporalTokenService: TemporalTokenService) {}
 

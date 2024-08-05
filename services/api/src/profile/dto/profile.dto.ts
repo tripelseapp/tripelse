@@ -9,11 +9,9 @@ import {
   MaxLength,
 } from 'class-validator';
 import { CommonDto } from 'common/common.dto';
-import { SavedTripDto } from './saved-trips/saved-trips.dto';
 import { SavedTripDetailsDto } from './saved-trips/saved-trips-details.dto';
 
 export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
-  //bio
   @IsString()
   @MaxLength(500)
   @ApiProperty({

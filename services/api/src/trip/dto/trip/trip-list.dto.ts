@@ -24,11 +24,13 @@ export const tripInListExample: TripInListDto = {
     {
       id: '60f5e7b3b7b3f3001d1f3e3d',
       username: 'John Doe',
+      profileId: '60f5e7b3b7b3f3001d1f3e3d',
       avatar: 'https://example.com/avatar.jpg',
     },
     {
       id: '60f5e7b3b7b3f3001d1f3e3d',
       username: 'Jane Doe',
+      profileId: '60f5e7b3b7b3f3001d1f3e3d',
       avatar: 'https://example.com/avatar.jpg',
     },
   ],

@@ -7,6 +7,8 @@ import {
   SavedTripsSchema,
 } from './entities/saved-trips.entity';
 import { ProfileService } from './services/profile.service';
+import { SavedTripsController } from './controllers/SavedTripsFolder.controller';
+import { FollowController } from './controllers/follow.controller';
 
 @Module({
   imports: [
@@ -15,7 +17,7 @@ import { ProfileService } from './services/profile.service';
       { name: ProfileEntity.name, schema: ProfileSchema },
     ]),
   ],
-  controllers: [ProfileController],
+  controllers: [ProfileController, SavedTripsController, FollowController],
   providers: [ProfileService],
   exports: [ProfileService],
 })
