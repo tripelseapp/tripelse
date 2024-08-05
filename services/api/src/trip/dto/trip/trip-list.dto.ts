@@ -13,7 +13,7 @@ export class TripInListDto extends PickType(TripDto, [
   'duration',
 ] as const) {}
 
-export const TripInListExample: TripInListDto = {
+export const tripInListExample: TripInListDto = {
   id: '60f5e7b3b7b3f3001d1f3e3d',
   name: 'A summer trip to the beach',
   duration: DurationsEnum.MEDIUM,

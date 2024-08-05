@@ -9,6 +9,7 @@ import {
   SavedTripsDocument,
   SavedTripsEntity,
 } from 'profile/entities/saved-trips.entity';
+import { TripService } from 'trip/services/trip.service';
 import { CreateProfileDto } from '../dto/create-profile.dto';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
 import { ProfileDocument, ProfileEntity } from '../entities/profile.entity';
@@ -114,6 +115,44 @@ export class ProfileService {
     return newProfile;
   }
 
+  async getSavedTripFolder(folderId: string): Promise<SavedTripsDocument> {
+    if (!isObjectIdOrHexString(folderId)) {
+      throw new NotFoundException('Invalid folder ID');
+    }
+
+    const folder = await this.savedTripsModel.findById(folderId).populate({
+      path: 'trips',
+      model: 'TripEntity',
+    });
+
+    if (!folder) {
+      throw new NotFoundException('Folder not found');
+    }
+
+    return folder;
+  }
+
+  async deleteSavedTripFolder(folderId: string) {
+    if (!isObjectIdOrHexString(folderId)) {
+      throw new NotFoundException('Invalid folder ID');
+    }
+
+    const folder = await this.savedTripsModel.findById(folderId);
+    if (!folder) {
+      throw new NotFoundException('Folder not found');
+    }
+
+    const deletedFolder = await this.savedTripsModel.findByIdAndDelete(
+      folderId,
+    );
+
+    if (!deletedFolder) {
+      throw new NotFoundException('Folder not found');
+    }
+
+    return deletedFolder;
+  }
+
   async addSavedTripToProfile(
     profileId: string,
     savedTripId: string,
@@ -134,5 +173,84 @@ export class ProfileService {
       throw new NotFoundException('Profile not found');
     }
     return newProfile;
+  }
+
+  async listMySavedTrips(profileId: string): Promise<ProfileDocument> {
+    if (!isObjectIdOrHexString(profileId)) {
+      throw new NotFoundException('Invalid profile ID');
+    }
+
+    const profile = await this.profileModel.findById(profileId).populate({
+      path: 'savedTrips',
+      populate: {
+        path: 'trips',
+        model: 'TripEntity',
+      },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+    return profile;
+  }
+
+  async removeTripFromFolder(
+    folderId: string,
+    tripIds: string[],
+  ): Promise<SavedTripsDocument> {
+    if (!isObjectIdOrHexString(folderId)) {
+      throw new NotFoundException('Invalid folder ID');
+    }
+
+    const folder = await this.savedTripsModel.findById(folderId);
+    if (!folder) {
+      throw new NotFoundException('Folder not found');
+    }
+
+    const updatedFolder = await this.savedTripsModel.findByIdAndUpdate(
+      folderId,
+      { $pull: { trips: { $in: tripIds } } },
+      { new: true },
+    );
+
+    if (!updatedFolder) {
+      throw new NotFoundException('Folder not found');
+    }
+
+    return updatedFolder;
+  }
+
+  async addTripToFolder(
+    folderId: string,
+    tripIds: string[],
+  ): Promise<SavedTripsDocument> {
+    if (!isObjectIdOrHexString(folderId)) {
+      throw new NotFoundException('Invalid folder ID');
+    }
+
+    // validate if the folder exists
+    const folder = await this.savedTripsModel.findById(folderId);
+
+    if (!folder) {
+      throw new NotFoundException('Folder not found');
+    }
+    // check if the folder already has the trip
+    const existingTrips = folder.trips;
+    const newTrips = tripIds.filter((id) => !existingTrips.includes(id));
+    if (newTrips.length === 0) {
+      throw new NotFoundException('Trip already exists in the folder');
+    }
+
+    const updatedFolder = await this.savedTripsModel.findByIdAndUpdate(
+      folderId,
+      { $push: { trips: { $each: tripIds } } },
+      { new: true },
+    );
+
+    if (!updatedFolder) {
+      throw new NotFoundException('Folder not found');
+    }
+
+    return updatedFolder;
   }
 }

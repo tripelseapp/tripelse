@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { CommonDto } from 'common/common.dto';
 import { SavedTripDto } from './saved-trips/saved-trips.dto';
+import { SavedTripDetailsDto } from './saved-trips/saved-trips-details.dto';
 
 export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
   //bio
@@ -98,8 +99,8 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
   @IsArray()
   @ApiPropertyOptional({
     description: 'Array of folders with saved trips',
-    type: [SavedTripDto],
+    type: [SavedTripDetailsDto],
     default: [],
   })
-  readonly savedTrips: SavedTripDto[];
+  readonly savedTrips: SavedTripDetailsDto[];
 }

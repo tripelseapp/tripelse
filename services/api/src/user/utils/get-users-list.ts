@@ -12,5 +12,6 @@ export const getUserInList = (user: UserDocument): UserInListDto => {
 };
 
 export const getUsersInList = (users: UserDocument[]): UserInListDto[] => {
-  return users.map((user) => getUserInList(user));
+  const array = users || [];
+  return array.map((user) => getUserInList(user));
 };

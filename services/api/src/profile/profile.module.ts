@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ProfileController } from './controllers/profile.controller';
 import { ProfileEntity, ProfileSchema } from './entities/profile.entity';
-import { ProfileService } from './services/profile.service';
 import {
   SavedTripsEntity,
   SavedTripsSchema,
 } from './entities/saved-trips.entity';
+import { ProfileService } from './services/profile.service';
 
 @Module({
   imports: [

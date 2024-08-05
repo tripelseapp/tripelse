@@ -20,5 +20,6 @@ export const getTripInList = (trip: TripDocument): TripInListDto => {
 };
 
 export const getTripsInList = (trips: TripDocument[]): TripInListDto[] => {
-  return trips.map((trip) => getTripInList(trip));
+  const array = trips || [];
+  return array.map((trip) => getTripInList(trip));
 };

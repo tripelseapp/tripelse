@@ -147,6 +147,10 @@ export class TripService {
       throw new Error('Error while fetching users.');
     }
   }
+  public async checkItExists(id: string): Promise<boolean> {
+    const trip = await this.tripModel.findById(id).lean().exec();
+    return !!trip;
+  }
 
   public async findOne(id: string, userId: string): Promise<TripDetailsDto> {
     const trip = await this.tripModel
