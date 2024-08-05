@@ -33,6 +33,8 @@ import { TripInListDto } from '../dto/trip/trip-list.dto';
 import { UpdateTripDto } from '../dto/trip/update-trip.dto';
 import { TripService } from '../services/trip.service';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
+import { UserInList } from 'user/dto/user-list.dto';
+import { GetAllTripsDto } from 'trip/dto/trip/get-all-trips.dto';
 
 @Controller('Trip')
 @ApiCookieAuth()
@@ -76,11 +78,24 @@ export class TripController {
     };
 
     // send the invitation to the rest of the travelers
+
+    const tripCreated = this.tripService.create(newTrip, currentUser.id);
+
+    if (!tripCreated) {
+      throw new BadRequestException('Trip not created');
+    }
+
+    const creator: UserInList = {
+      id: currentUserId,
+      username: currentUser.username,
+      avatar: currentUser.avatar,
+    };
+
     emailsToInvite.forEach((email) => {
-      this.tripService.sendTripInvitation(email, newTrip, currentUserId);
+      this.tripService.sendTripInvitation(email, newTrip, creator);
     });
 
-    return this.tripService.create(newTrip, currentUser.id);
+    return tripCreated;
   }
 
   // Find all paginated trips
@@ -93,7 +108,7 @@ export class TripController {
   })
   @ApiPaginatedResponse(TripInListDto)
   async getUsers(
-    @Query() pageOptionsDto: PageOptionsDto,
+    @Query() pageOptionsDto: GetAllTripsDto,
   ): Promise<PageDto<TripInListDto>> {
     const order = pageOptionsDto.orderBy;
     if (typeof order === 'string') {

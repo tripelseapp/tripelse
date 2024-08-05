@@ -37,7 +37,10 @@ function buildFilterConditions<T extends Document>(
 
   Object.keys(filters).forEach((key) => {
     if (!['search', 'startDate', 'endDate'].includes(key)) {
-      if (Array.isArray(filters[key])) {
+      if (!filters[key]) {
+        return;
+      }
+      if (Array.isArray(filters[key]) && filters[key].length > 0) {
         conditions[key] = { $in: filters[key] };
       } else {
         conditions[key] = filters[key];

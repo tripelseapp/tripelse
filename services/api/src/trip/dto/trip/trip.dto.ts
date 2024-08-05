@@ -1,4 +1,5 @@
 // trip.dto.ts
+import { Optional } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import {
   IsArray,
@@ -6,6 +7,7 @@ import {
   IsDateString,
   IsIn,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -92,6 +94,10 @@ export class TripDto extends PickType(CommonDto, [
     description: 'The list of user IDs that are part of the trip.',
     type: [Types.ObjectId],
     default: [],
+    items: {
+      type: 'string',
+      example: 'tripelseapp@gmail.com',
+    },
   })
   readonly travelers: UserInList[];
 
@@ -128,16 +134,18 @@ export class TripDto extends PickType(CommonDto, [
   })
   readonly areYouMember: boolean;
 
-  @IsArray()
-  @IsString({ each: true })
+  @IsOptional()
   @IsIn(Object.values(MoodsEnum), { each: true })
   @ApiPropertyOptional({
     description: 'Type of mood, experience user is looking for with the trip.',
-    type: 'string',
+    type: 'array',
     isArray: true,
-    default: [MoodsEnum.ADVENTURE],
+    items: {
+      type: 'string',
+      enum: Object.values(MoodsEnum),
+    },
   })
-  readonly moods: MoodsEnum[];
+  readonly moods?: MoodsEnum[];
 
   @IsArray()
   @IsString({ each: true })
@@ -171,6 +179,19 @@ export class TripDto extends PickType(CommonDto, [
     default: [DurationsEnum.SHORT],
   })
   readonly duration: DurationsEnum;
+
+  @IsOptional()
+  @IsIn(Object.values(DurationsEnum), { each: true })
+  @ApiPropertyOptional({
+    description: 'Array of possible duration to filter trips',
+    type: 'array',
+    isArray: true,
+    items: {
+      type: 'string',
+      enum: Object.values(DurationsEnum),
+    },
+  })
+  readonly durations?: DurationsEnum[];
 
   @IsArray()
   @IsString({ each: true })

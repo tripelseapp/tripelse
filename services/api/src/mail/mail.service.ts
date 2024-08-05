@@ -10,9 +10,7 @@ export class MailService {
   @OnEvent('user.welcome')
   async welcomeEmail(data: EventPayloads['user.welcome']) {
     const { email, name } = data;
-
     const subject = `Welcome to ${name}`;
-
     await this.mailerService.sendMail({
       to: email,
       subject,
@@ -22,9 +20,10 @@ export class MailService {
       },
     });
   }
-  @OnEvent('trip.invitation')
-  async tripInvitation(data: EventPayloads['trip.invitation']) {
-    const { email, trip, currentUserId } = data;
+
+  @OnEvent('trip.invitation.known')
+  async tripInvitation(data: EventPayloads['trip.invitation.known']) {
+    const { email, trip, receptor, creator } = data;
     const name = 'Tripelse';
     const subject = `Your new trip "${trip.name}" !`;
 
@@ -32,11 +31,11 @@ export class MailService {
       to: email,
       subject,
       template: './welcome',
-
       context: {
         name,
         trip,
-        currentUserId,
+        receptor,
+        creator,
       },
     });
   }

@@ -26,7 +26,6 @@ import {
 } from 'utils/query-utils';
 import { CreateProfileDto } from '../../profile/dto/create-profile.dto'; // Asegúrate de tener este DTO
 import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserDetails, UserDetailsDto } from '../dto/user-details.dto';
 import { UserInListDto } from '../dto/user-list.dto';
 import { UserDocument, UserEntity } from '../entities/user.entity';
@@ -276,16 +275,19 @@ export class UserService {
       })
       .select('+password')
       .populate('profile')
+      .lean()
       .exec();
 
     if (!user) {
-      return null;
+      throw new NotFoundException('User not found');
+    }
+    if (!user.profile) {
+      throw new InternalServerErrorException('User profile not found');
     }
 
-    const userPopulated: PopulatedUserDocument = {
-      ...user.toObject(),
-      profile: user?.profile as unknown as ProfileDocument,
-    };
+    const userPopulated = {
+      ...user,
+    } as unknown as PopulatedUserDocument;
     return userPopulated;
   }
 

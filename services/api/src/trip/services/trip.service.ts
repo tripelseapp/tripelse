@@ -26,6 +26,10 @@ import { getDays } from '../utils/create-days';
 import { getTripDetails } from '../utils/get-trip-details';
 import { UserService } from 'user/services/user.service';
 import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
+import { UserInList } from 'user/dto/user-list.dto';
+import { getUserInList } from 'user/utils/get-users-list';
+import { UserDocument } from 'user/entities/user.entity';
+import { GetAllTripsDto } from 'trip/dto/trip/get-all-trips.dto';
 
 @Injectable()
 export class TripService {
@@ -80,7 +84,7 @@ export class TripService {
   }
 
   public async findAll(
-    pageOptionsDto: PageOptionsDto,
+    pageOptionsDto: GetAllTripsDto,
   ): Promise<PageDto<TripInListDto>> {
     const {
       page = 1,
@@ -89,14 +93,23 @@ export class TripService {
       search,
       startDate,
       endDate,
+      moods,
+      durations,
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
     const { query, countQuery } = buildQueryWithCount<TripDocument>({
       model: this.tripModel,
-      filters: { search, startDate, endDate },
+      filters: { search, startDate, endDate, moods, durations },
       searchIn: ['name', 'description'],
-      fields: ['name', 'description', 'thumbnail', 'travelers'],
+      fields: [
+        'name',
+        'description',
+        'thumbnail',
+        'travelers',
+        'moods',
+        'days',
+      ],
     });
 
     const tripsQuery = query
@@ -270,13 +283,13 @@ export class TripService {
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
-    const userIdObjectId = new Types.ObjectId(userId); // Correct instantiation
+    const userIdObjectId = new Types.ObjectId(userId);
 
     const filters = {
       search,
       startDate,
       endDate,
-      travelers: [userIdObjectId], // Ensure this is an array for $in
+      travelers: [userIdObjectId],
     };
 
     const { query, countQuery } = buildQueryWithCount<TripDocument>({
@@ -339,14 +352,23 @@ export class TripService {
   public async sendTripInvitation(
     email: string,
     trip: CreateTripDto,
-    currentUserId: string,
+    creator: UserInList,
   ) {
-    const user = await this.userService.findUser({ email });
-
+    const userData = await this.userService.findUser({ email });
+    const user = getUserInList(userData as unknown as UserDocument);
     if (!user) {
-      this.eventEmitter.emit('trip.invitation', { email, trip, currentUserId });
+      this.eventEmitter.emit('trip.invitation.unknown', {
+        email,
+        trip,
+        creator,
+      });
     } else {
-      this.eventEmitter.emit('trip.invitation', { email, trip, currentUserId });
+      this.eventEmitter.emit('trip.invitation.known', {
+        email,
+        trip,
+        creator,
+        receptor: user,
+      });
     }
   }
 
