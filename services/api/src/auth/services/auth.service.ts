@@ -74,7 +74,7 @@ export class AuthService {
         email: createUserDto.email,
       });
     } catch (error) {
-      console.log('Error sending email', error);
+      console.error('Error sending email', error);
     }
     return await this.buildResponseWithToken({
       id: String(savedUser._id),

@@ -50,18 +50,12 @@ export class UserService {
   public async create(
     createUserDto: CreateUserDto,
   ): Promise<PopulatedUserDocument> {
-    const usernameExists = await this.findByUsernameOrEmail(
-      createUserDto.username,
-    );
-    if (usernameExists) {
-      throw new ConflictException('Username already exists');
-    }
-
-    const emailExists = await this.findUser({
+    const emailOrUsernameRepeated = await this.findUser({
       email: createUserDto.email,
+      username: createUserDto.username,
     });
-    if (emailExists) {
-      throw new ConflictException('Email already exists');
+    if (emailOrUsernameRepeated) {
+      throw new ConflictException('Email or Username already exists');
     }
 
     if (!createUserDto.password) {
@@ -227,7 +221,7 @@ export class UserService {
         .exec()) as UserDocument | null;
 
       if (!savedUser) {
-        throw new NotFoundException('User not found');
+        throw new NotFoundException('User to save not found ');
       }
       return getUserDetails(savedUser);
     } catch (err) {
@@ -275,13 +269,6 @@ export class UserService {
       .populate('profile')
       .lean()
       .exec();
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    if (!user.profile) {
-      throw new InternalServerErrorException('User profile not found');
-    }
 
     const userPopulated = {
       ...user,
@@ -339,7 +326,6 @@ export class UserService {
 
   async findOneWithProfile(id: string): Promise<PopulatedUserDocument> {
     try {
-      // populate profile and inside of profile populate favoriteTrips
       const user = await this.userModel
         .findById(id)
         .populate({

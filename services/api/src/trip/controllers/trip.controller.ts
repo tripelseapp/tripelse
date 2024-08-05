@@ -21,8 +21,9 @@ import {
 import { ReqWithUser, TokenPayload } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { Public } from 'common/decorators/publicRoute.decorator';
-import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
+import { GetAllTripsDto } from 'trip/dto/trip/get-all-trips.dto';
+import { UserInList } from 'user/dto/user-list.dto';
 import { ParseObjectIdPipe } from 'utils/parse-object-id-pipe.pipe';
 import { CreateTripDto, CreateTripExample } from '../dto/trip/create-trip.dto';
 import {
@@ -33,8 +34,6 @@ import { TripInListDto } from '../dto/trip/trip-list.dto';
 import { UpdateTripDto } from '../dto/trip/update-trip.dto';
 import { TripService } from '../services/trip.service';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
-import { UserInList } from 'user/dto/user-list.dto';
-import { GetAllTripsDto } from 'trip/dto/trip/get-all-trips.dto';
 
 @Controller('Trip')
 @ApiCookieAuth()
