@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -82,7 +81,11 @@ export class UserController {
   async findOneRaw(
     @Param('id') id: string,
   ): Promise<PopulatedUserDocument | null> {
-    return await this.userService.findUser({ id });
+    const user = await this.userService.findUser({ id });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return user;
   }
   // - Get user by id
 
@@ -107,8 +110,13 @@ export class UserController {
       statusCode: 400,
     },
   })
-  async findOne(@Param('id') id: string): Promise<UserDetails | null> {
-    return await this.userService.findById(id);
+  async findOneUser(@Param('id') id: string): Promise<UserDetailsDto | null> {
+    const userDocument = await this.userService.findUser({ id });
+    if (!userDocument) {
+      throw new BadRequestException('User not found');
+    }
+    const parsedData = getUserProfileDetails(userDocument);
+    return parsedData;
   }
 
   // - Get your profile by token
