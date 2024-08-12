@@ -36,9 +36,11 @@ export const tripDetailsExample: TripDetailsDto = {
   createdAt: new Date(),
   updatedAt: new Date(),
   expenses: [],
+
   createdBy: {
     id: '6695aebd76dcb559c2f56d17',
     username: 'John Doe',
+    profileId: '6695aebd76dcb559c2f56d17',
     avatar: 'https://example.com/avatar.jpg',
   },
   days: [DayExample1, DayExample2],

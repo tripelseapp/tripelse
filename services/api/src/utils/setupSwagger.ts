@@ -27,19 +27,11 @@ export function setupSwagger(app: INestApplication): void {
       docExpansion: 'none',
       deepLinking: true,
       displayOperationId: false,
-      defaultModelsExpandDepth: 2,
-      defaultModelExpandDepth: 2,
+
       tryItOutEnabled: true, // Enable the "Try it out" feature by default
       syntaxHighlight: {
         activate: true,
         theme: 'agate', // Options: 'agate', 'arta', 'monokai', etc.
-      },
-      showCommonExtensions: true,
-      customSiteTitle: 'Tripelse API',
-
-      requestInterceptor: (req: any) => {
-        req.credentials = 'include';
-        return req;
       },
     },
   });

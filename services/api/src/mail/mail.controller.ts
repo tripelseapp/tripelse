@@ -12,18 +12,23 @@ export class MailController {
     schema: {
       type: 'object',
       properties: {
-        name: {
-          type: 'string',
-          example: 'John Doe',
-        },
         email: {
           type: 'string',
           example: 'tripelseapp@gmail.com',
         },
+        username: {
+          type: 'string',
+          example: 'tripelseapp',
+        },
       },
     },
   })
-  async welcomeEmail(@Body() data: { name: string; email: string }) {
+  async welcomeEmail(@Body() body: { email: string; username: string }) {
+    const data = {
+      email: body.email,
+      username: body.username,
+    };
+
     return this.mailService.welcomeEmail(data);
   }
 }

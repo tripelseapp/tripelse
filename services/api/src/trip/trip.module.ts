@@ -14,6 +14,7 @@ import { TripUserController } from './controllers/trip-user.controller';
         schema: TripSchema,
       },
     ]),
+
     UserModule,
   ],
   controllers: [TripController, TripUserController],

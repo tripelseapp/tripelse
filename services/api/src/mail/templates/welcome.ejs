@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome</title>
-    <link rel="stylesheet" href="./styles.css" />
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -23,7 +22,9 @@
     </style>
   </head>
   <body>
-    <div class="welcome-message">Welcome !</div>
+    <div class="welcome-message">Welcome to <%= locals.appName %>!</div>
+    <p>Hi <%= locals.username %>,</p>
+
     <div class="user-details">
       <p>hola</p>
     </div>

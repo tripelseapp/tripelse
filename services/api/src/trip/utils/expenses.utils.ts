@@ -1,7 +1,8 @@
 import { TripDocument } from '../entities/trip.entity';
 
 export const sumAllExpenses = (trip: TripDocument): number => {
-  const tripExpenses = trip.expenses.reduce(
+  const expensesArray = trip.expenses || [];
+  const tripExpenses = expensesArray.reduce(
     (acc, curr) =>
       acc + curr.contributors.map((c) => c.amount).reduce((a, c) => a + c, 0),
     0,
