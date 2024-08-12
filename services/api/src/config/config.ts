@@ -11,6 +11,9 @@ const getEnv = (key: string) => {
 export default () => ({
   port: parseInt(getEnv('PORT'), 10),
   domain: getEnv('DOMAIN'),
+  app: {
+    name: getEnv('APP_NAME'),
+  },
   client: {
     domain: getEnv('CLIENT_DOMAIN'),
   },
