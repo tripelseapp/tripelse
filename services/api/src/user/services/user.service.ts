@@ -270,9 +270,14 @@ export class UserService {
       .lean()
       .exec();
 
+    if (!user) {
+      return null;
+    }
+
     const userPopulated = {
       ...user,
     } as unknown as PopulatedUserDocument;
+
     return userPopulated;
   }
 

@@ -2,7 +2,7 @@ import { CreateTripDto } from 'trip/dto/trip/create-trip.dto';
 import { UserInList } from 'user/dto/user-list.dto';
 
 export interface EventPayloads {
-  'user.welcome': { name: string; email: string };
+  'user.welcome': { username: string; email: string };
   'user.reset-password': { name: string; email: string; link: string };
   'user.verify-email': { name: string; email: string; otp: string };
   'trip.invitation.known': {

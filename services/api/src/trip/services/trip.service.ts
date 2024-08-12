@@ -11,9 +11,15 @@ import {
   PageMetaDto,
   PageOptionsDto,
 } from 'common/resources/pagination';
+import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
 import { FilterQuery, Model, Types } from 'mongoose';
+import { GetAllTripsDto } from 'trip/dto/trip/get-all-trips.dto';
 import { getTripsInList } from 'trip/utils/get-trip-list';
+import { UserInList } from 'user/dto/user-list.dto';
 import { UserDto } from 'user/dto/user.dto';
+import { UserDocument } from 'user/entities/user.entity';
+import { UserService } from 'user/services/user.service';
+import { getUserInList } from 'user/utils/get-users-list';
 import { buildQueryWithCount, buildSorting } from 'utils/query-utils';
 import { CreateTripDto } from '../dto/trip/create-trip.dto';
 import { TripDetailsDto } from '../dto/trip/trip-details.dto';
@@ -24,12 +30,6 @@ import { TripDocument, TripEntity } from '../entities/trip.entity';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
 import { getDays } from '../utils/create-days';
 import { getTripDetails } from '../utils/get-trip-details';
-import { UserService } from 'user/services/user.service';
-import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
-import { UserInList } from 'user/dto/user-list.dto';
-import { getUserInList } from 'user/utils/get-users-list';
-import { UserDocument } from 'user/entities/user.entity';
-import { GetAllTripsDto } from 'trip/dto/trip/get-all-trips.dto';
 
 @Injectable()
 export class TripService {
@@ -95,12 +95,22 @@ export class TripService {
       endDate,
       moods,
       durations,
+      budgets,
+      purposes,
     } = pageOptionsDto;
 
     const skip = (page - 1) * take;
     const { query, countQuery } = buildQueryWithCount<TripDocument>({
       model: this.tripModel,
-      filters: { search, startDate, endDate, moods, durations },
+      filters: {
+        search,
+        startDate,
+        endDate,
+        moods,
+        durations,
+        budget: budgets,
+        purposes,
+      },
       searchIn: ['name', 'description'],
       fields: [
         'name',
@@ -109,6 +119,9 @@ export class TripService {
         'travelers',
         'moods',
         'days',
+        'travelers',
+        'purposes',
+        'budget',
       ],
     });
 

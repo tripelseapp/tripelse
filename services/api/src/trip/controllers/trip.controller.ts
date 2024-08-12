@@ -107,7 +107,7 @@ export class TripController {
     description: 'Returns an array of all trips. Supports pagination',
   })
   @ApiPaginatedResponse(TripInListDto)
-  async getUsers(
+  async getAll(
     @Query() pageOptionsDto: GetAllTripsDto,
   ): Promise<PageDto<TripInListDto>> {
     const order = pageOptionsDto.orderBy;

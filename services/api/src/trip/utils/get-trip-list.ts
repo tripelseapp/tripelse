@@ -3,6 +3,7 @@ import { TripDocument } from 'trip/entities/trip.entity';
 import { UserDocument } from 'user/entities/user.entity';
 import { getUsersInList } from 'user/utils/get-users-list';
 import { getTripDuration } from './get-trip-duration.utils';
+import { getTripBudget } from './get-trip-budget.util';
 export interface TripDetailMetadata {
   active: boolean;
   areYouMember: boolean;
@@ -16,6 +17,8 @@ export const getTripInList = (trip: TripDocument): TripInListDto => {
     thumbnail: trip.thumbnail,
     travelers: getUsersInList(trip.travelers as unknown as UserDocument[]),
     moods: trip.moods,
+    budget: getTripBudget(trip),
+    purposes: trip.purposes,
   };
 };
 

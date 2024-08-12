@@ -16,15 +16,17 @@ export class MailController {
           type: 'string',
           example: 'tripelseapp@gmail.com',
         },
+        username: {
+          type: 'string',
+          example: 'tripelseapp',
+        },
       },
     },
   })
-  async welcomeEmail(@Body() body: { email: string }) {
-    const name = 'Tripelse';
-
+  async welcomeEmail(@Body() body: { email: string; username: string }) {
     const data = {
       email: body.email,
-      name,
+      username: body.username,
     };
 
     return this.mailService.welcomeEmail(data);

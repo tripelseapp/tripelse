@@ -70,8 +70,8 @@ export class AuthService {
 
     try {
       this.eventEmitter.emit('user.welcome', {
-        name: 'tripelse',
         email: createUserDto.email,
+        username: createUserDto.username,
       });
     } catch (error) {
       console.error('Error sending email', error);

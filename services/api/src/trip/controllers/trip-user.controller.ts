@@ -56,7 +56,7 @@ export class TripUserController {
     const userId = req.user.id;
 
     if (!userId) {
-      throw new BadRequestException('User not found  ');
+      throw new BadRequestException('User not found');
     }
 
     const order = pageOptionsDto.orderBy;
