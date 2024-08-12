@@ -10,6 +10,8 @@ import { LogisticsEnum } from 'trip/enums/logistics.enum';
 import { MoodsEnum } from 'trip/enums/mood.enum';
 import { PurposesEnum } from 'trip/enums/purpose.enum';
 import { Day, DaySchema } from './day.entity';
+import { BudgetsEnum } from 'trip/enums/budget.enum';
+import { DurationsEnum } from 'trip/enums/duration.enum';
 
 @Schema()
 export class TripEntity {
@@ -56,7 +58,10 @@ export class TripEntity {
   logistics: LogisticsEnum[];
 
   @Prop({ type: String, required: true })
-  budget: string;
+  budget: BudgetsEnum;
+
+  @Prop({ type: String, required: true })
+  duration: DurationsEnum;
 }
 
 export type TripDocument = HydratedDocument<TripEntity>;

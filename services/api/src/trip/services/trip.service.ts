@@ -30,6 +30,7 @@ import { TripDocument, TripEntity } from '../entities/trip.entity';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
 import { getDays } from '../utils/create-days';
 import { getTripDetails } from '../utils/get-trip-details';
+import { getTripDuration } from 'trip/utils/get-trip-duration.utils';
 
 @Injectable()
 export class TripService {
@@ -54,6 +55,7 @@ export class TripService {
       ...createTripDto,
       days,
       thumbnail: '',
+      duration: getTripDuration(days.length ?? 0),
       createdBy: createdById,
       moods: createTripDto.moods || [],
       purposes: createTripDto.purposes || [],

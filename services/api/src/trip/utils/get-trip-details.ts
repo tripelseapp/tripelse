@@ -39,8 +39,8 @@ export const getTripDetails = (
 
     moods: trip.moods,
     purposes: trip.purposes,
-    duration: getTripDuration(trip.days.length),
-    budget: getTripBudget(trip),
+    duration: trip.duration,
+    budget: trip.budget,
     logistics: trip.logistics,
     expenses: trip.expenses.map((expense: any) => ({
       id: String(expense._id),
