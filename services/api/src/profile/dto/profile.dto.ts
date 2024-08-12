@@ -1,4 +1,3 @@
-// profile.dto.ts
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import {
   IsArray,
@@ -10,9 +9,9 @@ import {
   MaxLength,
 } from 'class-validator';
 import { CommonDto } from 'common/common.dto';
+import { SavedTripDetailsDto } from './saved-trips/saved-trips-details.dto';
 
 export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
-  //bio
   @IsString()
   @MaxLength(500)
   @ApiProperty({
@@ -94,4 +93,12 @@ export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
     format: 'date-time',
   })
   readonly updatedAt?: Date;
+
+  @IsArray()
+  @ApiPropertyOptional({
+    description: 'Array of folders with saved trips',
+    type: [SavedTripDetailsDto],
+    default: [],
+  })
+  readonly savedTrips: SavedTripDetailsDto[];
 }

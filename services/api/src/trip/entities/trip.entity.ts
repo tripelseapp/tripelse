@@ -1,15 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
-import { LogisticsEnum } from 'trip/enums/logistics.enum';
-import { MoodsEnum } from 'trip/enums/mood.enum';
-import { PurposesEnum } from 'trip/enums/purpose.enum';
-import { Day, DaySchema } from './day.entity';
 import { Attachment } from 'common/resources/attachments/entity/attachment.entity';
 import {
   Expense,
   ExpenseSchema,
 } from 'common/resources/expenses/entities/expense.entity';
+import { LogisticsEnum } from 'trip/enums/logistics.enum';
+import { MoodsEnum } from 'trip/enums/mood.enum';
+import { PurposesEnum } from 'trip/enums/purpose.enum';
+import { Day, DaySchema } from './day.entity';
 
 @Schema()
 export class TripEntity {
@@ -54,6 +54,9 @@ export class TripEntity {
 
   @Prop({ type: [String], default: [] })
   logistics: LogisticsEnum[];
+
+  @Prop({ type: String, required: true })
+  budget: string;
 }
 
 export type TripDocument = HydratedDocument<TripEntity>;

@@ -9,41 +9,39 @@ export class MailService {
 
   @OnEvent('user.welcome')
   async welcomeEmail(data: EventPayloads['user.welcome']) {
-    const { email, name, username
-     } = data;
-    const subject = `Welcome to ${name}`;
+    const { email, username } = data;
+    const appName = 'Tripelse';
+    const subject = `Welcome to ${appName}`;
     await this.mailerService.sendMail({
       to: email,
       subject,
       template: './welcome',
       context: {
-        name,
+        appName,
         username,
-        
-
       },
     });
   }
 
-  // @OnEvent('trip.invitation.known')
-  // async tripInvitation(data: EventPayloads['trip.invitation.known']) {
-  //   const { email, trip, receptor, creator } = data;
-  //   const name = 'Tripelse';
-  //   const subject = `Your new trip "${trip.name}" !`;
+  @OnEvent('trip.invitation.known')
+  async tripInvitationKnown(data: EventPayloads['trip.invitation.known']) {
+    const { email, trip, receptor, creator } = data;
+    const name = 'Tripelse';
+    const subject = `Your new trip "${trip.name}" !`;
 
-  //   await this.mailerService.sendMail({
-  //     to: email,
-  //     subject,
-  //     template: './welcome',
-  //     context: {
-  //       name,
-  //       trip,
-  //       receptor,
-  //       creator,
-  //     },
-  //   });
-  // }
-
+    //   await this.mailerService.sendMail({
+    //     to: email,
+    //     subject,
+    //     template: './welcome',
+    //     context: {
+    //       name,
+    //       trip,
+    //       receptor,
+    //       creator,
+    //     },
+    //   });
+    // }
+  }
   @OnEvent('user.password.reset')
   async forgotPasswordEmail(data: EventPayloads['user.password.reset']) {
     const { email, resetUrl, username } = data;

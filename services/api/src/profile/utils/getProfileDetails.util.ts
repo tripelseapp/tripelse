@@ -1,7 +1,10 @@
-import { ProfileDetails } from '../dto/profile-details.dto';
+import { ProfileDetailsDto } from '../dto/profile-details.dto';
 import { ProfileDocument } from './../entities/profile.entity';
+import { getMultipleSavedTrips } from './getSavedTrips.utils';
 
-export const getProfileDetails = (profile: ProfileDocument): ProfileDetails => {
+export const getProfileDetails = (
+  profile: ProfileDocument,
+): ProfileDetailsDto => {
   return {
     bio: profile.bio,
     avatar: profile.avatar,
@@ -10,6 +13,6 @@ export const getProfileDetails = (profile: ProfileDocument): ProfileDetails => {
     id: profile._id.toString(),
     familyName: profile.familyName,
     givenName: profile.givenName,
-    // favoriteTrips: profile.favoriteTrips.map((id) => id.toString()),
+    savedTrips: getMultipleSavedTrips(profile.savedTrips),
   };
 };

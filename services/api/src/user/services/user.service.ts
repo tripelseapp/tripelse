@@ -14,8 +14,8 @@ import {
 } from 'common/resources/pagination';
 import { FilterQuery, Model } from 'mongoose';
 import { ProfileDocument } from 'profile/entities/profile.entity';
-import { ProfileService } from 'profile/profile.service';
-import { TemporalTokenService } from 'temporal-token/services/temporal-token.service';
+import { ProfileService } from 'profile/services/profile.service';
+import { UserDto } from 'user/dto/user.dto';
 import { PopulatedUserDocument } from 'user/types/populated-user.type';
 import { getUsersInList } from 'user/utils/get-users-list';
 import { passwordStrongEnough } from 'utils/password-checker';
@@ -32,7 +32,6 @@ import { UserDocument, UserEntity } from '../entities/user.entity';
 import { Role, RolesEnum } from '../types/role.types';
 import { UserBeforeCreate } from '../types/user-before-create.type';
 import { getUserDetails } from '../utils/get-users-details';
-import { UserDto } from 'user/dto/user.dto';
 
 interface findUserOptions {
   email?: string;
@@ -46,24 +45,17 @@ export class UserService {
     @InjectModel(UserEntity.name)
     private userModel: Model<UserDocument>,
     private profileService: ProfileService,
-    private readonly tokenService: TemporalTokenService,
   ) {}
 
   public async create(
     createUserDto: CreateUserDto,
   ): Promise<PopulatedUserDocument> {
-    const usernameExists = await this.findByUsernameOrEmail(
-      createUserDto.username,
-    );
-    if (usernameExists) {
-      throw new ConflictException('Username already exists');
-    }
-
-    const emailExists = await this.findUser({
+    const emailOrUsernameRepeated = await this.findUser({
       email: createUserDto.email,
+      username: createUserDto.username,
     });
-    if (emailExists) {
-      throw new ConflictException('Email already exists');
+    if (emailOrUsernameRepeated) {
+      throw new ConflictException('Email or Username already exists');
     }
 
     if (!createUserDto.password) {
@@ -229,7 +221,7 @@ export class UserService {
         .exec()) as UserDocument | null;
 
       if (!savedUser) {
-        throw new NotFoundException('User not found');
+        throw new NotFoundException('User to save not found ');
       }
       return getUserDetails(savedUser);
     } catch (err) {
@@ -278,9 +270,14 @@ export class UserService {
       .lean()
       .exec();
 
+    if (!user) {
+      return null;
+    }
+
     const userPopulated = {
       ...user,
     } as unknown as PopulatedUserDocument;
+
     return userPopulated;
   }
 
@@ -334,14 +331,26 @@ export class UserService {
 
   async findOneWithProfile(id: string): Promise<PopulatedUserDocument> {
     try {
-      // populate profile and inside of profile populate favoriteTrips
-      const user = await this.userModel.findById(id).populate('profile').exec();
+      const user = await this.userModel
+        .findById(id)
+        .populate({
+          path: 'profile',
+          populate: {
+            path: 'savedTrips',
+            populate: {
+              path: 'trips',
+              model: 'TripEntity', // Ensure the model name matches your TripEntity
+            },
+          },
+        })
+        .lean()
+        .exec();
       if (!user) {
         throw new NotFoundException('User not found');
       }
       const profile = user.profile as unknown as ProfileDocument;
       return {
-        ...user.toObject(),
+        ...user,
         profile,
       };
     } catch (err) {

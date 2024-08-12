@@ -8,9 +8,11 @@ export const getUserInList = (user: UserDocument): UserInListDto => {
     id: String(user._id),
     username: user.username,
     avatar: populatedUser.profile?.avatar ?? null,
+    profileId: populatedUser.profile._id.toString(),
   };
 };
 
 export const getUsersInList = (users: UserDocument[]): UserInListDto[] => {
-  return users.map((user) => getUserInList(user));
+  const array = users || [];
+  return array.map((user) => getUserInList(user));
 };

@@ -1,225 +1,134 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bienvenido a Tripelse</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        width: 100%;
-        max-width: 600px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      .header {
-        text-align: center;
-        padding: 20px 0;
-        background-color: #4caf50;
-        color: white;
-      }
-      .header img {
-        max-width: 100px;
-      }
-      .welcome-message {
-        font-size: 2em;
-        color: #333;
-        margin: 20px 0;
-      }
-      .user-details {
-        margin-top: 20px;
-        font-size: 1.2em;
-        color: #555;
-      }
-      .content {
-        text-align: left;
-        margin: 20px 0;
-      }
-      .btn {
-        display: inline-block;
-        background-color: #4caf50;
-        color: white;
-        padding: 10px 20px;
-        text-decoration: none;
-        border-radius: 5px;
-        font-size: 1.2em;
-        margin-top: 20px;
-      }
-      .btn:hover {
-        background-color: #45a049;
-      }
-      .footer {
-        text-align: center;
-        color: #777;
-        font-size: 12px;
-        padding: 10px 0;
-        border-top: 1px solid #dddddd;
-        margin-top: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <img src="" alt="Tripelse Logo" />
-        <h1>Tripelse</h1>
-        <p>Viaja, nos ocupamos del resto</p>
-      </div>
-      <div class="welcome-message">¡Bienvenido a Tripelse!</div>
-      <div class="content">
-        <p>Bienvenido a Tripelse <%= locals.username %>,</p>
-        <p>
-          Gracias por registrarte en Tripelse. Estamos encantados de tenerte con
-          nosotros.
-        </p>
-        <p>
-          Tripelse es tu compañero perfecto para planificar y disfrutar tus
-          viajes. Con nosotros, tendrás acceso a las mejores ofertas y
-          recomendaciones personalizadas.
-        </p>
-        <a href="#" class="btn">Crea tu primer viaje</a>
-        <p>
-          Si tienes alguna pregunta, no dudes en
-          <a href="mailto:support@tripelse.com">contactarnos</a>.
-        </p>
-      </div>
-      <div class="footer">
-        <p>&copy; 2024 Tripelse. Todos los derechos reservados.</p>
-      </div>
-    </div>
-  </body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bienvenido a Tripelse</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        font-family: 'Roboto', sans-serif;
-        background-color: #e0f7fa;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        width: 100%;
-        max-width: 600px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        padding: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-        overflow: hidden;
-      }
-      .header {
-        text-align: center;
-        padding: 20px 0;
-        background-color: #26bb6e;
-        color: white;
-        border-bottom: 4px solid #004d40;
-      }
-      .header img {
-        max-width: 100px;
-      }
-      .welcome-message {
-        font-size: 1.8em;
-        color: #00796b;
-        margin: 20px 0;
-        text-align: center;
-      }
-      .content {
-        text-align: left;
-        margin: 20px 0;
-      }
-      .content p {
-        font-size: 1.1em;
-        color: #555;
-        line-height: 1.6;
-      }
-      .btn {
-        display: inline-block;
-        background-color: #4e1a2e;
-        color: white;
-        padding: 12px 25px;
-        text-decoration: none;
-        border-radius: 5px;
-        font-size: 1em;
-        text-align: center;
-        margin: 20px auto;
-        display: block;
-        transition: background-color 0.3s ease;
-      }
-      .btn:hover {
-        background-color: #004d40;
-      }
-      .footer {
-        text-align: center;
-        color: #777;
-        font-size: 0.9em;
-        padding: 15px 0;
-        border-top: 1px solid #dddddd;
-        margin-top: 20px;
-      }
-      .footer a {
-        color: #00796b;
-        text-decoration: none;
-      }
-      .footer a:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <img
-          src="../../assets/imagesEjs/logo-tripelse.png"
-          alt="Tripelse Logo"
-        />
-        <!-- <h1><%= locals.appName%></h1> -->
-        <h1>Tripelse</h1>
 
-        <p>Viaja, nos ocupamos del resto</p>
-      </div>
-      <div class="welcome-message">
-        ¡Bienvenido <strong><%= locals.username %></strong>!
-      </div>
-      <div class="content">
-        <p>
-          Gracias por registrarte en Tripelse. Estamos encantados de tenerte con
-          nosotros.
-        </p>
-        <p>
-          Tripelse es tu compañero perfecto para planificar y disfrutar tus
-          viajes. Con nosotros, tendrás acceso a las mejores ofertas y
-          recomendaciones personalizadas.
-        </p>
-        <a href="#" class="btn">Crea tu primer viaje</a>
-        <p>
-          Si tienes alguna pregunta, no dudes en
-          <a href="mailto:support@tripelse.com">contactarnos</a>.
-        </p>
-      </div>
-      <div class="footer">
-        <p>&copy; 2024 Tripelse. Todos los derechos reservados.</p>
-        <p>
-          <a href="#">Política de privacidad</a> |
-          <a href="#">Términos de servicio</a>
-        </p>
-      </div>
-    </div>
-  </body>
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bienvenido a Tripelse</title>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+          }
+          .header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #26bb6e;
+            color: white;
+            border-bottom: 4px solid #004d40;
+          }
+          .header img {
+            max-width: 100px;
+          }
+          .welcome-message {
+            font-size: 1.8em;
+            color: #00796b;
+            margin: 20px 0;
+            text-align: center;
+          }
+          .content {
+            text-align: left;
+            margin: 20px 0;
+          }
+          .content p {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.6;
+          }
+          .btn {
+            display: inline-block;
+            background-color: #4e1a2e;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: center;
+            margin: 20px auto;
+            display: block;
+            transition: background-color 0.3s ease;
+          }
+          .btn:hover {
+            background-color: #004d40;
+          }
+          .footer {
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+            padding: 15px 0;
+            border-top: 1px solid #dddddd;
+            margin-top: 20px;
+          }
+          .footer a {
+            color: #00796b;
+            text-decoration: none;
+          }
+          .footer a:hover {
+            text-decoration: underline;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <img
+              src="../../assets/imagesEjs/logo-tripelse.png"
+              alt="Tripelse Logo"
+            />
+            <h1><%= locals.appName%></h1>
+
+            <p>Viaja, nos ocupamos del resto</p>
+          </div>
+          <div class="welcome-message">
+            ¡Bienvenido <strong><%= locals.username %></strong>!
+          </div>
+          <div class="content">
+            <p>
+              Gracias por registrarte en Tripelse. Estamos encantados de tenerte
+              con nosotros.
+            </p>
+            <p>
+              Tripelse es tu compañero perfecto para planificar y disfrutar tus
+              viajes. Con nosotros, tendrás acceso a las mejores ofertas y
+              recomendaciones personalizadas.
+            </p>
+            <a href="#" class="btn">Crea tu primer viaje</a>
+            <p>
+              Si tienes alguna pregunta, no dudes en
+              <a href="mailto:support@tripelse.com">contactarnos</a>.
+            </p>
+          </div>
+          <div class="footer">
+            <p>&copy; 2024 Tripelse. Todos los derechos reservados.</p>
+            <p>
+              <a href="#">Política de privacidad</a> |
+              <a href="#">Términos de servicio</a>
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  </head>
 </html>

@@ -6,5 +6,5 @@ import { PageOptionsDto } from '../../../common/resources/pagination';
 
 export class GetAllTripsDto extends IntersectionType(
   PageOptionsDto,
-  PickType(TripDto, ['moods', 'durations'] as const),
+  PickType(TripDto, ['moods', 'durations', 'purposes', 'budgets'] as const),
 ) {}

@@ -1,12 +1,13 @@
 // utils/query-utils.ts
 import { Model, Document, SortOrder, FilterQuery } from 'mongoose';
 import { Orders, PossibleOrders } from 'interfaces/pagination.interface';
+import { get } from 'http';
 
 export interface BuildQueryOptions<T> {
   model: Model<T>;
   filters: Record<string, any>; // Use Record<string, any> for dynamic filters
   searchIn: (keyof T)[];
-  fields?: (keyof T)[];
+  fields?: (keyof T | string)[];
 }
 
 //
@@ -41,6 +42,10 @@ function buildFilterConditions<T extends Document>(
         return;
       }
       if (Array.isArray(filters[key]) && filters[key].length > 0) {
+        if (key === 'budget') {
+          conditions[key] = { $in: filters[key] };
+        }
+
         conditions[key] = { $in: filters[key] };
       } else {
         conditions[key] = filters[key];
