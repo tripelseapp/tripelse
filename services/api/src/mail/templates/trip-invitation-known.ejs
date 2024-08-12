@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Restablecer tu contraseña</title>
+    <title>Bienvenido al viaje</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet"
     />
     <style>
       body {
-        font-family: 'Roboto', sans-serif;
+        font-family: "Roboto", sans-serif;
         background-color: #e0f7fa;
         margin: 0;
         padding: 0;
       }
       .container {
         width: 100%;
-        max-width: 600px;
+        max-width: 800px;
         margin: 0 auto;
         background-color: #ffffff;
         padding: 20px;
@@ -28,7 +28,7 @@
       .header {
         text-align: center;
         padding: 20px 0;
-        background-color: #26bb6e;
+        background-color: #4e1a2e;
         color: white;
         border-bottom: 4px solid #004d40;
       }
@@ -39,7 +39,7 @@
         font-size: 2em;
         margin: 10px 0;
       }
-      .reset-message {
+      .welcome-message {
         font-size: 1.5em;
         color: #00796b;
         margin: 20px 0;
@@ -54,9 +54,19 @@
         color: #555;
         line-height: 1.6;
       }
+      .avatars {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .avatars img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin: 0 5px;
+      }
       .btn {
         display: inline-block;
-        background-color: #4e1a2e;
+        background-color: #26bb6e;
         color: white;
         padding: 12px 25px;
         text-decoration: none;
@@ -69,6 +79,16 @@
       }
       .btn:hover {
         background-color: #004d40;
+      }
+      .photos {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .photos img {
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        margin: 10px;
       }
       .footer {
         text-align: center;
@@ -85,41 +105,34 @@
       .footer a:hover {
         text-decoration: underline;
       }
-      .icon {
-        font-size: 3em;
-        color: #00796b;
-        text-align: center;
-        margin-top: 20px;
-      }
     </style>
-   
   </head>
   <body>
     <div class="container">
       <div class="header">
-        <img src="./images/logo-tripelse.png" alt="Tripelse Logo" />
+        <img src="/images/logo-tripelse.png" alt="Tripelse Logo" />
         <h1>Tripelse</h1>
         <p>Viaja, nos ocupamos del resto</p>
       </div>
-      <div class="icon">
-        <i class="fas fa-unlock-alt"></i>
+      <div class="welcome-message">
+        Hola <%= currentUserId.name %>, <%= locals.creator %> te ha invitado al viaje: <%= locals.trip.name %>
       </div>
-      <div class="reset-message">Restablece tu contraseña</div>
       <div class="content">
-        <p>Hola, <strong><%= locals.username %></strong></p>
         <p>
-          Recibimos una solicitud para restablecer tu contraseña. Haz clic en el
-          botón de abajo para continuar.
+          ¡Estamos emocionados de que te unas a nosotros en este increíble viaje
+          a <%= locals.trip.name %>!
         </p>
-        <a href="<%= locals.resetUrl %>" class="btn">Restablecer contraseña</a>
-        <p>
-          Si no solicitaste restablecer tu contraseña, ignora este correo. Tu
-          contraseña actual no cambiará.
-        </p>
-        <p>
-          Si tienes alguna pregunta, no dudes en
-          <a href="mailto:support@tripelse.com">contactarnos</a>.
-        </p>
+      </div>
+      <div class="avatars">
+        <% locals.trip.members.forEach(member => { %>
+          <img src="<%= member.avatar %>" alt="<%= member.name %>" />
+        <% }) %>
+      </div>
+      <a href="<%= locals.trip.joinLink %>" class="btn">Únete al viaje</a>
+      <div class="photos">
+        <% locals.trip.photos.forEach(photo => { %>
+          <img src="<%= photo %>" alt="Foto del viaje" />
+        <% }) %>
       </div>
       <div class="footer">
         <p>&copy; 2024 Tripelse. Todos los derechos reservados.</p>

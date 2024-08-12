@@ -278,13 +278,6 @@ export class UserService {
       .lean()
       .exec();
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    if (!user.profile) {
-      throw new InternalServerErrorException('User profile not found');
-    }
-
     const userPopulated = {
       ...user,
     } as unknown as PopulatedUserDocument;

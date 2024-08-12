@@ -14,7 +14,7 @@ export class MailController {
       properties: {
         name: {
           type: 'string',
-          example: 'John Doe',
+          example: 'Tripelse',
         },
         email: {
           type: 'string',
@@ -23,7 +23,9 @@ export class MailController {
       },
     },
   })
-  async welcomeEmail(@Body() data: { name: string; email: string }) {
+  async welcomeEmail(
+    @Body() data: { name: string; email: string; username: string },
+  ) {
     return this.mailService.welcomeEmail(data);
   }
 }

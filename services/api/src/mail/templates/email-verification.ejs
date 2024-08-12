@@ -3,14 +3,130 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Email Verification</title>
+    <title>Verifica tu correo electrónico</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #e0f7fa;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .header {
+        text-align: center;
+        padding: 20px 0;
+        background-color: #4e1a2e;
+        color: white;
+        border-bottom: 4px solid #004d40;
+      }
+      .header img {
+        max-width: 100px;
+      }
+      .header h1 {
+        font-size: 2em;
+        margin: 10px 0;
+      }
+      .verification-message {
+        font-size: 1.5em;
+        color: #00796b;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .content {
+        text-align: left;
+        margin: 20px 0;
+      }
+      .content p {
+        font-size: 1.1em;
+        color: #555;
+        line-height: 1.6;
+      }
+      .btn {
+        display: inline-block;
+        background-color: #26bb6e;
+        color: white;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 1em;
+        text-align: center;
+        margin: 20px auto;
+        display: block;
+        transition: background-color 0.3s ease;
+      }
+      .btn:hover {
+        background-color: #004d40;
+      }
+      .footer {
+        text-align: center;
+        color: #777;
+        font-size: 0.9em;
+        padding: 15px 0;
+        border-top: 1px solid #dddddd;
+        margin-top: 20px;
+      }
+      .footer a {
+        color: #00796b;
+        text-decoration: none;
+      }
+      .footer a:hover {
+        text-decoration: underline;
+      }
+      .icon {
+        font-size: 3em;
+        color: #00796b;
+        text-align: center;
+        margin-top: 20px;
+      }
+    </style>
   </head>
   <body>
-    <p>Hi <%= locals.username %>,</p>
-    <p>Please verify your email address by clicking the link below:</p>
-    <a href="<%= locals.url %>">Verify Email</a>
-    <p>If you did not create an account, please ignore this email.</p>
-    <p>Thanks,</p>
-    <p>Tripelse</p>
+    <div class="container">
+      <div class="header">
+        <img src="./images/logo-tripelse.png" alt="Tripelse Logo" />
+        <h1>Tripelse</h1>
+        <p>Viaja, nos ocupamos del resto</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-envelope"></i>
+      </div>
+      <div class="verification-message">Verifica tu correo electrónico</div>
+      <div class="content">
+        <p>Hola, <strong><%= locals.username %></strong></p>
+        <p>
+          Gracias por registrarte en Tripelse. Por favor, verifica tu correo
+          electrónico haciendo clic en el botón de abajo.
+        </p>
+        <a href="<%= locals.url %>" class="btn">Verificar correo</a>
+        <p>
+          Si no te has registrado en Tripelse, ignora este correo. No se
+          realizará ninguna acción.
+        </p>
+        <p>
+          Si tienes alguna pregunta, no dudes en
+          <a href="mailto:support@tripelse.com">contactarnos</a>.
+        </p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2024 Tripelse. Todos los derechos reservados.</p>
+        <p>
+          <a href="#">Política de privacidad</a> |
+          <a href="#">Términos de servicio</a>
+        </p>
+      </div>
+    </div>
   </body>
 </html>

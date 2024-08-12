@@ -71,6 +71,7 @@ export class AuthService {
       this.eventEmitter.emit('user.welcome', {
         name: 'tripelse',
         email: createUserDto.email,
+        username: createUserDto.username,
       });
     } catch (error) {
       console.log('Error sending email', error);
@@ -121,7 +122,7 @@ export class AuthService {
         username: user.username,
         roles: user.roles,
         email: user.email,
-        avatar: user.profile.avatar,
+        avatar: user.profile?.avatar ?? null,
       });
     }
 
