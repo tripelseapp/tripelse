@@ -1,10 +1,10 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsArray, IsDateString, IsEmail, IsNotEmpty } from 'class-validator';
+import { BudgetsEnum } from 'trip/enums/budget.enum';
 import { LogisticsEnum } from 'trip/enums/logistics.enum';
 import { MoodsEnum } from 'trip/enums/mood.enum';
 import { PurposesEnum } from 'trip/enums/purpose.enum';
 import { TripDto } from './trip.dto';
-import { BudgetsEnum } from 'trip/enums/budget.enum';
 
 export class CreateTripDto extends PickType(TripDto, [
   'name',

@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../../user/dto/create-user.dto';
 import { UserService } from '../../user/services/user.service';
@@ -9,6 +14,7 @@ import { UserFromProvider } from '../types/User-from-google.type';
 import { ReqWithUser, TokenPayload } from '../types/token-payload.type';
 import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
 import config from 'config/config';
+import { EventEmitterEnum } from 'event-emitter/enum.event-emitter';
 
 @Injectable()
 export class AuthService {
@@ -69,7 +75,7 @@ export class AuthService {
     const savedUser = await this.userService.create(createUserDto);
 
     try {
-      this.eventEmitter.emit('user.welcome', {
+      this.eventEmitter.emit(EventEmitterEnum.USER_WELCOME, {
         email: createUserDto.email,
         username: createUserDto.username,
       });
@@ -125,7 +131,7 @@ export class AuthService {
 
     try {
       const userCreated = await this.userService.createWithProvider(details);
-      return this.buildResponseWithToken({
+      const newUser = this.buildResponseWithToken({
         id: String(userCreated._id),
         username: userCreated.username,
         email: userCreated.email,
@@ -133,6 +139,16 @@ export class AuthService {
         avatar: userCreated.profile.avatar,
         profileId: String(userCreated.profile._id),
       });
+      try {
+        this.eventEmitter.emit(EventEmitterEnum.USER_WELCOME, {
+          email: userCreated.email,
+          username: userCreated.username,
+        });
+      } catch (error) {
+        console.error('Error sending email', error);
+      }
+
+      return newUser;
     } catch (error) {
       throw new HttpException(
         'Error creating user',
@@ -183,10 +199,7 @@ export class AuthService {
       const payload = this.jwtService.verify(token);
       return payload;
     } catch (error) {
-      throw new HttpException(
-        'Error descerializing token',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new InternalServerErrorException('Error descerializing token');
     }
   }
 }

@@ -159,21 +159,20 @@ export class TripDto extends PickType(CommonDto, [
   })
   readonly purposes?: PurposesEnum[];
 
-  @IsArray()
-  @IsString({ each: true })
-  @IsIn(Object.values(BudgetsEnum), { each: true })
+  @IsIn(Object.values(BudgetsEnum))
   @ApiPropertyOptional({
-    description: 'Total price (per day per person) of the trip.',
+    description: 'The budget of the trip, only 1 accepted.',
     type: 'string',
     isArray: true,
-    default: [BudgetsEnum.AFFORDABLE],
+    default: BudgetsEnum.AFFORDABLE,
   })
   readonly budget: BudgetsEnum;
 
   @IsOptional()
   @IsIn(Object.values(BudgetsEnum), { each: true })
   @ApiPropertyOptional({
-    description: 'Array of possible budgets to filter trips',
+    description:
+      'Array of possible budgets to filter trips, made for multiple selection.',
     type: 'array',
     isArray: true,
     items: {

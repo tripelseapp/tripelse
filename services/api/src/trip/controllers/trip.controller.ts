@@ -35,8 +35,7 @@ import { UpdateTripDto } from '../dto/trip/update-trip.dto';
 import { TripService } from '../services/trip.service';
 import { ResponseTripOperation } from '../types/response-trip-operation.type';
 
-@Controller('Trip')
-@ApiCookieAuth()
+@Controller('trip')
 @ApiTags('Trip')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TripController {

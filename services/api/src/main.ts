@@ -42,9 +42,7 @@ async function bootstrap() {
   await app.listen(port, () => {
     console.log(`🚀 Application running at port ${port}`);
     console.log(
-      `🟢 Swagger opened in http://localhost:${port}/${config().api.prefix}/${
-        config().api.version
-      }`,
+      `🟢 Swagger opened in http://localhost:${port}/${config().api.prefix}`,
     );
   });
 }
