@@ -52,14 +52,14 @@ export class AuthController {
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(Date.now() + 3600000), // e.g., 1 hour
+      expires: new Date(Date.now() + 2592000000), // e.g., 1 month
     });
     res.cookie(accessCookieName, registerRes.accessToken, {
       httpOnly: true,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(Date.now() + 2592000000), // e.g., 1 month
+      expires: new Date(Date.now() + 3600000), // e.g., 1 hour
     });
     return res.status(HttpStatus.OK).send(registerRes);
   }

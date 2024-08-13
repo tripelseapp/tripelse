@@ -109,7 +109,7 @@ export class TripService {
         startDate,
         endDate,
         moods,
-        durations,
+        duration: durations,
         budget: budgets,
         purposes,
       },
@@ -124,6 +124,7 @@ export class TripService {
         'travelers',
         'purposes',
         'budget',
+        'duration',
       ],
     });
 

@@ -1,3 +1,2 @@
-export * from './object';
-export * from './object/pick';
-export * from './typescript';
+export * from './pick';
+export * from './pickProperties';
