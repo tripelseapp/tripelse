@@ -39,7 +39,7 @@ import {
   UserDetails,
   UserDetailsDto,
 } from '../dto/user-details.dto';
-import { UserInListDto } from '../dto/user-list.dto';
+import { UserInList, UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
 
 @Controller('user')

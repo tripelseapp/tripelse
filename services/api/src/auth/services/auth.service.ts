@@ -178,7 +178,9 @@ export class AuthService {
 
   async validateRefreshToken(token: string) {
     try {
-      return this.jwtService.verify(token);
+      return this.jwtService.verify(token, {
+        secret: config().jwt.refreshSecret,
+      });
     } catch (error) {
       throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     }

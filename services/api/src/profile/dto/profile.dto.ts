@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsDateString,
@@ -8,10 +8,18 @@ import {
   IsUrl,
   MaxLength,
 } from 'class-validator';
-import { CommonDto } from 'common/common.dto';
 import { SavedTripDetailsDto } from './saved-trips/saved-trips-details.dto';
 
-export class ProfileDto extends PickType(CommonDto, ['id'] as const) {
+export class ProfileDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'The unique identifier the resource',
+    minimum: 24,
+    type: 'string',
+    default: '123456789012345678901234',
+  })
+  readonly id: string;
   @IsString()
   @MaxLength(500)
   @ApiProperty({

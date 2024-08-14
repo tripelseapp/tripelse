@@ -73,7 +73,9 @@ export class UserService {
     const now = new Date();
 
     try {
-      const newProfile = await this.profileService.create({});
+      const newProfile = await this.profileService.create({
+        givenName: createUserDto.username,
+      });
 
       if (!newProfile._id) {
         throw new InternalServerErrorException('Could not save the profile');
@@ -105,7 +107,7 @@ export class UserService {
     data: UserFromProvider,
   ): Promise<PopulatedUserDocument> {
     const newProfile: CreateProfileDto = {
-      givenName: data.givenName,
+      givenName: data.givenName ?? data.username,
       familyName: data.familyName,
       avatar: data.avatar,
     };
