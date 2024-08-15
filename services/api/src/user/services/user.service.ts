@@ -333,7 +333,7 @@ export class UserService {
 
   async findOneWithProfile(id: string): Promise<PopulatedUserDocument> {
     try {
-      const user = await this.userModel
+      const user = (await this.userModel
         .findById(id)
         .populate({
           path: 'profile',
@@ -341,20 +341,21 @@ export class UserService {
             path: 'savedTrips',
             populate: {
               path: 'trips',
-              model: 'TripEntity', // Ensure the model name matches your TripEntity
+              model: 'TripEntity',
             },
           },
         })
         .lean()
-        .exec();
+        .exec()) as unknown as PopulatedUserDocument;
       if (!user) {
         throw new NotFoundException('User not found');
       }
       const profile = user.profile as unknown as ProfileDocument;
-      return {
+      const populatedUser = {
         ...user,
         profile,
       };
+      return populatedUser;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(err);
