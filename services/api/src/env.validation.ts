@@ -25,7 +25,6 @@ class EnvironmentVariables {
   @Min(0)
   @Max(65535)
   PORT: number;
-
   @IsString()
   CONNECT_STRING: string;
 
