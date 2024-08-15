@@ -9,8 +9,8 @@ export class ProfileEntity {
   @Prop({ default: null, type: String })
   bio: string | null;
 
-  @Prop({ required: false, default: null, type: String })
-  givenName: string | null;
+  @Prop({ required: true, type: String })
+  givenName: string;
 
   @Prop({ required: false, default: null, type: String })
   familyName: string | null;
@@ -24,13 +24,13 @@ export class ProfileEntity {
   @Prop({
     required: true,
     default: [],
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'UserEntity' }],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'ProfileEntity' }],
   })
   followers: string[];
   @Prop({
     required: true,
     default: [],
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'UserEntity' }],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'ProfileEntity' }],
   })
   following: string[];
 

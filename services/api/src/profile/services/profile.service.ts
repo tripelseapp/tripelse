@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -236,7 +237,7 @@ export class ProfileService {
   async followUser(
     profileId: string,
     followeeProfileId: string,
-  ): Promise<ProfileDocument> {
+  ): Promise<ProfileDocument['following']> {
     if (
       !isObjectIdOrHexString(profileId) ||
       !isObjectIdOrHexString(followeeProfileId)
@@ -255,18 +256,18 @@ export class ProfileService {
 
     // Check if the user is already following
     if (profile.following.includes(followeeProfileId)) {
-      throw new InternalServerErrorException('Already following this user');
+      throw new BadRequestException('Already following this user');
     }
 
     // Add followeeProfileId to following list
     profile.following.push(followeeProfileId);
-    await profile.save();
+    await (await profile.save()).populate('following');
 
     // Add profileId to followers list of followee
     followeeProfile.followers.push(profileId);
     await followeeProfile.save();
 
-    return profile;
+    return profile.following;
   }
   /**
    *  Removing a Follower - This method will allow a profile to unfollow another profile:
@@ -275,7 +276,7 @@ export class ProfileService {
   async unfollowUser(
     profileId: string,
     followeeProfileId: string,
-  ): Promise<ProfileDocument> {
+  ): Promise<ProfileDocument[]> {
     if (
       !isObjectIdOrHexString(profileId) ||
       !isObjectIdOrHexString(followeeProfileId)
@@ -283,9 +284,15 @@ export class ProfileService {
       throw new NotFoundException('Invalid profile ID');
     }
 
-    const profile = await this.profileModel.findById(profileId).exec();
+    const profile = await this.profileModel
+      .findById(profileId)
+      .populate('following')
+      .select('following')
+      .exec();
     const followeeProfile = await this.profileModel
       .findById(followeeProfileId)
+      .populate('followers')
+      .select('followers')
       .exec();
 
     if (!profile || !followeeProfile) {
@@ -294,7 +301,7 @@ export class ProfileService {
 
     // Check if the user is already not following
     if (!profile.following.includes(followeeProfileId)) {
-      throw new InternalServerErrorException('Not following this user');
+      throw new BadRequestException('Not following this user');
     }
 
     // Remove followeeProfileId from following list
@@ -309,7 +316,7 @@ export class ProfileService {
     );
     await followeeProfile.save();
 
-    return profile;
+    return profile.following as unknown as ProfileDocument[];
   }
   /**
    * Fetching Followers and Following Lists - This method will allow fetching the followers and following lists of a profile
@@ -331,7 +338,7 @@ export class ProfileService {
     return profile;
   }
 
-  async getFollowing(profileId: string): Promise<ProfileDocument> {
+  async getFollowing(profileId: string): Promise<ProfileDocument[]> {
     if (!isObjectIdOrHexString(profileId)) {
       throw new NotFoundException('Invalid profile ID');
     }
@@ -339,12 +346,15 @@ export class ProfileService {
     const profile = await this.profileModel
       .findById(profileId)
       .populate('following')
+      .lean()
+      .select('following')
       .exec();
 
+    console.log('profile', profile);
     if (!profile) {
       throw new NotFoundException('Profile not found');
     }
 
-    return profile;
+    return (profile.following as unknown as ProfileDocument[]) ?? [];
   }
 }

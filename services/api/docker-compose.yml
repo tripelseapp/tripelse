@@ -35,7 +35,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - CONNECT_STRING=${CONNECT_STRING}
       - PORT=${PORT}
-      - NODE_ENV=production
+      - NODE_ENV=development
     ports:
       - '4000:${PORT}'
       - 9229:9229

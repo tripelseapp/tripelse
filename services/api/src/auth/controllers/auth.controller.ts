@@ -17,7 +17,6 @@ import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { LocalAuthGuard } from '../guards/local.guard';
-import { RefreshJwtAuthGuard } from '../guards/refresh-jwt-auth.guard';
 import { AuthService } from '../services/auth.service';
 import { TokensRes } from '../types/LoginRes.type';
 import { ReqWithUser } from '../types/token-payload.type';
@@ -49,6 +48,7 @@ export class AuthController {
     }
     res.cookie(refreshCookieName, registerRes.refreshToken, {
       httpOnly: true,
+
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -107,14 +107,14 @@ export class AuthController {
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(Date.now() + 3600000), // e.g., 1 hour
+      expires: new Date(Date.now() + 2592000000), // e.g., 1 hour
     });
     res.cookie(accessCookieName, loginRes.accessToken, {
       httpOnly: true,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(Date.now() + 2592000000), // e.g., 1 month
+      expires: new Date(Date.now() + 3600000), // e.g., 1 month
     });
 
     return res.status(HttpStatus.OK).send(loginRes);
@@ -150,26 +150,26 @@ export class AuthController {
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(Date.now() + 3600000), // e.g., 1 hour
+      expires: new Date(Date.now() + 2592000000), // e.g., 1 month
     });
     res.cookie(accessCookieName, tokens.accessToken, {
       httpOnly: true,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(Date.now() + 2592000000), // e.g., 1 month
+      expires: new Date(Date.now() + 3600000), // e.g., 1 hour
     });
 
     return res.status(HttpStatus.OK).send(tokens);
   }
 
-  @Post('refresh')
   @Public()
+  @Post('refresh')
   @ApiOperation({
     summary: 'Refresh JWT token',
     description: 'Refresh the JWT token',
   })
-  @UseGuards(RefreshJwtAuthGuard)
+  // @UseGuards(RefreshJwtAuthGuard)
   async refreshToken(
     @Req() req: ReqWithUser,
     @Res() res: Response,

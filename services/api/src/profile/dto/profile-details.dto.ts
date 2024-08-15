@@ -3,11 +3,11 @@ import { ProfileDto } from './profile.dto';
 import { savedTripDetailExample } from './saved-trips/saved-trips-details.dto';
 
 export class ProfileDetailsDto extends PickType(ProfileDto, [
+  'id',
   'bio',
   'avatar',
   'followers',
   'following',
-  'id',
   'givenName',
   'familyName',
   'savedTrips',
