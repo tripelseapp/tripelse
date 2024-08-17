@@ -1,4 +1,4 @@
-version: '3.6'
+version: "3.6"
 
 services:
   mongodb:
@@ -16,17 +16,18 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     ports:
       - 27017:27017
+    logging:
+      driver: "none"
 
   nest:
-    container_name: 'nest'
+    container_name: "api-nestjs"
     build:
-      context: .
+      context: ./services/api
       target: development
-      # only will build dev stage from dockerfile
     env_file:
       - .env
     volumes:
-      - .:/usr/src/app
+      - ./services/api:/usr/src/app
       - /usr/src/app/node_modules
     command: npm run start:dev
     environment:
@@ -34,19 +35,39 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - CONNECT_STRING=${CONNECT_STRING}
-      - PORT=${PORT}
+      - PORT=${API_PORT}
       - NODE_ENV=development
     ports:
-      - '4000:${PORT}'
-      - 9229:9229
+      - ${API_PORT}:${API_PORT}
     restart: unless-stopped
     networks:
       - server-network
     depends_on:
       - mongodb
 
+  web:
+    container_name: "frontend-web"
+    build:
+      context: ./frontends/web
+      target: development
+    env_file:
+      - .env
+    volumes:
+      - ./frontends/web:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+    ports:
+      - ${WEB_PORT}:${WEB_PORT}
+    restart: unless-stopped
+    networks:
+      - server-network
+    depends_on:
+      - nest
+
 networks:
   server-network:
+    driver: bridge
 
 volumes:
   mongodata:

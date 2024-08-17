@@ -24,7 +24,7 @@ class EnvironmentVariables {
   @IsNumber()
   @Min(0)
   @Max(65535)
-  PORT: number;
+  API_PORT: number;
   @IsString()
   CONNECT_STRING: string;
 
@@ -80,7 +80,7 @@ class EnvironmentVariables {
   GOOGLE_MAIL_HOST: string;
 
   @IsString()
-  DOMAIN: string;
+  API_DOMAIN: string;
 
   @IsString()
   CLIENT_DOMAIN: string;

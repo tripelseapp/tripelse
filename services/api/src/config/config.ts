@@ -9,10 +9,9 @@ const getEnv = (key: string) => {
   return value;
 };
 export default () => ({
-  port: parseInt(getEnv('PORT'), 10),
-  domain: getEnv('DOMAIN'),
   app: {
     name: getEnv('APP_NAME'),
+    domain: getEnv('API_DOMAIN'),
   },
   client: {
     domain: getEnv('CLIENT_DOMAIN'),
@@ -20,6 +19,7 @@ export default () => ({
   api: {
     version: getEnv('API_VERSION'),
     prefix: getEnv('API_PREFIX'),
+    port: parseInt(getEnv('API_PORT'), 10),
   },
   email: {
     client: getEnv('GOOGLE_CLIENT_ID'),

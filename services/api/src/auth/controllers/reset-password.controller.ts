@@ -68,7 +68,7 @@ export class ResetPasswordController {
     if (!token) throw new InternalServerErrorException('Token not created');
 
     const resetUrl = `${
-      config().domain
+      config().client.domain
     }/auth/reset-password?token=${tokenGenerated}`;
 
     // Emit an event to send an email
