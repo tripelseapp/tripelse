@@ -59,7 +59,7 @@ services:
       - NODE_ENV=development
     ports:
       - ${WEB_PORT}:${WEB_PORT}
-    restart: unless-stopped
+    restart: always
     networks:
       - server-network
     depends_on:

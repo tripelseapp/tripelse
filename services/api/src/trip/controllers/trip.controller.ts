@@ -12,12 +12,7 @@ import {
   Req,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiCookieAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ReqWithUser, TokenPayload } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
 import { Public } from 'common/decorators/publicRoute.decorator';

@@ -26,7 +26,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
       console.error(info);
-      throw err || new UnauthorizedException();
+      throw (
+        err ||
+        new UnauthorizedException('You are not authorized to access this route')
+      );
     }
     return user;
   }

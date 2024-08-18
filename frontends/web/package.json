@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "WATCHPACK_POLLING=true next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "generate": "npx openapi-typescript --alphabetize --enum --enum-values -t --path-params-as-types"
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.10.1",
@@ -26,6 +27,7 @@
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.4",
+    "openapi-typescript": "^7.3.0",
     "postcss": "^8.4.39",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.5",

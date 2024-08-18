@@ -20,6 +20,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ReqWithUser } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
@@ -39,8 +40,9 @@ import {
   UserDetails,
   UserDetailsDto,
 } from '../dto/user-details.dto';
-import { UserInList, UserInListDto } from '../dto/user-list.dto';
+import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
+import { GenericUnauthorizedResponse } from 'common/decorators/unautorized-response.decorator';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -57,6 +59,7 @@ export class UserController {
   })
   @HttpCode(HttpStatus.OK)
   @ApiPaginatedResponse(UserInListDto)
+  @GenericUnauthorizedResponse()
   async getUsers(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<UserInListDto>> {
@@ -145,9 +148,8 @@ export class UserController {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const userAndProfileDocument = await this.userService.findOneWithProfile(
-      id,
-    );
+    const userAndProfileDocument =
+      await this.userService.findOneWithProfile(id);
     const parsedData = getUserProfileDetails(userAndProfileDocument);
 
     return parsedData;
@@ -264,7 +266,7 @@ export class UserController {
 
   //  - Get user by username or email
 
-  @Get('byUsernameOrEmail/:userNameOrEmail')
+  @Get('by-email-or-username/:userNameOrEmail')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -306,9 +308,8 @@ export class UserController {
     },
   })
   async findOneWithProfile(@Param('id') id: string) {
-    const userAndProfileDocument = await this.userService.findOneWithProfile(
-      id,
-    );
+    const userAndProfileDocument =
+      await this.userService.findOneWithProfile(id);
 
     const parsedData = getUserProfileDetails(userAndProfileDocument);
 

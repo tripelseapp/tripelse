@@ -1,0 +1,113 @@
+import { API_URL } from "constants/api";
+import { paths } from "public/data/api";
+
+type Path = keyof paths;
+type PathMethod<T extends Path> = keyof paths[T];
+export type PossibleResponses<
+  T extends Path,
+  M extends PathMethod<T>,
+> = "responses" extends keyof paths[T][M]
+  ? keyof paths[T][M]["responses"]
+  : never;
+export type RequestParams<
+  P extends Path,
+  M extends PathMethod<P>,
+> = paths[P][M] extends {
+  parameters: any;
+}
+  ? paths[P][M]["parameters"]["query"]
+  : undefined;
+
+export type OkResponseType<
+  P extends Path,
+  M extends PathMethod<P>,
+> = paths[P][M] extends {
+  responses: {
+    200: { content: { "application/json": any } };
+  };
+}
+  ? paths[P][M]["responses"][200]["content"]["application/json"]
+  : undefined;
+
+export type ResponseType<
+  P extends Path,
+  M extends PathMethod<P>,
+  status extends number,
+> = paths[P][M] extends {
+  responses: {
+    [key in status]: { content: { "application/json": any } };
+  };
+}
+  ? paths[P][M]["responses"][status]["content"]["application/json"]
+  : undefined;
+export type UnauthorizedResponseType<
+  P extends Path,
+  M extends PathMethod<P>,
+> = paths[P][M] extends {
+  responses: {
+    401: { content: { "application/json": any } };
+  };
+}
+  ? paths[P][M]["responses"][401]["content"]["application/json"]
+  : undefined;
+
+export const apiCall = async <P extends Path, M extends PathMethod<P>>(
+  url: P,
+  method: M = "get" as M,
+  ...params: RequestParams<P, M> extends undefined ? [] : [RequestParams<P, M>]
+): Promise<OkResponseType<P, M>> => {
+  const getBody = (params: any) => {
+    return params.length > 0 ? JSON.stringify(params[0]) : undefined;
+  };
+
+  const mayBody = (method: M) => {
+    const bodyMethods = ["post", "put", "patch"];
+    const hasBody = bodyMethods.includes(method.toString());
+    if (hasBody) {
+      return { body: getBody(params) };
+    }
+  };
+
+  const baseUrl = new URL(API_URL + url);
+
+  const createParams = (params: Record<string, string | string[]>) => {
+    const searchParams = new URLSearchParams();
+    for (const key in params) {
+      // if its array we need to add each element separately
+      if (Array.isArray(params[key])) {
+        for (const element of params[key]) {
+          searchParams.append(key, element);
+        }
+      } else {
+        searchParams.append(key, params[key] as string);
+      }
+    }
+    return searchParams;
+  };
+
+  const uri =
+    baseUrl +
+    "?" +
+    createParams(params[0] as Record<string, string | string[]>).toString();
+  console.log(uri);
+  const init = {
+    method: method as string,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    ...mayBody(method),
+  };
+
+  try {
+    const res = await fetch(uri, init);
+    const statusCode = res.status;
+    if (statusCode >= 400) {
+      const error = await res.json();
+      throw error;
+    }
+    const json = await res.json();
+    return json as OkResponseType<P, M>;
+  } catch (error) {
+    throw error;
+  }
+};
