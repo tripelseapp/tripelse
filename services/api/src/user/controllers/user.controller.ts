@@ -148,8 +148,9 @@ export class UserController {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const userAndProfileDocument =
-      await this.userService.findOneWithProfile(id);
+    const userAndProfileDocument = await this.userService.findOneWithProfile(
+      id,
+    );
     const parsedData = getUserProfileDetails(userAndProfileDocument);
 
     return parsedData;
@@ -308,8 +309,9 @@ export class UserController {
     },
   })
   async findOneWithProfile(@Param('id') id: string) {
-    const userAndProfileDocument =
-      await this.userService.findOneWithProfile(id);
+    const userAndProfileDocument = await this.userService.findOneWithProfile(
+      id,
+    );
 
     const parsedData = getUserProfileDetails(userAndProfileDocument);
 
