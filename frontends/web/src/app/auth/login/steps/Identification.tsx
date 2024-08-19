@@ -56,10 +56,6 @@ const IdentificationStep = ({
 
     //   validate if user exists
 
-    // const promise = apiCall({
-    //   url: `/api/v1/user/by-email-or-username/${usernameOrEmail}`,
-    //   method: "get",
-    // });
     const promise = fetch(
       `${CLIENT_API_URL}/api/v1/user/by-email-or-username/${usernameOrEmail}`,
     );

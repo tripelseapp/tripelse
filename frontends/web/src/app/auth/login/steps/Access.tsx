@@ -1,6 +1,9 @@
+"use client";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, PasswordInput } from "pol-ui";
-import { FormEvent, useState } from "react";
+import { FormEvent, useCallback, useState } from "react";
+import login from "../action";
 
 interface AccessStepProps {
   goPrevStep: () => void;
@@ -11,16 +14,43 @@ interface AccessStepProps {
 const AccessStep = (props: AccessStepProps) => {
   const { onSubmit, goPrevStep, userName } = props;
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    setIsLoading(true);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+      return params.toString();
+    },
+    [searchParams],
+  );
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
     const formData = new FormData(e.currentTarget);
-    const usernameOrEmail = formData.get("usernameOrEmail") as string;
+    try {
+      const response = await login(formData);
+      if (response.status === "fieldError") {
+        createQueryString("fieldError", JSON.stringify(response.errors));
+      }
 
-    //   validate if user exists
-    if (false) {
-      onSubmit(usernameOrEmail);
+      if (response.status === "generalError") {
+        router.push(
+          pathname +
+            "?" +
+            createQueryString("generalError", response.generalError),
+        );
+      }
+    } catch (error) {
+      router.push(
+        pathname +
+          "?" +
+          createQueryString(
+            "generalError",
+            "An error occurred. Please try again later.",
+          ),
+      );
     }
     setIsLoading(false);
   };
