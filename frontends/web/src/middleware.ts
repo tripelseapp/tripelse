@@ -12,7 +12,7 @@ export function middleware(request: NextRequest) {
 
   console.log("User:", user);
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
   // Optionally, validate the token with your backend here
 

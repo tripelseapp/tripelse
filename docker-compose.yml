@@ -15,11 +15,10 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     ports:
-      - 27017:27017
-    logging:
-      driver: "none"
+      - ${DB_PORT}:${DB_PORT}
 
-  nest:
+
+  api-nestjs:
     container_name: "api-nestjs"
     build:
       context: ./services/api
@@ -63,7 +62,7 @@ services:
     networks:
       - server-network
     depends_on:
-      - nest
+      - api-nestjs
 
 networks:
   server-network:

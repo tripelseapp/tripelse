@@ -1,4 +1,4 @@
-import { API_URL } from "constants/api";
+import { SERVER_API_URL } from "constants/api";
 import { paths } from "public/data/api";
 
 type Path = keyof paths;
@@ -9,7 +9,7 @@ export type PossibleResponses<
 > = "responses" extends keyof paths[T][M]
   ? keyof paths[T][M]["responses"]
   : never;
-  
+
 export type RequestBody<
   P extends Path,
   M extends PathMethod<P>,
@@ -83,7 +83,7 @@ export const apiCall = async <P extends Path, M extends PathMethod<P>>({
     }
   };
 
-  const baseUrl = new URL(API_URL + url);
+  const baseUrl = new URL(SERVER_API_URL + url);
 
   const createParams = (params: Record<string, string | string[]>) => {
     const searchParams = new URLSearchParams();

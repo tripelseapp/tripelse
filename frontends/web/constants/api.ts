@@ -1,4 +1,12 @@
-export const API_URL = "http://api-nestjs:4000";
+export const SERVER_API_URL = "http://api-nestjs:4000";
+export const CLIENT_API_URL = "http://localhost:4000";
+
+const getApiUrl = () => {
+  if (typeof window !== "undefined") {
+    return CLIENT_API_URL;
+  }
+  return SERVER_API_URL;
+};
 // /api/v1
 enum EntitiesEnum {
   trip = "trip",
@@ -7,11 +15,11 @@ enum EntitiesEnum {
 export type Entity = keyof typeof EntitiesEnum;
 
 const baseResource = (entity: Entity) => (id: string) =>
-  `${API_URL}/${entity}/${id}`;
+  `${getApiUrl()}/${entity}/${id}`;
 
 const baseCrud = (entity: Entity) => ({
-  list: `${API_URL}/${entity}`,
-  create: `${API_URL}/${entity}`,
+  list: `${getApiUrl()}/${entity}`,
+  create: `${getApiUrl()}/${entity}`,
   show: baseResource(entity),
   update: baseResource(entity),
   delete: baseResource(entity),
@@ -21,15 +29,15 @@ export const API = {
   trip: baseCrud(EntitiesEnum.trip),
   user: {
     ...baseCrud(EntitiesEnum.user),
-    profile: (id: string) => `${API_URL}/user/${id}/profile`,
+    profile: (id: string) => `${getApiUrl()}/user/${id}/profile`,
     byEmailOrUsername: (emailOrUsername: string) =>
-      `${API_URL}/user/by-email-or-username/${emailOrUsername}`,
-    myProfile: `${API_URL}/user/mine/profile`,
+      `${getApiUrl()}/user/by-email-or-username/${emailOrUsername}`,
+    myProfile: `${getApiUrl()}/user/mine/profile`,
   },
 
   auth: {
-    login: `${API_URL}/auth/login`,
-    register: `${API_URL}/auth/register`,
-    me: `${API_URL}/auth/me`,
+    login: `${getApiUrl()}/auth/login`,
+    register: `${getApiUrl()}/auth/register`,
+    me: `${getApiUrl()}/auth/me`,
   },
 };

@@ -2,6 +2,7 @@ import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
+import AppProvider from "~/providers/AppProvider";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -15,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className="min-h-screen bg-zinc-50 text-black dark:bg-slate-950 dark:text-zinc-50">
-        {children}
+        <AppProvider>{children}</AppProvider>
       </body>
     </html>
   );
