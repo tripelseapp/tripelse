@@ -9,8 +9,10 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { TokensDto } from 'auth/dto/tokens.dto';
 import { Public } from 'common/decorators/publicRoute.decorator';
+import config from 'config/config';
 import { Request, Response } from 'express';
 import { CreateUserDto } from '../../user/dto/create-user.dto';
 import { LoginDto } from '../dto/login.dto';
@@ -20,7 +22,6 @@ import { LocalAuthGuard } from '../guards/local.guard';
 import { AuthService } from '../services/auth.service';
 import { TokensRes } from '../types/LoginRes.type';
 import { ReqWithUser } from '../types/token-payload.type';
-import config from 'config/config';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -31,6 +32,10 @@ export class AuthController {
   @ApiOperation({
     summary: 'Register user',
     description: 'Register a new user with username, email, and password',
+  })
+  @ApiCreatedResponse({
+    type: TokensDto,
+    description: 'User registered successfully',
   })
   async register(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     const registerRes = await this.authService.register(createUserDto);
@@ -48,7 +53,6 @@ export class AuthController {
     }
     res.cookie(refreshCookieName, registerRes.refreshToken, {
       httpOnly: true,
-
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -83,6 +87,10 @@ export class AuthController {
   @ApiOperation({
     summary: 'Login user',
     description: 'Get a JWT token for a user by username or email and password',
+  })
+  @ApiCreatedResponse({
+    type: TokensDto,
+    description: 'User registered successfully',
   })
   async login(
     @Body() loginDto: LoginDto,
@@ -123,6 +131,10 @@ export class AuthController {
   @Get('login/social/google')
   @Public()
   @UseGuards(GoogleAuthGuard)
+  @ApiCreatedResponse({
+    type: TokensDto,
+    description: 'User registered successfully',
+  })
   async googleAuth(@Req() req: Request) {
     return req.user;
   }
@@ -168,6 +180,10 @@ export class AuthController {
   @ApiOperation({
     summary: 'Refresh JWT token',
     description: 'Refresh the JWT token',
+  })
+  @ApiCreatedResponse({
+    type: TokensDto,
+    description: 'User registered successfully',
   })
   // @UseGuards(RefreshJwtAuthGuard)
   async refreshToken(

@@ -43,6 +43,7 @@ import {
 import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
 import { GenericUnauthorizedResponse } from 'common/decorators/unautorized-response.decorator';
+import { Public } from 'common/decorators/publicRoute.decorator';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -267,8 +268,8 @@ export class UserController {
 
   //  - Get user by username or email
 
+  @Public()
   @Get('by-email-or-username/:userNameOrEmail')
-  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     status: HttpStatus.OK,
     type: UserDetailsDto,

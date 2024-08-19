@@ -8,8 +8,6 @@ import { getUserDetails } from './get-users-details';
 export const getUserProfileDetails = (
   user: PopulatedUserDocument,
 ): PopulatedUser => {
-  // If no changes have been made to the user, updatedAt will be null so we use createdAt instead
-
   return {
     ...getUserDetails(user as any),
     profile: getProfileDetails(user.profile),

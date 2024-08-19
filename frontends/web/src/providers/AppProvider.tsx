@@ -6,7 +6,7 @@ const AppProvider = (props: PropsWithChildren) => {
   return (
     <PoluiProvider>
       {props.children}
-      <Toaster />
+      <Toaster position="top-right" />
     </PoluiProvider>
   );
 };

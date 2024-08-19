@@ -708,7 +708,7 @@ export type paths = {
     patch?: never;
     trace?: never;
   };
-  [path: `/api/v1/user/by-email-or-username/${string}`]: {
+  "/api/v1/user/check2": {
     parameters: {
       query?: never;
       header?: never;
@@ -1108,6 +1108,18 @@ export type components = {
        */
       trips: components["schemas"]["TripInListDto"][];
     };
+    TokensDto: {
+      /**
+       * @description A JWT token string for accesing the API
+       * @example eyJhbGciOiJIUzI1NiIsInR
+       */
+      accessToken: string;
+      /**
+       * @description A JWT token string for refreshing the authentication
+       * @example eyJhbGciOiJIUzI1NiIsInR5cCI6Ik
+       */
+      refreshToken: string;
+    };
     TripDetailsDto: {
       /**
        * @description Flag to indicate if the trip is active or not.
@@ -1378,11 +1390,14 @@ export interface operations {
       };
     };
     responses: {
+      /** @description User registered successfully */
       201: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["TokensDto"];
+        };
       };
     };
   };
@@ -1395,11 +1410,14 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: {
+      /** @description User registered successfully */
+      201: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["TokensDto"];
+        };
       };
     };
   };
@@ -1446,11 +1464,14 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description User registered successfully */
       201: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["TokensDto"];
+        };
       };
     };
   };
@@ -1467,11 +1488,14 @@ export interface operations {
       };
     };
     responses: {
+      /** @description User registered successfully */
       201: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["TokensDto"];
+        };
       };
     };
   };
@@ -2394,8 +2418,8 @@ export interface operations {
        *       "name": "A summer trip to the beach",
        *       "description": "A complete week of fun and relaxation at the beach.",
        *       "thumbnail": "https://example.com/image.jpg",
-       *       "createdAt": "2024-08-18T19:12:28.264Z",
-       *       "updatedAt": "2024-08-18T19:12:28.264Z",
+       *       "createdAt": "2024-08-19T15:31:53.732Z",
+       *       "updatedAt": "2024-08-19T15:31:53.732Z",
        *       "expenses": [],
        *       "createdBy": {
        *         "id": "6695aebd76dcb559c2f56d17",
@@ -2444,8 +2468,8 @@ export interface operations {
        *                   "mimetype": ".jpeg",
        *                   "size": 17000,
        *                   "isFavorite": true,
-       *                   "createdAt": "2024-08-18T19:12:28.243Z",
-       *                   "updatedAt": "2024-08-18T19:12:28.243Z"
+       *                   "createdAt": "2024-08-19T15:31:53.720Z",
+       *                   "updatedAt": "2024-08-19T15:31:53.720Z"
        *                 }
        *               ],
        *               "dateTime": "2024-06-01T14:37:00.000Z",
@@ -2478,8 +2502,8 @@ export interface operations {
        *                   "mimetype": ".jpeg",
        *                   "size": 17000,
        *                   "isFavorite": true,
-       *                   "createdAt": "2024-08-18T19:12:28.243Z",
-       *                   "updatedAt": "2024-08-18T19:12:28.243Z"
+       *                   "createdAt": "2024-08-19T15:31:53.720Z",
+       *                   "updatedAt": "2024-08-19T15:31:53.720Z"
        *                 }
        *               ],
        *               "dateTime": "2024-06-01T14:37:00.000Z",
@@ -2674,8 +2698,8 @@ export interface operations {
        *       "name": "A summer trip to the beach",
        *       "description": "A complete week of fun and relaxation at the beach.",
        *       "thumbnail": "https://example.com/image.jpg",
-       *       "createdAt": "2024-08-18T19:12:28.264Z",
-       *       "updatedAt": "2024-08-18T19:12:28.264Z",
+       *       "createdAt": "2024-08-19T15:31:53.732Z",
+       *       "updatedAt": "2024-08-19T15:31:53.732Z",
        *       "expenses": [],
        *       "createdBy": {
        *         "id": "6695aebd76dcb559c2f56d17",
@@ -2724,8 +2748,8 @@ export interface operations {
        *                   "mimetype": ".jpeg",
        *                   "size": 17000,
        *                   "isFavorite": true,
-       *                   "createdAt": "2024-08-18T19:12:28.243Z",
-       *                   "updatedAt": "2024-08-18T19:12:28.243Z"
+       *                   "createdAt": "2024-08-19T15:31:53.720Z",
+       *                   "updatedAt": "2024-08-19T15:31:53.720Z"
        *                 }
        *               ],
        *               "dateTime": "2024-06-01T14:37:00.000Z",
@@ -2758,8 +2782,8 @@ export interface operations {
        *                   "mimetype": ".jpeg",
        *                   "size": 17000,
        *                   "isFavorite": true,
-       *                   "createdAt": "2024-08-18T19:12:28.243Z",
-       *                   "updatedAt": "2024-08-18T19:12:28.243Z"
+       *                   "createdAt": "2024-08-19T15:31:53.720Z",
+       *                   "updatedAt": "2024-08-19T15:31:53.720Z"
        *                 }
        *               ],
        *               "dateTime": "2024-06-01T14:37:00.000Z",
@@ -2860,8 +2884,8 @@ export interface operations {
        *       "name": "A summer trip to the beach",
        *       "description": "A complete week of fun and relaxation at the beach.",
        *       "thumbnail": "https://example.com/image.jpg",
-       *       "createdAt": "2024-08-18T19:12:28.264Z",
-       *       "updatedAt": "2024-08-18T19:12:28.264Z",
+       *       "createdAt": "2024-08-19T15:31:53.732Z",
+       *       "updatedAt": "2024-08-19T15:31:53.732Z",
        *       "expenses": [],
        *       "createdBy": {
        *         "id": "6695aebd76dcb559c2f56d17",
@@ -2910,8 +2934,8 @@ export interface operations {
        *                   "mimetype": ".jpeg",
        *                   "size": 17000,
        *                   "isFavorite": true,
-       *                   "createdAt": "2024-08-18T19:12:28.243Z",
-       *                   "updatedAt": "2024-08-18T19:12:28.243Z"
+       *                   "createdAt": "2024-08-19T15:31:53.720Z",
+       *                   "updatedAt": "2024-08-19T15:31:53.720Z"
        *                 }
        *               ],
        *               "dateTime": "2024-06-01T14:37:00.000Z",
@@ -2944,8 +2968,8 @@ export interface operations {
        *                   "mimetype": ".jpeg",
        *                   "size": 17000,
        *                   "isFavorite": true,
-       *                   "createdAt": "2024-08-18T19:12:28.243Z",
-       *                   "updatedAt": "2024-08-18T19:12:28.243Z"
+       *                   "createdAt": "2024-08-19T15:31:53.720Z",
+       *                   "updatedAt": "2024-08-19T15:31:53.720Z"
        *                 }
        *               ],
        *               "dateTime": "2024-06-01T14:37:00.000Z",
@@ -3331,11 +3355,11 @@ export interface operations {
   };
   UserController_checkIfUsernameExists: {
     parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        userNameOrEmail: string;
+      query: {
+        user: string;
       };
+      header?: never;
+      path?: never;
       cookie?: never;
     };
     requestBody?: never;

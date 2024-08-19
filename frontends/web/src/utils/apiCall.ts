@@ -1,3 +1,4 @@
+"use server";
 import { SERVER_API_URL } from "constants/api";
 import { paths } from "public/data/api";
 
@@ -119,11 +120,15 @@ export const apiCall = async <P extends Path, M extends PathMethod<P>>({
     return searchParams;
   };
 
-  const uri =
-    baseUrl +
-    "?" +
-    createParams(params?.[0] as Record<string, string | string[]>).toString();
-  console.log(uri);
+  let uri = baseUrl.toString();
+  if (params) {
+    uri =
+      baseUrl +
+      "?" +
+      createParams(params as Record<string, string | string[]>).toString;
+  }
+
+  console.group(uri);
   const init = {
     method: method as string,
     headers: {

@@ -249,7 +249,6 @@ export class UserService {
     const user = await this.findUser({
       [isEmail ? 'email' : 'username']: usernameOrEmail,
     });
-
     return user;
   }
 
