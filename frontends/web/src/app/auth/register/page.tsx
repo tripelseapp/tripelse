@@ -106,7 +106,6 @@ export default function RegisterPage() {
 
       if (res.ok) {
         const data = await res.json();
-        console.log(data);
         if (data?.accessToken) {
           router.push("/dashboard");
         }
