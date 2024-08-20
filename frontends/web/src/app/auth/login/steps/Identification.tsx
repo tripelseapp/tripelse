@@ -18,10 +18,6 @@ const IdentificationStep = ({
 
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
 
-  // const searchParams = useSearchParams();
-
-  // Get a new searchParams string by merging the current
-  // searchParams with a provided key/value pair
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -104,7 +100,7 @@ const IdentificationStep = ({
           required
         />
         <div className="mt-1 text-xs text-red-500">
-          {/* {errors.find((error) => error.for === "name")?.message} */}
+          {errors.find((error) => error.for === "usernameOrEmail")?.message}
         </div>
       </div>
       <div className="flex w-full flex-col gap-2">

@@ -93,16 +93,16 @@ export default async function login(formData: FormData): Promise<Response> {
 
   const response = await promise;
   if (response.ok) {
-    const data = await response.json();
+    const data = (await response.json()) as ResponseOk;
     if (data?.accessToken) {
       redirect("/dashboard");
     }
     return data;
   } else {
-    const error = await response.json();
+    const error = (await response.json()) as GeneralError;
     return {
       status: PossibleResponsesEnum.GENERAL_ERROR,
-      generalError: error,
+      generalError: error.toString(),
     };
   }
 }

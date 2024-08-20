@@ -1,6 +1,6 @@
 "use client";
 import { PoluiProvider, Toaster } from "pol-ui";
-import { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 const AppProvider = (props: PropsWithChildren) => {
   return (

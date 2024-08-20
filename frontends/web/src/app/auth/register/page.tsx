@@ -1,12 +1,17 @@
 "use client";
 
-import { Button, Input, PasswordInput, toast } from "pol-ui";
+import { Button, Input, PasswordInput } from "pol-ui";
 import { FormEvent, useState } from "react";
-import createUser from "./action";
+import createUser, { PossibleResponsesEnum } from "./action";
 
 export default function RegisterPage() {
   //
-  const [errors, setErrors] = useState<any[]>([]);
+  const [errors, setErrors] = useState<
+    {
+      for: string;
+      message: string | undefined | string[];
+    }[]
+  >([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
@@ -16,14 +21,14 @@ export default function RegisterPage() {
     const formData = new FormData(e.currentTarget);
     try {
       const response = await createUser(formData);
-      if (response.status === "fieldError") {
+      if (response.status === PossibleResponsesEnum.FIELD_ERROR) {
         setErrors([
           { for: "email", message: response.errors.email },
           { for: "username", message: response.errors.username },
           { for: "password", message: response.errors.password },
         ]);
       }
-      if (response.status === "generalError") {
+      if (response.status === PossibleResponsesEnum.GENERAL_ERROR) {
         setGlobalError(response.generalError);
       }
     } catch (error) {

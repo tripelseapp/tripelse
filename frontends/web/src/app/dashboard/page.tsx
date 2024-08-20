@@ -1,19 +1,18 @@
-import { apiCall, RequestParams } from "~/utils/apiCall";
-import Link from "next/link";
+// import { apiCall, RequestParams } from "~/utils/apiCall";
 import { getToken } from "~/utils/auth/getToken";
 
-const endpoint = "/api/v1/trip";
+// const endpoint = "/api/v1/trip";
 
-type GetUserOptions = RequestParams<typeof endpoint, "get">;
-async function getTrips(params?: GetUserOptions) {
-  try {
-    const trips = await apiCall({ url: endpoint });
-    return trips;
-  } catch (error) {
-    console.error(error);
-    return error;
-  }
-}
+// type GetUserOptions = RequestParams<typeof endpoint, "get">;
+// async function getTrips(params?: GetUserOptions) {
+//   try {
+//     const trips = await apiCall({ url: endpoint });
+//     return trips;
+//   } catch (error) {
+//     console.error(error);
+//     return error;
+//   }
+// }
 
 export default async function HomePage() {
   const token = await getToken();

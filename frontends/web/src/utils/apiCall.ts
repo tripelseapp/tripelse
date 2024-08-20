@@ -15,7 +15,7 @@ export type RequestBody<
   P extends Path,
   M extends PathMethod<P>,
 > = paths[P][M] extends {
-  requestBody: Record<string, any>;
+  requestBody: Record<string | number, any>;
 }
   ? paths[P][M]["requestBody"]["content"]["application/json"]
   : undefined;
@@ -114,7 +114,7 @@ export const apiCall = async <P extends Path, M extends PathMethod<P>>({
           searchParams.append(key, element);
         }
       } else {
-        searchParams.append(key, params[key] as string);
+        searchParams.append(key, params[key]!);
       }
     }
     return searchParams;

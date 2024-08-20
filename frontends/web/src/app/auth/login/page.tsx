@@ -7,7 +7,7 @@ import IdentificationStep from "./steps/Identification";
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Record<string, string | string[] | undefined>;
 }) {
   const hasUser = searchParams.user;
   const globalError = searchParams.globalError;
@@ -28,7 +28,6 @@ export default function LoginPage({
         <AccessStep
           userName={searchParams.user as string}
           onSubmit={() => {}}
-          goPrevStep={() => redirect("/auth/login")}
         />
       )}
     </div>

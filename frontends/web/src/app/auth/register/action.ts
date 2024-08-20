@@ -27,7 +27,7 @@ const method = "post";
 type ResponseTokens =
   paths[typeof endpoint]["post"]["responses"]["201"]["content"]["application/json"];
 // Enum representing the possible response statuses.
-enum PossibleResponsesEnum {
+export enum PossibleResponsesEnum {
   SUCCESS = "SUCCESS",
   GENERAL_ERROR = "generalError",
   FIELD_ERROR = "fieldError",

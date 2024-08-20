@@ -6,13 +6,12 @@ import { FormEvent, useCallback, useState } from "react";
 import login from "../action";
 
 interface AccessStepProps {
-  goPrevStep: () => void;
   onSubmit: (value: string) => void;
   userName: string;
 }
 
 const AccessStep = (props: AccessStepProps) => {
-  const { onSubmit, goPrevStep, userName } = props;
+  const { userName } = props;
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -81,11 +80,15 @@ const AccessStep = (props: AccessStepProps) => {
       <div className="flex w-full flex-col gap-2">
         <p className="mt-4 text-sm text-gray-500">
           That wasn't you?{" "}
-          <Link href="/auth/login">
-            <Button type="button" variant="ghost">
-              Go back
-            </Button>
-          </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() =>
+              router.push(pathname + "?" + createQueryString("user", ""))
+            }
+          >
+            Go back
+          </Button>
         </p>
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? "Searching user..." : "Continue"}
