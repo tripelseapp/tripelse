@@ -1,26 +1,10 @@
 {
+  "extends": "@tripelse/typescript-config/nestjs.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2017",
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "outDir": "./dist",
-    "strictPropertyInitialization": false,
-    "strict": true,
-    "esModuleInterop": true,
-    "baseUrl": "./src",
-
-    "incremental": true,
-    "forceConsistentCasingInFileNames": true
+    "baseUrl": "./",
+    "outDir": "./dist"
   },
   "watchOptions": {
     "watchFile": "fixedPollingInterval"
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  }
 }

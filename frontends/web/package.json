@@ -1,13 +1,14 @@
 {
-  "name": "tripelse-web",
+  "name": "web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
-    "dev": "WATCHPACK_POLLING=true next dev",
-    "lint": "next lint",
+    "check-types": "tsc --noEmit",
+    "dev": "WATCHPACK_POLLING=true next dev --turbo",
+    "lint": "eslint .",
     "start": "next start",
+    "build": "next build",
     "generate": "npx openapi-typescript --alphabetize --enum --enum-values -t --path-params-as-types"
   },
   "dependencies": {
@@ -22,6 +23,8 @@
     "zod": "^3.23.3"
   },
   "devDependencies": {
+    "@tripelse/eslint-config": "workspace:*",
+    "@tripelse/typescript-config": "workspace:*",
     "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
@@ -30,6 +33,7 @@
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.4",
+    "eslint-config-prettier": "^9.1.0",
     "openapi-typescript": "^7.3.0",
     "postcss": "^8.4.39",
     "prettier": "^3.3.2",

@@ -5,11 +5,18 @@ const project = resolve(process.cwd(), "tsconfig.json");
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
   extends: [
-    "eslint:recommended",
-    "prettier",
+    require.resolve("@vercel/style-guide/eslint/node"),
+    require.resolve("@vercel/style-guide/eslint/typescript"),
+    require.resolve("@vercel/style-guide/eslint/browser"),
+    require.resolve("@vercel/style-guide/eslint/react"),
     require.resolve("@vercel/style-guide/eslint/next"),
-    "turbo",
-  ],
+    // Turborepo custom eslint configuration configures the following rules:
+    //  - https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/no-undeclared-env-vars.md
+    "eslint-config-turbo",
+  ].map(require.resolve),
+  parserOptions: {
+    project,
+  },
   globals: {
     React: true,
     JSX: true,
@@ -29,7 +36,11 @@ module.exports = {
   ignorePatterns: [
     // Ignore dotfiles
     ".*.js",
+    "dist/",
     "node_modules/",
   ],
+  rules: {
+    "import/no-default-export": "off",
+  },
   overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
 };
