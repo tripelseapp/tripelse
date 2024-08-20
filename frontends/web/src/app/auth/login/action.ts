@@ -1,9 +1,9 @@
 "use server";
 
-import { SERVER_API_URL } from "constants/api";
 import { redirect } from "next/navigation";
-import { paths } from "public/data/api";
+import type { paths } from "public/data/api";
 import { z } from "zod";
+import { SERVER_API_URL } from "~/constants/api";
 
 const registerSchema = z.object({
   usernameOrEmail: z.string().min(3),
@@ -20,9 +20,9 @@ type ResponseTokens =
   paths[typeof endpoint]["post"]["responses"]["201"]["content"]["application/json"];
 // Enum representing the possible response statuses.
 enum PossibleResponsesEnum {
-  SUCCESS = "SUCCESS",
-  GENERAL_ERROR = "generalError",
-  FIELD_ERROR = "fieldError",
+  Success = "Success",
+  GeneralError = "GeneralError",
+  FieldError = "FieldError",
 }
 
 // Type alias for possible response status strings.
@@ -35,12 +35,12 @@ interface BaseResponse {
 
 // Response type for a successful operation.
 interface ResponseOk extends BaseResponse, ResponseTokens {
-  status: PossibleResponsesEnum.SUCCESS;
+  status: PossibleResponsesEnum.Success;
 }
 
 // Response type for general errors with key-value error details.
 interface GeneralError extends BaseResponse {
-  status: PossibleResponsesEnum.GENERAL_ERROR;
+  status: PossibleResponsesEnum.GeneralError;
   generalError: string;
 }
 
@@ -49,7 +49,7 @@ type FieldError = string[] | undefined;
 
 // Response type for field errors with possible error messages for specific fields.
 interface FieldsErrors extends BaseResponse {
-  status: PossibleResponsesEnum.FIELD_ERROR;
+  status: PossibleResponsesEnum.FieldError;
   errors: {
     usernameOrEmail?: FieldError;
     password?: FieldError;
@@ -71,7 +71,7 @@ export default async function login(formData: FormData): Promise<Response> {
   // Return early if the form data is invalid
   if (!validatedFields.success) {
     const res: FieldsErrors = {
-      status: PossibleResponsesEnum.FIELD_ERROR,
+      status: PossibleResponsesEnum.FieldError,
       errors: validatedFields.error.flatten().fieldErrors,
     };
     return res;
@@ -84,7 +84,7 @@ export default async function login(formData: FormData): Promise<Response> {
 
   // Create the user
   const promise = fetch(url, {
-    method: method,
+    method,
     headers: {
       "Content-Type": "application/json",
     },
@@ -94,15 +94,14 @@ export default async function login(formData: FormData): Promise<Response> {
   const response = await promise;
   if (response.ok) {
     const data = (await response.json()) as ResponseOk;
-    if (data?.accessToken) {
+    if (data.accessToken) {
       redirect("/dashboard");
     }
     return data;
-  } else {
-    const error = (await response.json()) as GeneralError;
-    return {
-      status: PossibleResponsesEnum.GENERAL_ERROR,
-      generalError: error.toString(),
-    };
   }
+  const error = (await response.json()) as GeneralError;
+  return {
+    status: PossibleResponsesEnum.GeneralError,
+    generalError: error.toString(),
+  };
 }

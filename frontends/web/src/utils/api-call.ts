@@ -1,6 +1,6 @@
 "use server";
-import { SERVER_API_URL } from "constants/api";
-import { paths } from "public/data/api";
+import type { paths } from "public/data/api";
+import { SERVER_API_URL } from "~/constants/api";
 
 type Path = keyof paths;
 type PathMethod<T extends Path> = keyof paths[T];
@@ -43,13 +43,13 @@ export type OkResponseType<
 export type ResponseType<
   P extends Path,
   M extends PathMethod<P>,
-  status extends number,
+  Status extends number,
 > = paths[P][M] extends {
   responses: {
-    [key in status]: { content: { "application/json": any } };
+    [key in Status]: { content: { "application/json": any } };
   };
 }
-  ? paths[P][M]["responses"][status]["content"]["application/json"]
+  ? paths[P][M]["responses"][Status]["content"]["application/json"]
   : undefined;
 export type UnauthorizedResponseType<
   P extends Path,
@@ -70,26 +70,17 @@ interface ApiCallProps<P extends Path, M extends PathMethod<P>> {
 }
 export const apiCall = async <P extends Path, M extends PathMethod<P>>({
   url,
+  params,
   method = "get" as M,
   body,
-  params,
 }: ApiCallProps<P, M>): Promise<OkResponseType<P, M>> => {
+  const baseUrl = new URL(`${SERVER_API_URL}${String(url)}`);
   const stringBody = body ? JSON.stringify(body) : undefined;
 
-  const mayBody = (method: M) => {
-    const bodyMethods = ["post", "put", "patch"];
-    const hasBody = bodyMethods.includes(method.toString());
-    if (hasBody) {
-      return { body: stringBody };
-    }
-  };
-
-  const baseUrl = new URL(SERVER_API_URL + url);
-
-  const createParams = (params: Record<string, string | string[]>) => {
+  const createParams = (parameters: Record<string, string | string[]>) => {
     const searchParams = new URLSearchParams();
 
-    for (const key in params) {
+    for (const key in parameters) {
       const notInUrlParams = [
         "body",
         "headers",
@@ -109,12 +100,12 @@ export const apiCall = async <P extends Path, M extends PathMethod<P>>({
         continue;
       }
       // if its array we need to add each element separately
-      if (Array.isArray(params[key])) {
-        for (const element of params[key]) {
+      if (Array.isArray(parameters[key])) {
+        for (const element of parameters[key]) {
           searchParams.append(key, element);
         }
       } else {
-        searchParams.append(key, params[key]!);
+        searchParams.append(key, parameters[key]!);
       }
     }
     return searchParams;
@@ -122,13 +113,17 @@ export const apiCall = async <P extends Path, M extends PathMethod<P>>({
 
   let uri = baseUrl.toString();
   if (params) {
-    uri =
-      baseUrl +
-      "?" +
-      createParams(params as Record<string, string | string[]>).toString;
+    uri = `${baseUrl}?${
+      createParams(params as Record<string, string | string[]>).toString
+    }`;
   }
-
-  console.group(uri);
+  const mayBody = (method: M) => {
+    const bodyMethods = ["post", "put", "patch"];
+    const hasBody = bodyMethods.includes(method.toString());
+    if (hasBody) {
+      return { body: stringBody };
+    }
+  };
   const init = {
     method: method as string,
     headers: {
@@ -136,17 +131,12 @@ export const apiCall = async <P extends Path, M extends PathMethod<P>>({
     },
     ...mayBody(method),
   };
-
-  try {
-    const res = await fetch(uri, init);
-    const statusCode = res.status;
-    if (statusCode >= 400) {
-      const error = await res.json();
-      throw error;
-    }
-    const json = await res.json();
-    return json as OkResponseType<P, M>;
-  } catch (error) {
+  const res = await fetch(uri, init);
+  const statusCode = res.status;
+  if (statusCode >= 400) {
+    const error = await res.json();
     throw error;
   }
+  const json = await res.json();
+  return json as OkResponseType<P, M>;
 };

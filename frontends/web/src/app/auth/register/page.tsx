@@ -1,10 +1,12 @@
 "use client";
 
 import { Button, Input, PasswordInput } from "pol-ui";
-import { FormEvent, useState } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import createUser, { PossibleResponsesEnum } from "./action";
 
-export default function RegisterPage() {
+type HandleSubmitType = (e: FormEvent<HTMLFormElement>) => Promise<void>;
+export default function RegisterPage(): JSX.Element {
   //
   const [errors, setErrors] = useState<
     {
@@ -15,20 +17,20 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit: HandleSubmitType = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     const formData = new FormData(e.currentTarget);
     try {
       const response = await createUser(formData);
-      if (response.status === PossibleResponsesEnum.FIELD_ERROR) {
+      if (response.status === PossibleResponsesEnum.FieldError) {
         setErrors([
           { for: "email", message: response.errors.email },
           { for: "username", message: response.errors.username },
           { for: "password", message: response.errors.password },
         ]);
       }
-      if (response.status === PossibleResponsesEnum.GENERAL_ERROR) {
+      if (response.status === PossibleResponsesEnum.GeneralError) {
         setGlobalError(response.generalError);
       }
     } catch (error) {
@@ -44,19 +46,19 @@ export default function RegisterPage() {
           <h2 className="text-2xl font-semibold text-black dark:text-white">
             Register
           </h2>
-          {globalError && (
+          {globalError ? (
             <div className="text-sm font-medium text-red-500">
               {globalError}
             </div>
-          )}
+          ) : null}
         </header>
 
         <form className="flex flex-col gap-10" onSubmit={handleSubmit}>
           <div>
             <Input
+              id="username"
               label="Username"
               name="username"
-              id="username"
               placeholder="Pep Sanchis"
               required
             />
@@ -66,9 +68,9 @@ export default function RegisterPage() {
           </div>
           <div>
             <Input
+              id="email"
               label="email"
               name="email"
-              id="email"
               placeholder="pepsanchis@email.com"
               required
             />
@@ -78,10 +80,10 @@ export default function RegisterPage() {
           </div>
           <div>
             <PasswordInput
-              label="Password"
-              placeholder="········"
-              name="password"
               id="password"
+              label="Password"
+              name="password"
+              placeholder="········"
               required
             />
             <div className="mt-1 text-xs text-red-500">
@@ -90,14 +92,14 @@ export default function RegisterPage() {
           </div>
 
           <div className="text-end">
-            <Button type="submit" disabled={isLoading}>
+            <Button disabled={isLoading} type="submit">
               {isLoading ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>
         <p className="mt-4 text-sm text-gray-500">
           Already have an account?{" "}
-          <a href="/auth/login" className="text-blue-500">
+          <a className="text-blue-500" href="/auth/login">
             Create
           </a>
         </p>

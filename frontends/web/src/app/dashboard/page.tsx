@@ -1,5 +1,6 @@
 // import { apiCall, RequestParams } from "~/utils/apiCall";
-import { getToken } from "~/utils/auth/getToken";
+
+import { getToken } from "~/utils/auth/get-token";
 
 // const endpoint = "/api/v1/trip";
 
@@ -14,7 +15,7 @@ import { getToken } from "~/utils/auth/getToken";
 //   }
 // }
 
-export default async function HomePage() {
+export default async function HomePage(): Promise<React.JSX.Element> {
   const token = await getToken();
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">

@@ -5,16 +5,16 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import config from 'config/config';
+import { EventEmitterEnum } from 'event-emitter/enum.event-emitter';
+import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
 import { CreateUserDto } from '../../user/dto/create-user.dto';
 import { UserService } from '../../user/services/user.service';
 import { comparePassword } from '../../user/utils/password-utils';
-import { LoginDto } from './../dto/login.dto';
-import { TokensRes } from './../types/LoginRes.type';
 import { UserFromProvider } from '../types/User-from-google.type';
 import { ReqWithUser, TokenPayload } from '../types/token-payload.type';
-import { TypedEventEmitter } from 'event-emitter/typed-event-emitter.class';
-import config from 'config/config';
-import { EventEmitterEnum } from 'event-emitter/enum.event-emitter';
+import { LoginDto } from './../dto/login.dto';
+import { TokensRes } from './../types/LoginRes.type';
 
 @Injectable()
 export class AuthService {

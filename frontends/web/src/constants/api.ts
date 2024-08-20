@@ -1,7 +1,13 @@
 export const SERVER_API_URL = "http://api-nestjs:4000";
 export const CLIENT_API_URL = "http://localhost:4000";
-
-const getApiUrl = () => {
+type BaseCrudType = (entity: Entity) => {
+  list: string;
+  create: string;
+  show: (id: string) => string;
+  update: (id: string) => string;
+  delete: (id: string) => string;
+};
+const getApiUrl = (): string => {
   if (typeof window !== "undefined") {
     return CLIENT_API_URL;
   }
@@ -9,15 +15,17 @@ const getApiUrl = () => {
 };
 // /api/v1
 enum EntitiesEnum {
-  trip = "trip",
-  user = "user",
+  Trip = "Trip",
+  User = "User",
 }
 export type Entity = keyof typeof EntitiesEnum;
 
-const baseResource = (entity: Entity) => (id: string) =>
-  `${getApiUrl()}/${entity}/${id}`;
+const baseResource =
+  (entity: Entity) =>
+  (id: string): string =>
+    `${getApiUrl()}/${entity}/${id}`;
 
-const baseCrud = (entity: Entity) => ({
+const baseCrud: BaseCrudType = (entity) => ({
   list: `${getApiUrl()}/${entity}`,
   create: `${getApiUrl()}/${entity}`,
   show: baseResource(entity),
@@ -26,9 +34,9 @@ const baseCrud = (entity: Entity) => ({
 });
 
 export const API = {
-  trip: baseCrud(EntitiesEnum.trip),
+  trip: baseCrud(EntitiesEnum.Trip),
   user: {
-    ...baseCrud(EntitiesEnum.user),
+    ...baseCrud(EntitiesEnum.User),
     profile: (id: string) => `${getApiUrl()}/user/${id}/profile`,
     byEmailOrUsername: (emailOrUsername: string) =>
       `${getApiUrl()}/user/by-email-or-username/${emailOrUsername}`,

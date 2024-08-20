@@ -1,9 +1,9 @@
 "use server";
 
-import { SERVER_API_URL } from "constants/api";
 import { redirect } from "next/navigation";
-import { paths } from "public/data/api";
 import { z } from "zod";
+import type { paths } from "public/data/api";
+import { SERVER_API_URL } from "~/constants/api";
 
 const registerSchema = z.object({
   username: z.string().min(4, "Username must be at least 4 characters long"),
@@ -28,9 +28,9 @@ type ResponseTokens =
   paths[typeof endpoint]["post"]["responses"]["201"]["content"]["application/json"];
 // Enum representing the possible response statuses.
 export enum PossibleResponsesEnum {
-  SUCCESS = "SUCCESS",
-  GENERAL_ERROR = "generalError",
-  FIELD_ERROR = "fieldError",
+  Success = "Success",
+  GeneralError = "GeneralError",
+  FieldError = "FieldError",
 }
 
 // Type alias for possible response status strings.
@@ -43,12 +43,12 @@ interface BaseResponse {
 
 // Response type for a successful operation.
 interface ResponseOk extends BaseResponse, ResponseTokens {
-  status: PossibleResponsesEnum.SUCCESS;
+  status: PossibleResponsesEnum.Success;
 }
 
 // Response type for general errors with key-value error details.
 interface GeneralError extends BaseResponse {
-  status: PossibleResponsesEnum.GENERAL_ERROR;
+  status: PossibleResponsesEnum.GeneralError;
   generalError: string;
 }
 
@@ -57,7 +57,7 @@ type FieldError = string[] | undefined;
 
 // Response type for field errors with possible error messages for specific fields.
 interface FieldsErrors extends BaseResponse {
-  status: PossibleResponsesEnum.FIELD_ERROR;
+  status: PossibleResponsesEnum.FieldError;
   errors: {
     email?: FieldError;
     username?: FieldError;
@@ -83,7 +83,7 @@ export default async function createUser(
   // Return early if the form data is invalid
   if (!validatedFields.success) {
     const res: FieldsErrors = {
-      status: PossibleResponsesEnum.FIELD_ERROR,
+      status: PossibleResponsesEnum.FieldError,
       errors: validatedFields.error.flatten().fieldErrors,
     };
     return res;
@@ -99,7 +99,7 @@ export default async function createUser(
 
   // Create the user
   const promise = fetch(url, {
-    method: method,
+    method,
     headers: {
       "Content-Type": "application/json",
     },
@@ -113,11 +113,10 @@ export default async function createUser(
       redirect("/dashboard");
     }
     return data;
-  } else {
-    const error = await response.json();
-    return {
-      status: PossibleResponsesEnum.GENERAL_ERROR,
-      generalError: error,
-    };
   }
+  const error = await response.json();
+  return {
+    status: PossibleResponsesEnum.GeneralError,
+    generalError: error,
+  };
 }

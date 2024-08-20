@@ -41,6 +41,10 @@ module.exports = {
   ],
   rules: {
     "import/no-default-export": "off",
+    "no-unsafe-return": "off",
+    "turbo/no-undeclared-env-vars": "warn",
+    "no-explicit-any": "off",
+    "no-useless-template-literals": "off",
   },
   overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
 };

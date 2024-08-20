@@ -1,0 +1,5 @@
+prettier.config.js
+next.config.js
+next-env.d.ts
+tailwind.config.ts
+public/data/api.d.ts

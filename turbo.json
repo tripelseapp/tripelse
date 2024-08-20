@@ -9,7 +9,12 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"],
-      "env": ["MY_API_URL", "MY_API_KEY"],
+      "env": [
+        "JWT_SECRET",
+        "NODE_ENV",
+        "NEXT_PUBLIC_API_URL",
+        "SKIP_ENV_VALIDATION"
+      ],
       "inputs": [
         "$TURBO_DEFAULT$",
         ".env.production.local",

@@ -1,7 +1,12 @@
 {
   "extends": "@tripelse/typescript-config/nextjs.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": "src",
+    "paths": {
+      "~/*": ["src/*"]
+    },
+    "baseUrl": "."
   },
   "include": ["src"],
   "exclude": ["node_modules"]

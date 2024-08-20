@@ -1,8 +1,10 @@
 "use client";
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 import { Button, PasswordInput } from "pol-ui";
-import { FormEvent, useCallback, useState } from "react";
+import type { FormEvent } from "react";
+import { useCallback, useState } from "react";
+import { PossibleResponsesEnum } from "../../register/action";
 import login from "../action";
 
 interface AccessStepProps {
@@ -10,7 +12,7 @@ interface AccessStepProps {
   userName: string;
 }
 
-const AccessStep = (props: AccessStepProps) => {
+function AccessStep(props: AccessStepProps) {
   const { userName } = props;
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -30,25 +32,24 @@ const AccessStep = (props: AccessStepProps) => {
     const formData = new FormData(e.currentTarget);
     try {
       const response = await login(formData);
-      if (response.status === "fieldError") {
+      if (response.status === PossibleResponsesEnum.FieldError) {
         createQueryString("fieldError", JSON.stringify(response.errors));
       }
 
-      if (response.status === "generalError") {
+      if (response.status === PossibleResponsesEnum.GeneralError) {
         router.push(
-          pathname +
-            "?" +
-            createQueryString("generalError", response.generalError),
+          `${pathname}?${createQueryString(
+            "generalError",
+            response.generalError,
+          )}`,
         );
       }
     } catch (error) {
       router.push(
-        pathname +
-          "?" +
-          createQueryString(
-            "generalError",
-            "An error occurred. Please try again later.",
-          ),
+        `${pathname}?${createQueryString(
+          "generalError",
+          "An error occurred. Please try again later.",
+        )}`,
       );
     }
     setIsLoading(false);
@@ -66,11 +67,11 @@ const AccessStep = (props: AccessStepProps) => {
           <h3>Please enter your password to continue to your account</h3>
         </header>
         <PasswordInput
-          label="Password"
-          placeholder="********"
-          name="password"
-          id="password"
           autoComplete="off"
+          id="password"
+          label="Password"
+          name="password"
+          placeholder="********"
           required
         />
         <div className="mt-1 text-xs text-red-500">
@@ -81,21 +82,21 @@ const AccessStep = (props: AccessStepProps) => {
         <p className="mt-4 text-sm text-gray-500">
           That wasn't you?{" "}
           <Button
+            onClick={() => {
+              router.push(`${pathname}?${createQueryString("user", "")}`);
+            }}
             type="button"
             variant="ghost"
-            onClick={() =>
-              router.push(pathname + "?" + createQueryString("user", ""))
-            }
           >
             Go back
           </Button>
         </p>
-        <Button type="submit" disabled={isLoading} className="w-full">
+        <Button className="w-full" disabled={isLoading} type="submit">
           {isLoading ? "Searching user..." : "Continue"}
         </Button>
       </div>
     </form>
   );
-};
+}
 
 export default AccessStep;

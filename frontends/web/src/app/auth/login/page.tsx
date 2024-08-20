@@ -1,8 +1,7 @@
 "use client";
 
-import { redirect } from "next/navigation";
-import AccessStep from "./steps/Access";
-import IdentificationStep from "./steps/Identification";
+import AccessStep from "./steps/access";
+import IdentificationStep from "./steps/identification";
 
 export default function LoginPage({
   searchParams,
@@ -15,7 +14,9 @@ export default function LoginPage({
   return (
     <div className="flex h-full w-full flex-col gap-4">
       <header className="h-fit w-full pb-4">
-        {globalError && <small className="text-error">{globalError}</small>}
+        {globalError ? (
+          <small className="text-error">{globalError}</small>
+        ) : null}
       </header>
 
       {!hasUser ? (
@@ -26,8 +27,8 @@ export default function LoginPage({
         />
       ) : (
         <AccessStep
-          userName={searchParams.user as string}
           onSubmit={() => {}}
+          userName={searchParams.user as string}
         />
       )}
     </div>

@@ -1,8 +1,9 @@
+import type { JWTPayload } from "jose";
 import { jwtVerify } from "jose";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-export async function verifyToken(token: string) {
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
   if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined");
   }
@@ -16,7 +17,7 @@ export async function verifyToken(token: string) {
     return payload;
   } catch (error) {
     // Handle token verification errors
-    console.error("Invalid token:", error);
+    // console.error("Invalid token:", error);
     return null;
   }
 }
