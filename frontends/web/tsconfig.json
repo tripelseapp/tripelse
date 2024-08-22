@@ -1,5 +1,5 @@
 {
-  "extends": "@tripelse/typescript-config/next.json",
+  "extends": "../../packages/typescript-config/next.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
@@ -10,5 +10,5 @@
     "baseUrl": "."
   },
   "include": ["src", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".next", "dist"]
 }

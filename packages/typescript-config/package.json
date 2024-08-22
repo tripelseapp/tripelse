@@ -1,5 +1,5 @@
 {
-  "name": "@tripelse/typescript-config",
+  "name": "@repo/typescript-config",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -7,13 +7,9 @@
     "access": "public"
   },
   "exports": {
-    ".": {
-      "import": "./base.json",
-      "require": "./base.json"
-    },
-    "./base.json": "./base.json",
-    "./next.json": "./next.json",
-    "./nest.json": "./nest.json",
-    "./react-library.json": "./react-library.json"
+    "./*": {
+      "next": "./next.json",
+      "nest": "./nest.json"
+    }
   }
 }

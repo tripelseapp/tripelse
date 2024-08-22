@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@tripelse/eslint-config": "workspace:*",
-    "@tripelse/typescript-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
