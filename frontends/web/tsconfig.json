@@ -1,5 +1,5 @@
 {
-  "extends": "@tripelse/typescript-config/nextjs.json",
+  "extends": "@tripelse/typescript-config/next.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",

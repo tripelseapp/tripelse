@@ -1,7 +1,6 @@
 // utils/query-utils.ts
 import { Model, Document, SortOrder, FilterQuery } from 'mongoose';
 import { Orders, PossibleOrders } from 'interfaces/pagination.interface';
-import { get } from 'http';
 
 export interface BuildQueryOptions<T> {
   model: Model<T>;

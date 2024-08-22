@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { User } from '../entities/user.entity';
+import { UserEntity } from '../entities/user.entity';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ExampleUserDetailsDto } from '../dto/user-details.dto';
 
 describe('UserService', () => {
   let service: UserService;
-  let model: Model<User>;
+  let model: Model<UserEntity>;
   const mockUserService = {
     create: jest.fn(),
     findAll: jest.fn(),
@@ -22,14 +22,14 @@ describe('UserService', () => {
       providers: [
         UserService,
         {
-          provide: getModelToken(User.name),
+          provide: getModelToken(UserEntity.name),
           useValue: mockUserService,
         },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
-    model = module.get<Model<User>>(getModelToken(User.name));
+    model = module.get<Model<UserEntity>>(getModelToken(UserEntity.name));
   });
 
   describe('findById function', () => {

@@ -1,10 +1,26 @@
 {
-  "extends": "@tripelse/typescript-config/nestjs.json",
   "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist"
-  },
-  "watchOptions": {
-    "watchFile": "fixedPollingInterval"
+    "paths": {
+      "~/*": ["*"]
+    },
+    "module": "commonjs",
+
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2015",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./src/",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true
   }
 }
