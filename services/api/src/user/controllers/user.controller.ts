@@ -20,10 +20,11 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ReqWithUser } from 'auth/types/token-payload.type';
 import { ApiPaginatedResponse } from 'common/decorators/api-paginated-response.decorator';
+import { Public } from 'common/decorators/publicRoute.decorator';
+import { GenericUnauthorizedResponse } from 'common/decorators/unautorized-response.decorator';
 import { PageOptionsDto } from 'common/resources/pagination/page-options.dto';
 import { PageDto } from 'common/resources/pagination/page.dto';
 import { Types } from 'mongoose';
@@ -42,8 +43,6 @@ import {
 } from '../dto/user-details.dto';
 import { UserInListDto } from '../dto/user-list.dto';
 import { UserService } from '../services/user.service';
-import { GenericUnauthorizedResponse } from 'common/decorators/unautorized-response.decorator';
-import { Public } from 'common/decorators/publicRoute.decorator';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)

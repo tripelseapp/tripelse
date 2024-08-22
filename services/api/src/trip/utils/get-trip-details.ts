@@ -2,8 +2,6 @@ import { TripDetailsDto } from 'trip/dto/trip/trip-details.dto';
 import { TripDocument } from 'trip/entities/trip.entity';
 import { UserDocument } from 'user/entities/user.entity';
 import { getUserInList, getUsersInList } from 'user/utils/get-users-list';
-import { getTripDuration } from './get-trip-duration.utils';
-import { getTripBudget } from './get-trip-budget.util';
 export interface TripDetailMetadata {
   active: boolean;
   areYouMember: boolean;

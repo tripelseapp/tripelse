@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCookieAuth,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
