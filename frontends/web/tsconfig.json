@@ -1,14 +1,24 @@
 {
-  "extends": "../../packages/typescript-config/next.json",
+  "extends": "@repo/typescript-config/next.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": [
+        "src/*"
+      ]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "esModuleInterop": true
   },
-  "include": ["src", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next", "dist"]
+  "include": [
+    "src",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

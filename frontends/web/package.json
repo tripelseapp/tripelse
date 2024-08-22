@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit",
-    "dev": "WATCHPACK_POLLING=true next dev --turbo",
+    "docker-dev": "WATCHPACK_POLLING=true next dev --turbo",
+    "dev": "next dev --turbo",
     "external-lint": "eslint .",
     "lint": "next lint",
     "start": "next start",
@@ -25,7 +26,7 @@
   },
   "devDependencies": {
     "@tripelse/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@tripelse/typescript-config": "workspace:*",
     "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",

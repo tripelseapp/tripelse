@@ -16,7 +16,7 @@ COPY . .
 EXPOSE 3000
 
 # Start the Next.js development server with hot-reloading
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "docker-dev"]
 
 # Stage 2: Production
 FROM node:20 AS production
