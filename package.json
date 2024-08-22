@@ -1,7 +1,4 @@
 {
-  "dependencies": {
-    "@nestjs/mapped-types": "*"
-  },
   "name": "tripelse",
   "description": "Tripelse Monorepo",
   "version": "0.0.1",

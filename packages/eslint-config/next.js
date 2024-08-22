@@ -45,6 +45,10 @@ module.exports = {
     "turbo/no-undeclared-env-vars": "warn",
     "no-explicit-any": "off",
     "no-useless-template-literals": "off",
+    "no-floating-promises": "off",
+    "explicit-function-return-type": "off",
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off",
   },
   overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
 };

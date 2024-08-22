@@ -6,7 +6,8 @@
   "scripts": {
     "check-types": "tsc --noEmit",
     "dev": "WATCHPACK_POLLING=true next dev --turbo",
-    "lint": "eslint .",
+    "external-lint": "eslint .",
+    "lint": "next lint",
     "start": "next start",
     "build": "next build",
     "generate": "npx openapi-typescript --alphabetize --enum --enum-values -t --path-params-as-types"
