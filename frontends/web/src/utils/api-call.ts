@@ -4,6 +4,7 @@ import { SERVER_API_URL } from "~/constants/api";
 
 type Path = keyof paths;
 type PathMethod<T extends Path> = keyof paths[T];
+
 export type PossibleResponses<
   T extends Path,
   M extends PathMethod<T>,
