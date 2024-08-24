@@ -28,7 +28,6 @@ services:
     volumes:
       - ./services/api:/usr/src/app
       - /usr/src/app/node_modules
-    command: npm run start:dev
     environment:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
@@ -47,8 +46,8 @@ services:
   web:
     container_name: "frontend-web"
     build:
-      context: ./frontends/web
-      target: development
+      context: .
+      dockerfile: ./frontends/web/Dockerfile
     env_file:
       - .env
     volumes:

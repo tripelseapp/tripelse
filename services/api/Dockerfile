@@ -5,20 +5,20 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install -g @nestjs/cli
+RUN npm install -g @nestjs/cli pnpm 
 
-RUN npm install
+RUN pnpm install
 
 COPY . .
 
 # Run the build to generate the dist folder
-RUN npm run build
+RUN pnpm build
 
 # Expose the port that the app will run on
 EXPOSE 4000
 
 # Default command for development
-CMD ["npm", "run", "start:dev"]
+CMD ["npm","run", "start:dev"]
 
 # Stage 2: Production
 FROM node:20 AS production
@@ -30,7 +30,10 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install --only=production
+RUN npm install -g pnpm 
+
+RUN pnpm install --only=production
+
 
 COPY . .
 

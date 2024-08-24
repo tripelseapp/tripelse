@@ -78,8 +78,6 @@ WORKDIR /app
 # Copy the entire app directory, including node_modules and built code. This includes all necessary runtime files.
 COPY --from=builder --chown=nodejs:nodejs /app .
 
-RUN cat /app/frontends/${PROJECT}/package.json
-WORKDIR /app/frontends/${PROJECT}
-
+WORKDIR /app/apps/${PROJECT}
 # Specify the command to run the application. Adjust the path as needed for your project's start script.
-CMD ["node", "dist/index.js"]   
+CMD ["npm", "run", "start"]
