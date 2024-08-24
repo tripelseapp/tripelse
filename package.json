@@ -19,15 +19,18 @@
   "license": "ISC",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "turbo build",
     "dev": "turbo dev",
+    "start": "pnpm dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "docker": "docker-compose down && docker-compose build && docker-compose up"
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.3",
     "turbo": "^2.0.14",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.4"
   },
   "packageManager": "pnpm@8.15.6",
   "engines": {

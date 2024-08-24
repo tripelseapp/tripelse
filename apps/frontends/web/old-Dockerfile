@@ -1,0 +1,39 @@
+# Stage 1: Base
+FROM node:20 AS base
+
+WORKDIR /usr/src/app
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Copy project files
+COPY . .
+
+# Install dependencies using pnpm for the entire monorepo
+RUN pnpm install
+
+# Build the web project using TurboRepo
+RUN pnpm turbo run build --filter="web..."
+
+# Stage 2: Production
+FROM node:20 AS production
+
+WORKDIR /usr/src/app
+
+# Install only production dependencies
+COPY package*.json ./
+RUN npm install -g pnpm
+
+RUN pnpm install --only=production
+
+# Install turbo explicitly for the build process
+RUN pnpm install turbo
+
+# Copy the built files from the base stage
+COPY --from=base /usr/src/app/dist ./dist
+
+# Expose the port for the Next.js app
+EXPOSE 3000
+
+# Command to start the application in production
+CMD ["node", "dist/index.js"]

@@ -21,12 +21,12 @@ services:
   api-nestjs:
     container_name: "api-nestjs"
     build:
-      context: ./services/api
+      context: ./apps/services/api
       target: development
     env_file:
       - .env
     volumes:
-      - ./services/api:/usr/src/app
+      - ./apps/services/api:/usr/src/app
       - /usr/src/app/node_modules
     environment:
       - DB_NAME=${DB_NAME}
@@ -42,17 +42,20 @@ services:
       - server-network
     depends_on:
       - mongodb
-
+    
+  
   web:
     container_name: "frontend-web"
     build:
-      context: .
-      dockerfile: ./frontends/web/Dockerfile
+      context: .  # Set the context to the root directory of your project
+      dockerfile: ./apps/frontends/web/Dockerfile
     env_file:
       - .env
     volumes:
       - ./frontends/web:/usr/src/app
       - /usr/src/app/node_modules
+      - .:/usr/src/app  # Bind mount for live code reloading
+
     environment:
       - NODE_ENV=development
     ports:
@@ -62,6 +65,26 @@ services:
       - server-network
     depends_on:
       - api-nestjs
+  # web:
+  #   container_name: "frontend-web"
+  #   build:
+  #     context: ./apps/frontends/web
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./apps/services/api:/usr/src/app
+  #     - /usr/src/app/node_modules
+
+  #   command: pnpm dev
+  #   environment:
+  #     - NODE_ENV=development
+  #   ports:
+  #     - ${WEB_PORT}:${WEB_PORT}
+  #   restart: on-failure
+  #   networks:
+  #     - server-network
+  #   depends_on:
+  #     - api-nestjs
 
 networks:
   server-network:
