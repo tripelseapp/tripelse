@@ -45,6 +45,7 @@ module.exports = {
     "explicit-function-return-type": "off",
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
+    "explicit-function-return-type": "off",
   },
   overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
 };
