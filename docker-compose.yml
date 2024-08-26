@@ -47,15 +47,14 @@ services:
   web:
     container_name: "frontend-web"
     build:
-      context: .  # Set the context to the root directory of your project
+      context: .
       dockerfile: ./apps/frontends/web/Dockerfile
     env_file:
       - .env
     volumes:
       - ./frontends/web:/usr/src/app
       - /usr/src/app/node_modules
-      - .:/usr/src/app  # Bind mount for live code reloading
-
+      - .:/usr/src/app  
     environment:
       - NODE_ENV=development
     ports:
@@ -65,26 +64,7 @@ services:
       - server-network
     depends_on:
       - api-nestjs
-  # web:
-  #   container_name: "frontend-web"
-  #   build:
-  #     context: ./apps/frontends/web
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - ./apps/services/api:/usr/src/app
-  #     - /usr/src/app/node_modules
-
-  #   command: pnpm dev
-  #   environment:
-  #     - NODE_ENV=development
-  #   ports:
-  #     - ${WEB_PORT}:${WEB_PORT}
-  #   restart: on-failure
-  #   networks:
-  #     - server-network
-  #   depends_on:
-  #     - api-nestjs
+ 
 
 networks:
   server-network:

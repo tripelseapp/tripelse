@@ -9,14 +9,13 @@
     ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "allowJs": true,
-    "jsx": "preserve",
     "noEmit": true,
     "outDir": "dist",
+    "allowJs": true,
+    "jsx": "preserve",
     "paths": {
-      "~/*": [
-        "src/*"
-      ]
+      "react": ["./node_modules/@types/react"],
+      "~/*": ["src/*"]
     },
     "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
@@ -25,11 +24,7 @@
     "esModuleInterop": true,
     "incremental": false,
     "isolatedModules": true,
-    "lib": [
-      "es2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["es2022", "DOM", "DOM.Iterable"],
     "moduleDetection": "force",
     "noUncheckedIndexedAccess": true,
     "resolveJsonModule": true,
@@ -37,14 +32,6 @@
     "strict": true,
     "target": "ES2022"
   },
-  "include": [
-    "src",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    ".next",
-    "dist",
-    "**/*.spec.ts"
-  ]
+  "include": ["src", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", ".next", "dist", "**/*.spec.ts"]
 }

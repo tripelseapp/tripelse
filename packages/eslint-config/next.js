@@ -10,9 +10,6 @@ module.exports = {
     require.resolve("@vercel/style-guide/eslint/browser"),
     require.resolve("@vercel/style-guide/eslint/react"),
     require.resolve("@vercel/style-guide/eslint/next"),
-    // Turborepo custom eslint configuration configures the following rules:
-    //  - https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/no-undeclared-env-vars.md
-    "eslint-config-turbo",
   ].map(require.resolve),
   parserOptions: {
     project,
@@ -42,7 +39,6 @@ module.exports = {
   rules: {
     "import/no-default-export": "off",
     "no-unsafe-return": "off",
-    "turbo/no-undeclared-env-vars": "warn",
     "no-explicit-any": "off",
     "no-useless-template-literals": "off",
     "no-floating-promises": "off",
