@@ -1,10 +1,24 @@
 import Link from "next/link";
+import { routes } from "~/constants/routes";
 
 export default function HomePage(): React.JSX.Element {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <Link href="/dashboard">Go to dashboard</Link>
+    <main className="h-screen w-full space-y-6 p-6 md:max-w-xl">
+      <div className="grid h-full w-full grid-rows-[1fr,auto] gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="h-[270px] w-full rounded-2xl bg-lime-300"></div>
+          <hgroup className="flex w-full flex-col">
+            <strong className="text-2xl opacity-75">Welcome to</strong>
+            <h1 className="text-4xl font-bold">Tripelse</h1>
+          </hgroup>
+        </div>
+
+        <Link
+          href={routes.dashboard}
+          className="container flex w-full flex-col items-center justify-center gap-12 rounded-xl bg-lime-400 px-2 py-3 text-lg font-semibold"
+        >
+          Continue
+        </Link>
       </div>
     </main>
   );

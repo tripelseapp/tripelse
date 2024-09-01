@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import { Button, PasswordInput } from "pol-ui";
 import type { FormEvent } from "react";
 import { useCallback, useState } from "react";
-import { PossibleResponsesEnum } from "../../register/action";
-import login from "../action";
+import { PossibleResponsesEnum } from "../../../register/action";
+import login from "../../action";
 
 interface AccessStepProps {
   onSubmit: (value: string) => void;

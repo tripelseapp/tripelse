@@ -57,6 +57,7 @@ services:
       - .:/usr/src/app  
     environment:
       - NODE_ENV=development
+      - isOffline=false
     ports:
       - ${WEB_PORT}:${WEB_PORT}
     restart: always

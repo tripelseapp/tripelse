@@ -28,4 +28,4 @@ RUN pnpm i --frozen-lockfile
 RUN pnpm build
 
 # Start the app
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "dev-docker"]

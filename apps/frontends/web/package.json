@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit",
-    "dev": "WATCHPACK_POLLING=true next dev",
+    "dev": "next dev",
+    "dev-docker": "WATCHPACK_POLLING=true next dev",
     "external-lint": "eslint .",
     "lint": "next lint",
     "start": "next start",

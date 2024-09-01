@@ -1,16 +1,18 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyToken } from "./utils/auth/verify-token";
+import { routes } from "./constants/routes";
+import vars from "./constants/vars";
 
 export function middleware(request: NextRequest): NextResponse {
   const cookieStore = cookies();
-  const token = cookieStore.get("tripelse_access_token")?.value;
+  const token = cookieStore.get(vars().token.access_name)?.value;
 
   // Verify and decode the token
   const user = token ? verifyToken(token) : null;
 
   if (!user) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    return NextResponse.redirect(new URL(routes.auth.login, request.url));
   }
   // Optionally, validate the token with your backend here
 
