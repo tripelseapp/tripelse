@@ -18,6 +18,7 @@ function IdentificationStep() {
           id={userOrMail.name}
           label={userOrMail.labelKey}
           name={userOrMail.name}
+          minLength={userOrMail.validations.minLength}
           {...userOrMail.validations}
         />
 

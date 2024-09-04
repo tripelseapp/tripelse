@@ -6,7 +6,7 @@ import { ErrorValidating } from "../../../../../utils/zod-errors/types";
 import { CLIENT_API_URL } from "~/constants/api";
 import { getZodErrors } from "~/utils/zod-errors/zod-errors";
 import { loginConstants } from "../../constants/login-constants";
-import { z } from "zod";
+import { z, ZodError } from "zod";
 
 export const useIdentification = () => {
   const {
@@ -46,12 +46,19 @@ export const useIdentification = () => {
     identificationSchema.safeParse({
       usernameOrEmail,
     });
+
+  //
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    startLoading();
 
     const formData = new FormData(e.currentTarget);
     const usernameOrEmail = formData.get(userOrMail.name) as string;
+
+    if (!usernameOrEmail) {
+      throw new Error("usernameOrEmail is required");
+    }
+
+    startLoading();
 
     // validate if online
 
@@ -67,8 +74,11 @@ export const useIdentification = () => {
       return;
     }
     //  validate schema
+    console.log("usernameOrEmail", usernameOrEmail);
     try {
       const result = validateData(usernameOrEmail);
+
+      console.log("result", result);
       if (!result.success) {
         endLoading();
         return;
