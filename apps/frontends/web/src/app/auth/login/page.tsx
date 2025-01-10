@@ -7,14 +7,14 @@ export default function LoginPage({
 	searchParams,
 }: {
 	searchParams: Record<string, string | string[] | undefined>;
-}) {
+}): JSX.Element {
 	const hasUser = searchParams.user;
 	const globalError = searchParams.globalError;
 
 	return (
 		<div className="flex h-full w-full flex-col gap-4">
 			<header className="flex items-center gap-2">
-				<div className="h-[25px] w-[25px] rounded-2xl bg-primary-300"></div>
+				<div className="h-[25px] w-[25px] rounded-2xl bg-primary-300" />
 				<h1 className="text-2xl font-bold">Tripelse</h1>
 			</header>
 
@@ -28,7 +28,7 @@ export default function LoginPage({
 				<IdentificationStep />
 			) : (
 				<AccessStep
-					onSubmit={() => {}}
+					onSubmit={() => null}
 					userName={searchParams.user as string}
 				/>
 			)}
