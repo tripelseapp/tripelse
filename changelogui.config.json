@@ -1,0 +1,5 @@
+{
+	"repo": "tripelseapp/tripelse",
+	"output": "./dist/changelog",
+	"theme": "light"
+}

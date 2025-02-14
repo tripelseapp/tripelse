@@ -8,6 +8,9 @@
 # testing
 /coverage
 
+
+.changelogui/
+
 # database
 /prisma/db.sqlite
 /prisma/db.sqlite-journal

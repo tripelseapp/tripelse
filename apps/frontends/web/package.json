@@ -14,6 +14,7 @@
     "generate": "npx openapi-typescript --alphabetize --enum --enum-values -t --path-params-as-types"
   },
   "dependencies": {
+    "@pol-gubau/changelogui": "^1.0.1",
     "@t3-oss/env-nextjs": "^0.10.1",
     "@vercel/toolbar": "^0.1.15",
     "geist": "^1.3.0",
