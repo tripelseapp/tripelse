@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { routes } from "~/constants/routes";
 
-export default function HomePage(): React.JSX.Element {
+export default function HomePage() {
   return (
     <main className="h-screen w-full space-y-6 p-6 md:max-w-xl">
       <div className="grid h-full w-full grid-rows-[1fr,auto] gap-4">

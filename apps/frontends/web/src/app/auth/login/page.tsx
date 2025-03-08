@@ -1,4 +1,3 @@
-"use client";
 
 import AccessStep from "./steps/2-access/access";
 import IdentificationStep from "./steps/1-Identification/identification";

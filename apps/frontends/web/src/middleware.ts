@@ -5,21 +5,21 @@ import { routes } from "./constants/routes";
 import vars from "./constants/vars";
 
 export function middleware(request: NextRequest): NextResponse {
-  const cookieStore = cookies();
-  const token = cookieStore.get(vars().token.access_name)?.value;
+	const cookieStore = cookies();
+	const token = cookieStore.get(vars.token.access_name)?.value;
 
-  // Verify and decode the token
-  const user = token ? verifyToken(token) : null;
+	// Verify and decode the token
+	const user = token ? verifyToken(token) : null;
 
-  if (!user) {
-    return NextResponse.redirect(new URL(routes.auth.login, request.url));
-  }
-  // Optionally, validate the token with your backend here
+	if (!user) {
+		return NextResponse.redirect(new URL(routes.auth.login, request.url));
+	}
+	// Optionally, validate the token with your backend here
 
-  return NextResponse.next();
+	return NextResponse.next();
 }
 
 // Protect all routes under /dashboard or /admin
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+	matcher: ["/dashboard/:path*", "/admin/:path*"],
 };

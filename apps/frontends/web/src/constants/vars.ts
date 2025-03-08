@@ -1,7 +1,5 @@
-import { env } from "node:process";
-
 const getEnv = (key: string): string => {
-	const value = env[key];
+	const value = process.env[key] || process.env[`NEXT_PUBLIC_${key}`];
 	if (value === undefined) {
 		throw new Error(
 			`Configuration error - missing environment variable: ${key}`,
@@ -21,7 +19,7 @@ interface Config {
 	};
 }
 
-export default (): Config => ({
+const vars: Config = Object.freeze({
 	api: {
 		client: getEnv("NEXT_PUBLIC_CLIENT_API_URL"),
 		server: getEnv("NEXT_PUBLIC_SERVER_API_URL"),
@@ -31,3 +29,5 @@ export default (): Config => ({
 		access_name: getEnv("NEXT_PUBLIC_ACCESS_TOKEN_COOKIE_NAME"),
 	},
 });
+
+export default vars;
