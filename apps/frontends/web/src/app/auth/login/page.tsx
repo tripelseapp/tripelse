@@ -1,4 +1,3 @@
-
 import AccessStep from "./steps/2-access/access";
 import IdentificationStep from "./steps/1-Identification/identification";
 
@@ -6,7 +5,7 @@ export default function LoginPage({
 	searchParams,
 }: {
 	searchParams: Record<string, string | string[] | undefined>;
-}): JSX.Element {
+}) {
 	const hasUser = searchParams.user;
 	const globalError = searchParams.globalError;
 

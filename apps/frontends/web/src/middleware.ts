@@ -1,17 +1,16 @@
 import { cookies } from "next/headers";
-import { NextResponse, type NextRequest,userAgent } from "next/server";
+import { NextResponse, type NextRequest, userAgent } from "next/server";
 import { verifyToken } from "./utils/auth/verify-token";
 import { routes } from "./constants/routes";
 import vars from "./constants/vars";
 
-
-export function middleware(request: NextRequest): NextResponse {
-	const cookieStore = cookies();
+export async function middleware(request: NextRequest): Promise<NextResponse> {
+	const cookieStore = await cookies();
 	const url = request.nextUrl;
 	const { device } = userAgent(request);
 	const viewport = device.type === "mobile" ? "mobile" : "desktop";
 	url.searchParams.set("viewport", viewport);
-	
+
 	const token = cookieStore.get(vars.token.access_name)?.value;
 
 	// Verify and decode the token
@@ -23,8 +22,7 @@ export function middleware(request: NextRequest): NextResponse {
 	// Optionally, validate the token with your backend here
 
 	// return NextResponse.next();
-		return NextResponse.rewrite(url);
-
+	return NextResponse.rewrite(url);
 }
 
 // Protect all routes under /dashboard or /admin
