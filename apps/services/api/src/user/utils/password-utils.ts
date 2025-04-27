@@ -1,8 +1,8 @@
-import { hash, compare } from 'bcrypt';
+import { hash, compare } from "bcryptjs";
 
 export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 10;
-  return hash(password, saltRounds);
+	const saltRounds = 10;
+	return hash(password, saltRounds);
 }
 
 /**
@@ -12,14 +12,14 @@ export async function hashPassword(password: string): Promise<string> {
  * @returns A promise that resolves to true if the passwords match, and false otherwise.
  */
 export async function comparePassword(
-  plainTextPassword: string,
-  hashedPassword: string,
+	plainTextPassword: string,
+	hashedPassword: string,
 ): Promise<boolean> {
-  try {
-    const match = await compare(plainTextPassword, hashedPassword);
-    return match;
-  } catch (error) {
-    console.error('Error comparing passwords:', error);
-    throw new Error('Error comparing passwords');
-  }
+	try {
+		const match = await compare(plainTextPassword, hashedPassword);
+		return match;
+	} catch (error) {
+		console.error("Error comparing passwords:", error);
+		throw new Error("Error comparing passwords");
+	}
 }
