@@ -17,7 +17,6 @@ services:
     ports:
       - ${DB_PORT}:${DB_PORT}
 
-
   api-nestjs:
     container_name: "api-nestjs"
     build:
@@ -42,30 +41,28 @@ services:
       - server-network
     depends_on:
       - mongodb
-    
-  
-  web:
-    container_name: "frontend-web"
-    build:
-      context: .
-      dockerfile: ./apps/frontends/web/Dockerfile
-    env_file:
-      - .env
-    volumes:
-      - ./frontends/web:/usr/src/app
-      - /usr/src/app/node_modules
-      - .:/usr/src/app  
-    environment:
-      - NODE_ENV=development
-      - isOffline=false
-    ports:
-      - ${WEB_PORT}:${WEB_PORT}
-    restart: always
-    networks:
-      - server-network
-    depends_on:
-      - api-nestjs
- 
+
+  # web:
+  #   container_name: "frontend-web"
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/frontends/web/Dockerfile
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./frontends/web:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #     - .:/usr/src/app
+  #   environment:
+  #     - NODE_ENV=development
+  #     - isOffline=false
+  #   ports:
+  #     - ${WEB_PORT}:${WEB_PORT}
+  #   restart: always
+  #   networks:
+  #     - server-network
+  #   depends_on:
+  #     - api-nestjs
 
 networks:
   server-network:
